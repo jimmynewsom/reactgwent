@@ -5,3 +5,8 @@
   margin: 10px;
   padding: 10px;
 }
+
+nav li {
+  display: inline;
+  padding-right: 10px;
+}

@@ -1,7 +1,7 @@
 import './App.css';
 import React from 'react';
-import ReactDOM from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+//import ReactDOM from "react-dom/client";
+import { Route, Routes, Link } from "react-router-dom";
 
 import Dashboard from '../Dashboard/Dashboard';
 import Login from '../Login/Login';
@@ -15,18 +15,17 @@ class App extends React.Component {
       <div className="app-wrapper">
         <h1>React Gwent</h1>
 
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Dashboard />}>
-              <Route index element={<Home />} />
-              <Route path="blogs" element={<Blogs />} />
-              <Route path="contact" element={<Contact />} />
-              <Route path="*" element={<NoPage />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
+        <nav>
+          <ul>
+            <li><Link to="/">Dashboard</Link></li>
+            <li><Link to="/deckbuilder">DeckBuilder</Link></li>
+          </ul>
+        </nav>
 
-        <DeckBuilder />
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/deckbuilder" element={<DeckBuilder />} />
+        </Routes>
       </div>
     );
   }
