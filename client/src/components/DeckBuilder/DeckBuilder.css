@@ -10,3 +10,22 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
 }
+
+.faction_select p {
+    display: inline;
+}
+
+.card_panel {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0 2px;
+    margin: 0 16px 16px 16px;
+}
+
+.cell{
+    padding: 10px;
+    width: 30%;
+    word-wrap: break-word;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+}

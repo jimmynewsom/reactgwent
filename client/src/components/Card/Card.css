@@ -13,3 +13,7 @@
     height: 40%;
     width: 100%;
 }
+
+.card_icon_column {
+    text-align: left;
+}

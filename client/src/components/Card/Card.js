@@ -14,14 +14,13 @@ export class CardData {
     //getCurrentStrength(weather, otherCardsInRow)
 }
 
-class Car extends React.Component {
-    render() {
-      return <h2>Hi, I am a Car!</h2>;
-    }
-  }
-
 export class CardView extends React.Component {
     render() {
+        let type_icon;
+
+        if(this.props.card.type != "creature")
+            type_icon = <p>{this.props.card.type}</p>
+
         return (
             <div className="card">
                 <div className="card_img_area">
@@ -29,10 +28,11 @@ export class CardView extends React.Component {
                     
                     <a className="card_img" href="{}"></a>
                     <div className="card_icon_column">
-                        <p> {this.props.card.type} </p>
-                        <p> {this.props.card.strength} </p>
-                        <p> {this.props.card.range} </p>
-                        <p> {this.props.card.special} </p>
+
+                        { (this.props.card.type != "creature") ? <p>{this.props.card.type}</p> : <p></p>}
+                        { (this.props.card.strength != -1) ? <p>{this.props.card.strength}</p> : <p></p>}
+                        { (this.props.card.type != "none") ? <p>{this.props.card.range}</p> : <p></p>}
+                        { (this.props.card.type != "special") ? <p>{this.props.card.none}</p> : <p></p>}
                     </div>
 
 
