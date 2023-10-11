@@ -1,7 +1,8 @@
 import express from "express";
 import sanitize from "sanitize";
 import cors from "cors";
-import brcypt from "bcrypt";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import db from "./db/conn.mjs";
 
 const app = express();
@@ -38,8 +39,14 @@ app.post("/register", async (req, res) => {
 
     let result = await collection.insertOne(newUser);
 
-    //TODO - return a token instead
-    res.send(result).status(201);
+    //this creates a jwt token asynchronously (await syntax didn't work for some reason)
+    jwt.sign(req.body.username, process.env.JWT_SECRET, function(error, token) {
+      res.json({
+        message: "registration successful",
+        token: token
+      });
+    });
+    
   } catch (error) {
     console.log(error);
     return "error creating new user, please try again", 500
@@ -65,14 +72,22 @@ app.post("/login", async (req, res) => {
     }
     //if the user exists and the password is right, log them in and return a token
     else {
-      //TODO - return a token instead
-      res.send("success");
+      //this creates a jwt token asynchronously (await syntax didn't work for some reason)
+      jwt.sign(req.body.username, process.env.JWT_SECRET, function(error, token) {
+        res.json({
+          message: "login successful",
+          token: token
+        });
+      });
     }
   } catch (error) {
     console.log(error);
     return "error logging in, please try again", 500
   }
 });
+
+
+
 
 
 
