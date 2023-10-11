@@ -1,18 +1,14 @@
-const express = require("express");
+import express from "express";
+import sanitize from "sanitize";
+import cors from "cors";
+import brcypt from "bcrypt";
+import db from "./db/conn.mjs";
+
 const app = express();
-const sanitize = require("sanitize");
-const cors = require("cors");
-const brcypt = require("bcrypt");
-require("dotenv").config({ path: "./config.env" });
-
 const port = process.env.PORT || 5000;
-
 app.use(sanitize.middleware);
 app.use(cors());
 app.use(express.json());
-
-// get driver connection
-const dbo = require("./db/conn");
 
 
 app.get("/", (req, res) => {
@@ -22,7 +18,7 @@ app.get("/", (req, res) => {
 
 app.post("/register", async (req, res) => {
   try {
-    let collection = await dbo.getDb("reactgwent").collection("users");
+    let collection = await db.collection("users");
     let user = await collection.findOne({"_id": req.body.username});
 
     //if the user exists already, return an error message
@@ -53,7 +49,7 @@ app.post("/register", async (req, res) => {
 
 app.post("/login", async (req, res) => {
   try {
-    let collection = await dbo.getDb("reactgwent").collection("users");
+    let collection = await db.collection("users");
     let user = await collection.findOne({"_id": req.body.username});
 
     //if the user doesn't exist, return an error
@@ -81,11 +77,5 @@ app.post("/login", async (req, res) => {
 
 
 app.listen(port, () => {
-  // perform a database connection when server starts
-  dbo.connectToServer(function (err) {
-    if (error){
-      console.error(error);
-    }
-  });
   console.log(`Server is running on port: ${port}`);
 });

@@ -1,18 +1,7 @@
-import bcrypt from "bcrypt";
+import { MongoClient } from "mongodb";
+const DB_URL = "mongodb://127.0.0.1:27017";
+const client = new MongoClient(DB_URL);
+ 
+var _db = await client.connect();
 
-async function encrypt(plaintext) {
-    let ciphertext = await bcrypt.hash(plaintext, 10);
-    console.log(ciphertext);
-    return ciphertext;
-}
-
-async function testEncryption(plaintext, ciphertext) {
-    return await bcrypt.compare(plaintext, ciphertext);
-}
-
-let plainPassword = "Business69420";
-let encryptedPassword = await encrypt(plainPassword)
-
-let result = await testEncryption(plainPassword, encryptedPassword);
-
-console.log(result);
+console.log("successfully connected to the database");
