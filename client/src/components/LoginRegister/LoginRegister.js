@@ -1,12 +1,19 @@
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
-import './Login.css';
+import { useSignIn } from 'react-auth-kit';
+import './LoginRegister.css';
 
+function login(){
+  console.log("login button clicked");
+}
 
+function register(){
+  console.log("register button clicked");
+}
 
-export default function Login({ setToken }) {
-  const [username, setUsername] = useState();
-  const [password, setPassword] = useState();
+export default function LoginRegister({ setToken }) {
+  //const signIn = useSignIn();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   return(
     <div className="login-wrapper">
@@ -28,5 +35,3 @@ export default function Login({ setToken }) {
     </div>
   );
 }
-
-Login.PropTypes = {setToken: PropTypes.func.isRequired};

@@ -41,7 +41,7 @@ app.post("/register", async (req, res) => {
 
     //this creates a jwt token asynchronously (await syntax didn't work for some reason)
     jwt.sign(req.body.username, process.env.JWT_SECRET, function(error, token) {
-      res.json({
+      res.status(201).json({
         message: "registration successful",
         token: token
       });
@@ -74,7 +74,7 @@ app.post("/login", async (req, res) => {
     else {
       //this creates a jwt token asynchronously (await syntax didn't work for some reason)
       jwt.sign(req.body.username, process.env.JWT_SECRET, function(error, token) {
-        res.json({
+        res.status(200).json({
           message: "login successful",
           token: token
         });
