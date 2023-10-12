@@ -4,6 +4,10 @@ import { useSignIn } from 'react-auth-kit';
 import './LoginRegister.css';
 
 
+//TODO - add flash messages for login and registration successes and failures
+
+
+
 export default function LoginRegister({ setToken }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");

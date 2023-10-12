@@ -4,6 +4,7 @@ import cors from "cors";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import db from "./db/conn.mjs";
+import authenticateToken from './middleware/authenticateToken.mjs';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -89,7 +90,19 @@ app.post("/login", async (req, res) => {
 });
 
 
-
+app.get("/userStats", authenticateToken, async (req, res) => {
+  try {
+    let collection = await db.collection("users");
+    let user = await collection.findOne({"_id": req.username});
+    res.status(200).json({
+      wins: user.wins,
+      losses: user.losses
+    });
+  } catch (error) {
+    console.log(error);
+    return 500;
+  }
+});
 
 
 
