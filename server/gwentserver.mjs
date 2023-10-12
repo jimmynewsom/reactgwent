@@ -43,7 +43,8 @@ app.post("/register", async (req, res) => {
     jwt.sign(req.body.username, process.env.JWT_SECRET, function(error, token) {
       res.status(201).json({
         message: "registration successful",
-        token: token
+        token: token,
+        username: req.body.username
       });
     });
     
@@ -76,7 +77,8 @@ app.post("/login", async (req, res) => {
       jwt.sign(req.body.username, process.env.JWT_SECRET, function(error, token) {
         res.status(200).json({
           message: "login successful",
-          token: token
+          token: token,
+          username: req.body.username
         });
       });
     }

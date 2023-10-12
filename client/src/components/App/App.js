@@ -1,7 +1,7 @@
 import './App.css';
 import React, { useState } from 'react';
-import RequireAuth from 'react-auth-kit';
-import { Route, Routes, Link } from "react-router-dom";
+import { RequireAuth } from 'react-auth-kit';
+import { Route, Routes } from "react-router-dom";
 
 import Dashboard from '../Dashboard/Dashboard';
 import LoginRegister from '../LoginRegister/LoginRegister';
@@ -16,9 +16,8 @@ function App() {
 
       <nav>
         <ul>
-          <li><Link to="/">Dashboard</Link></li>
-          <li><Link to="/deckbuilder">DeckBuilder</Link></li>
-          <li><Link to="/loginregister">Login/Register</Link></li>
+          <li><a href="/">Dashboard</a></li>
+          <li><a href="/deckbuilder">DeckBuilder</a></li>
         </ul>
       </nav>
 

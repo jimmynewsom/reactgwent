@@ -1,19 +1,95 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSignIn } from 'react-auth-kit';
 import './LoginRegister.css';
 
-function login(){
-  console.log("login button clicked");
-}
-
-function register(){
-  console.log("register button clicked");
-}
 
 export default function LoginRegister({ setToken }) {
-  //const signIn = useSignIn();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const signIn = useSignIn();
+  const navigate = useNavigate();
+
+
+  async function login(){
+    console.log("login button clicked");
+    let login = document.getElementById("login");
+    login.disabled = true;
+    let register = document.getElementById("register");
+    register.disabled = true;
+  
+    try {
+      let result = await fetch("http://localhost:5000/login", {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password
+        })
+      });
+
+      result = await result.json();
+      console.log(result);
+
+      signIn({
+        token: result.token,
+        tokenType: "Bearer",
+        expiresIn: 1440,
+        authState: {username: result.username}
+      });
+
+      navigate("/");
+    }
+    catch (error) {
+      console.log(error);
+    }
+
+    login.disabled = false;
+    register.disabled = false;
+  }
+
+  async function register(){
+    console.log("register button clicked");
+    let login = document.getElementById("login");
+    login.disabled = true;
+    let register = document.getElementById("register");
+    register.disabled = true;
+  
+    try {
+      let result = await fetch("http://localhost:5000/register", {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password
+        })
+      });
+
+      result = await result.json();
+      console.log(result);
+
+      signIn({
+        token: result.token,
+        tokenType: "Bearer",
+        expiresIn: 1440,
+        authState: {username: result.username}
+      });
+
+      navigate("/");
+    }
+    catch (error) {
+      console.log(error);
+    }
+
+    login.disabled = false;
+    register.disabled = false;
+  }
 
   return(
     <div className="login-wrapper">
@@ -28,8 +104,8 @@ export default function LoginRegister({ setToken }) {
           <input type="password" onChange={e => setPassword(e.target.value)} />
         </label>
         <div>
-          <button id="login">Login</button>
-          <button id="register">Register</button>
+          <button id="login" onClick={login}>Login</button>
+          <button id="register" onClick={register}>Register</button>
         </div>
       </form>
     </div>
