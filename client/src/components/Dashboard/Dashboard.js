@@ -8,7 +8,7 @@ export default function Dashboard() {
   const [userStats, setUserStats] = useState({wins: "loading", losses: "loading"});
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchUserData = async () => {
       try {
         let result = await fetch("http://localhost:5000/userStats", {
           headers: {"Authorization": authHeader().split(" ")[1]}
@@ -19,8 +19,8 @@ export default function Dashboard() {
         console.log(error);
       }
     }
-    fetchData();
-  }, []);
+    fetchUserData();
+  });
 
   return(
     <div className="dashboard">
