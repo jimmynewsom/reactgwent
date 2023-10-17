@@ -5,7 +5,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import db from "./db/conn.mjs";
 import authenticateToken from './middleware/authenticateToken.mjs';
-import {cardMap, cardRows} from './gwent/gwent.mjs';
+import {cardMap, cardRows, validateDeck} from './gwent/gwent.mjs';
 
 
 const app = express();
@@ -114,13 +114,16 @@ app.get("/userStats", authenticateToken, async (req, res) => {
 
 app.get("/getUserDecks", authenticateToken, async (req, res) => {
   try {
+    let factions = ["northern realms", "nilfgaard", "scoiatael", "monsters"];
+
     let collection = await db.collection("decks");
     let decks = await collection.find({"owner": req.username}).toArray();
     //if there are no user decks in the database, load the default decks
+    //TODO - if there are some user decks in the database, but not for every faction, load the other faction default decks
     if(decks.length == 0)
       decks = await collection.find({"owner": "default"}).toArray();
 
-    console.log(decks);
+    //console.log(decks);
 
     res.status(200).json(decks);
   } catch (error) {
@@ -128,6 +131,30 @@ app.get("/getUserDecks", authenticateToken, async (req, res) => {
     return 500;
   }
 });
+
+
+// this is commented out because I haven't tested it yet
+// I will uncomment and test it shortly
+// app.post("saveUserDeck", authenticateToken, async (req, res) => {
+//   try {
+//     let deck = req.body.deck;
+//     deck.owner = req.body.username;
+//     if(!validateDeck(req.body.deck)){
+//       return "invalid deck", 400
+//     } else {
+//       let query = { owner: deck.owner, faction: deck.faction};
+//       let update = {$set: deck};
+//       let options = {upsert: true};
+
+//       let collection = await db.collection("decks");
+//       collection.updateOne(query, update, options);
+//       return "deck saved to database", 200;
+//     } 
+//   } catch (error) {
+//     console.log(error);
+//     return 500;
+//   }
+// });
 
 
 

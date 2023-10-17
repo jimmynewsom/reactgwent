@@ -35,8 +35,42 @@ fs.readFile("./gwent/unit_cards.csv", function (err, fileData) {
   });
 });
 
-
 //const end = Date.now();
 //console.log(`Execution time: ${end - start} ms`);
 
 export {cardMap, cardRows};
+
+export function validateDeck(deck){
+  let heroCount = 0, specialCount = 0, unitCount = 0;
+  
+  //TODO - validate leader exists and is the correct faction
+
+  for(let [cardName, numberInDeck] of deck.cards){
+    let card = cardMap.get(cardName);
+
+    if(numberInDeck > card.available)
+      return false;
+
+    if(card.faction != deck.faction || card.faction != "neutral")
+      return false;
+
+    if(card.type == "hero"){
+      heroCount++;
+      unitCount++;
+    }
+
+    if(card.type == "special")
+      specialCount++;
+
+    if(card.type == "unit")
+      unitCount++;
+  }
+
+  if(specialCount > 10)
+    return false;
+
+  if(unitCount < 22)
+    return false;
+
+  return true;
+}

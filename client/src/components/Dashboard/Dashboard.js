@@ -20,7 +20,7 @@ export default function Dashboard() {
       }
     }
     fetchUserData();
-  });
+  }, []);
 
   return(
     <div className="dashboard">
