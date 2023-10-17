@@ -119,6 +119,9 @@ export default function DeckBuilder() {
   function createAvailableCards(){
     let cardViews = [];
     for(let [keyy, value] of cardMap){
+      if(value.faction != currentFaction.toLowerCase() && value.faction != "neutral")
+        continue;
+
       let used = currentDeck.has(keyy) ? currentDeck.get(keyy) : 0;
       let available = value.available - used;
       if(available != 0)
