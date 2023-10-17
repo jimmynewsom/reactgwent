@@ -15,11 +15,16 @@ export class CardData {
   }
 }
 
-export function CardView ({cardData, handleClick}) {
+export function CardView ({cardData, handleClick, available}) {
 
   return(
-    <div className="card" onclick={handleClick(cardData)}>
-      <p>cardData.name</p>
+    <div className="card" onClick={handleClick(cardData)}>
+      <p>{cardData.name}</p>
+      <p>type: {cardData.type}</p>
+      <p>faction: {cardData.faction}</p>
+      {cardData.type == "hero" || cardData.type == "unit" ? <><p>{cardData.strength}</p><p>{cardData.range}</p></> : <p></p>}
+      {cardData.special != "none" ? <p>{cardData.special}</p> : <p></p>}
+      <p>{available}</p>
     </div>
   )
 }

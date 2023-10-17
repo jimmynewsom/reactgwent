@@ -35,7 +35,7 @@ So, my approach is as follows:
 
 export default function DeckBuilder() {
   const authHeader = useAuthHeader();
-  const [cardMap, setCardMap] = useState();
+  const [cardMap, setCardMap] = useState(new Map());
   const [currentFaction, setCurrentFaction] = useState("Northern Realms");
   const [currentDeck, setCurrentDeck] = useState(new Map());
   const [northernRealmsDeck, setNorthernRealmsDeck] = useState(currentDeck);
@@ -72,43 +72,81 @@ export default function DeckBuilder() {
   }
   
   function addCardToDeck(cardData){
-    if(currentDeck.has(cardData.name) && currentDeck.get(cardData.name) == cardData.available){
-      console.log("error! maximum number of card " + cardData.name + " already in deck!");
-    }
-    else {
-      setCurrentDeck(new Map(currentDeck.set(cardData.name, currentDeck.has(cardData.name) ? currentDeck.get(cardData.name) + 1 : 1)));
-      
-      //I was going to use another map, faction decks, with all the decks in it
-      //but since state is supposed to immutable, I think this is better
-      if(currentFaction == "Northern Realms")
-        setNorthernRealmsDeck(currentDeck);
-      else if(currentFaction == "Monsters")
-        setMonsterDeck(currentDeck);
-      else if(currentFaction == "Skellige")
-        setSkelligeDeck(currentDeck);
-      else if(currentFaction == "Nilfgaard")
-        setNilfgaardDeck(currentDeck);
-      else if(currentFaction == "Scoiatael")
-        setScoiataelDeck(currentDeck);
-    }
+    return (() => {
+      console.log("card clicked");
+
+      if(currentDeck.has(cardData.name) && currentDeck.get(cardData.name) == cardData.available){
+        console.log("error! maximum number of card " + cardData.name + " already in deck!");
+      }
+      else {
+        setCurrentDeck(new Map(currentDeck.set(cardData.name, currentDeck.has(cardData.name) ? currentDeck.get(cardData.name) + 1 : 1)));
+        
+        //I was going to use another map, faction decks, with all the decks in it
+        //but since state is supposed to immutable, I think this is better
+        if(currentFaction == "Northern Realms")
+          setNorthernRealmsDeck(currentDeck);
+        else if(currentFaction == "Monsters")
+          setMonsterDeck(currentDeck);
+        else if(currentFaction == "Skellige")
+          setSkelligeDeck(currentDeck);
+        else if(currentFaction == "Nilfgaard")
+          setNilfgaardDeck(currentDeck);
+        else if(currentFaction == "Scoiatael")
+          setScoiataelDeck(currentDeck);
+      }
+    })
   }
   
   function removeCardFromDeck(cardData){
-    setCurrentDeck(new Map(currentDeck.set(cardData.name, currentDeck.get(cardData.name) - 1)));
+    return (() => {
+      console.log("card clicked");
 
-    if(currentFaction == "Northern Realms")
-        setNorthernRealmsDeck(currentDeck);
-      else if(currentFaction == "Monsters")
-        setMonsterDeck(currentDeck);
-      else if(currentFaction == "Skellige")
-        setSkelligeDeck(currentDeck);
-      else if(currentFaction == "Nilfgaard")
-        setNilfgaardDeck(currentDeck);
-      else if(currentFaction == "Scoiatael")
-        setScoiataelDeck(currentDeck);
+      setCurrentDeck(new Map(currentDeck.set(cardData.name, currentDeck.get(cardData.name) - 1)));
+
+      if(currentFaction == "Northern Realms")
+          setNorthernRealmsDeck(currentDeck);
+        else if(currentFaction == "Monsters")
+          setMonsterDeck(currentDeck);
+        else if(currentFaction == "Skellige")
+          setSkelligeDeck(currentDeck);
+        else if(currentFaction == "Nilfgaard")
+          setNilfgaardDeck(currentDeck);
+        else if(currentFaction == "Scoiatael")
+          setScoiataelDeck(currentDeck);
+    }
+  )};
+
+  function createAvailableCards(){
+    let cardViews = [];
+    for(let [keyy, value] of cardMap){
+      let used = currentDeck.has(keyy) ? currentDeck.get(keyy) : 0;
+      let available = value.available - used;
+      if(available != 0)
+        cardViews.push(<li><CardView
+                            cardData={value}
+                            handleClick={addCardToDeck}
+                            key={value.name}
+                            available={available}
+                        /></li>)
+    }
+    return cardViews;
   }
 
+  function createUsedCards(){
+    let cardViews = [];
+    for(let [keyy, value] of currentDeck){
+      if(currentDeck.get(keyy) == 0)
+        continue;
 
+      cardViews.push(<li><CardView
+                          cardData={cardMap.get(keyy)}
+                          handleClick={removeCardFromDeck}
+                          key={value.name + "2"}
+                          available={currentDeck.get(keyy)}
+                      /></li>)
+    }
+    return cardViews;
+  }
 
   //this is a big one. loads data for deckbuilder component
   //first, checks for cardRows in localStorage
@@ -122,7 +160,7 @@ export default function DeckBuilder() {
       cardRows = JSON.parse(localStorage.getItem("cardRows"));
       let map = new Map();
       cardRows.forEach((row, i) => {
-        if(i !== 1){
+        if(i !== 0){
           let card = new CardData(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9]);
           map.set(row[0], card);
         }
@@ -139,7 +177,7 @@ export default function DeckBuilder() {
           localStorage.setItem("cardRows", JSON.stringify(cardRows));
           let map = new Map();
           cardRows.forEach((row, i) => {
-            if(i !== 1){
+            if(i !== 0){
               let card = new CardData(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9]);
               map.set(row[0], card);
             }
@@ -180,7 +218,7 @@ export default function DeckBuilder() {
           <p>(filters)</p>
           <p>Available Cards</p>
           <div className="card_panel">
-            
+            <ul>{createAvailableCards()}</ul>
           </div>
         </div>
         <div className="two">
@@ -203,7 +241,7 @@ export default function DeckBuilder() {
           <p>(filters)</p>
           <p>Cards in Deck</p>
           <div className="card_panel">
-            
+            <ul>{createUsedCards()}</ul>
           </div>
         </div>
       </div>
