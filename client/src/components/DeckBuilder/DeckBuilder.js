@@ -44,6 +44,12 @@ export default function DeckBuilder() {
   const [monsterDeck, setMonsterDeck] = useState(new Map());
   const [skelligeDeck, setSkelligeDeck] = useState(new Map());
 
+  const [totalCardCount, setTotalCardCount] = useState(0);
+  const [unitCardCount, setUnitCardCount] = useState(0);
+  const [specialCardCount, setSpecialCardsCount] = useState(0);
+  const [totalUnitStrength, setTotalUnitStrength] = useState(0);
+  const [heroCardCount, setHeroCardCount] = useState(0);
+
 
   function nextFaction(){
     if(currentFaction == "Northern Realms")
@@ -73,12 +79,26 @@ export default function DeckBuilder() {
   
   function addCardToDeck(cardData){
     return (() => {
-      console.log("card clicked");
-
       if(currentDeck.has(cardData.name) && currentDeck.get(cardData.name) == cardData.available){
         console.log("error! maximum number of card " + cardData.name + " already in deck!");
       }
       else {
+        //this might be faster / rerender less times if I group some of these states into an object
+        //will optimize later if necessary
+        setTotalCardCount(totalCardCount + 1);
+
+        if(cardData.type == "unit"){
+          setUnitCardCount(unitCardCount + 1);
+          setTotalUnitStrength(totalUnitStrength + Number(cardData.strength));
+        }
+        else if(cardData.type == "special")
+          setSpecialCardsCount(specialCardCount + 1);
+        else if(cardData.type == "hero"){
+          setUnitCardCount(unitCardCount + 1);
+          setTotalUnitStrength(totalUnitStrength + Number(cardData.strength));
+          setHeroCardCount(heroCardCount + 1);
+        }
+
         setCurrentDeck(new Map(currentDeck.set(cardData.name, currentDeck.has(cardData.name) ? currentDeck.get(cardData.name) + 1 : 1)));
         
         //I was going to use another map, faction decks, with all the decks in it
@@ -99,7 +119,19 @@ export default function DeckBuilder() {
   
   function removeCardFromDeck(cardData){
     return (() => {
-      console.log("card clicked");
+      setTotalCardCount(totalCardCount - 1);
+
+      if(cardData.type == "unit"){
+        setUnitCardCount(unitCardCount - 1);
+        setTotalUnitStrength(totalUnitStrength - Number(cardData.strength));
+      }
+      else if(cardData.type == "special")
+        setSpecialCardsCount(specialCardCount - 1);
+      else if(cardData.type == "hero"){
+        setUnitCardCount(unitCardCount - 1);
+        setTotalUnitStrength(totalUnitStrength - Number(cardData.strength));
+        setHeroCardCount(heroCardCount - 1);
+      }
 
       setCurrentDeck(new Map(currentDeck.set(cardData.name, currentDeck.get(cardData.name) - 1)));
 
@@ -228,13 +260,19 @@ export default function DeckBuilder() {
           <p>leader</p>
           <h3>leader card</h3>
           <p>total cards in deck</p>
-          <p>(#)</p>
+          <p>{totalCardCount}</p>
           <p>number of unit cards</p>
-          <p>(#)</p>
+
+          {unitCardCount >= 22 ? <p style={{color:"green"}}>{unitCardCount}</p> : <p style={{color:"red"}}>{unitCardCount}/22</p>}
+
           <p>special cards</p>
-          <p>(#)/10</p>
+
+          {specialCardCount <= 10 ? <p style={{color:"green"}}>{specialCardCount}/10</p> : <p style={{color:"red"}}>{specialCardCount}/10</p>}
+          
+          <p>total unit card strength</p>
+          <p>{totalUnitStrength}</p>
           <p>hero cards</p>
-          <p>(#)</p>
+          <p>{heroCardCount}</p>
 
           <button> Start Game </button>
 
