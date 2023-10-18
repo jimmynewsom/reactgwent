@@ -1,6 +1,6 @@
 .deckbuilder {
   height: 80%;
-  width: 98%;
+  width: 100%;
   padding: 10px;
   border-style: solid;
   text-align: center;
@@ -35,4 +35,8 @@
   flex-wrap: wrap;
   padding: 0 2px;
   margin: 0 16px 16px 16px;
+}
+
+ul {
+  list-style-type: none;
 }
