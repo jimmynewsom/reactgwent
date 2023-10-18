@@ -3,8 +3,8 @@ ul {
 }
 
 .large_card {
-    height: 350px;
-    width: 250px;
+    height: 250px;
+    width: 180px;
     border-style: solid;
     margin: 5px;
 }
