@@ -15,16 +15,19 @@ export class CardData {
   }
 }
 
-export function LargeCardView ({cardData, handleClick, available}) {
+export function LargeCardView ({cardData, handleClick, available = 0}) {
 
   return(
-    <div className="card" onClick={handleClick(cardData)}>
-      <p>{cardData.name}</p>
-      <p>type: {cardData.type}</p>
-      <p>faction: {cardData.faction}</p>
-      {cardData.type == "hero" || cardData.type == "unit" ? <><p>{cardData.strength}</p><p>{cardData.range}</p></> : <p></p>}
-      {cardData.special != "none" ? <p>{cardData.special}</p> : <p></p>}
-      {available ? <p>{available}</p> : <p></p>}
+    <div className="large_card" onClick={handleClick(cardData)}>
+      <div className="card_img_area"></div>
+      <div className="card_text_area">
+        <p>{cardData.name}</p>
+        <p>type: {cardData.type}</p>
+        <p>faction: {cardData.faction}</p>
+        {cardData.type == "hero" || cardData.type == "unit" ? <><p>{cardData.strength}</p><p>{cardData.range}</p></> : <p></p>}
+        {cardData.special != "none" ? <p>{cardData.special}</p> : <p></p>}
+        {available ? <p>available: {available}</p> : <p>{cardData.description}</p>}
+      </div>
     </div>
   )
 }

@@ -2,10 +2,11 @@ ul {
   list-style-type: none;
 }
 
-.card {
+.large_card {
     height: 350px;
     width: 250px;
-    border-style: dashed;
+    border-style: solid;
+    margin: 5px;
 }
 
 .card-img-area {

@@ -52,29 +52,49 @@ export default function DeckBuilder() {
 
 
   function nextFaction(){
-    if(currentFaction == "Northern Realms")
+    if(currentFaction == "Northern Realms"){
       setCurrentFaction("Monsters");
-    else if(currentFaction == "Monsters")
+      setCurrentDeck(monsterDeck);
+    }
+    else if(currentFaction == "Monsters"){
       setCurrentFaction("Skellige");
-    else if(currentFaction == "Skellige")
+      setCurrentDeck(skelligeDeck);
+    }
+    else if(currentFaction == "Skellige"){
       setCurrentFaction("Nilfgaard");
-    else if(currentFaction == "Nilfgaard")
+      setCurrentDeck(nilfgaardDeck);
+    }
+    else if(currentFaction == "Nilfgaard"){
       setCurrentFaction("Scoiatael");
-    else if(currentFaction == "Scoiatael")
+      setCurrentDeck(scoiataelDeck);
+    }
+    else if(currentFaction == "Scoiatael"){
       setCurrentFaction("Northern Realms");
+      setCurrentDeck(northernRealmsDeck);
+    }
   }
   
   function previousFaction(){
-    if(currentFaction == "Northern Realms")
+    if(currentFaction == "Northern Realms"){
       setCurrentFaction("Scoiatael");
-    else if(currentFaction == "Scoiatael")
+      setCurrentDeck(scoiataelDeck);
+    }
+    else if(currentFaction == "Scoiatael"){
       setCurrentFaction("Nilfgaard");
-    else if(currentFaction == "Nilfgaard")
+      setCurrentDeck(nilfgaardDeck);
+    }
+    else if(currentFaction == "Nilfgaard"){
       setCurrentFaction("Skellige");
-    else if(currentFaction == "Skellige")
+      setCurrentDeck(skelligeDeck);
+    }
+    else if(currentFaction == "Skellige"){
       setCurrentFaction("Monsters");
-    else if(currentFaction == "Monsters")
+      setCurrentDeck(monsterDeck);
+    }
+    else if(currentFaction == "Monsters"){
       setCurrentFaction("Northern Realms");
+      setCurrentDeck(northernRealmsDeck);
+    }
   }
   
   function addCardToDeck(cardData){
