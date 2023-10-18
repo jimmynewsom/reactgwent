@@ -7,15 +7,15 @@ export class CardData {
     this.image_url = image_url;
     this.type = type;
     this.faction = faction;
-    this.strength = strength;
+    this.strength = Number(strength);
     this.range = range;
     this.special = special;
-    this.available = available;
+    this.available = Number(available);
     this.description = description;
   }
 }
 
-export function CardView ({cardData, handleClick, available}) {
+export function LargeCardView ({cardData, handleClick, available}) {
 
   return(
     <div className="card" onClick={handleClick(cardData)}>
@@ -24,10 +24,14 @@ export function CardView ({cardData, handleClick, available}) {
       <p>faction: {cardData.faction}</p>
       {cardData.type == "hero" || cardData.type == "unit" ? <><p>{cardData.strength}</p><p>{cardData.range}</p></> : <p></p>}
       {cardData.special != "none" ? <p>{cardData.special}</p> : <p></p>}
-      <p>{available}</p>
+      {available ? <p>{available}</p> : <p></p>}
     </div>
   )
 }
+
+// function SmallCardView ({cardData}){
+//   return <p></p>
+// }
 
 // return (
 //     <div className="card">

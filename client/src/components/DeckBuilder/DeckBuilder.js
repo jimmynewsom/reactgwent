@@ -2,7 +2,7 @@ import './DeckBuilder.css';
 import React, { useState, useEffect } from 'react';
 import { useAuthHeader } from 'react-auth-kit';
 
-import {CardView, CardData} from '../Card/Card';
+import {LargeCardView, CardData} from '../Card/Card';
 
 
 /*
@@ -89,13 +89,13 @@ export default function DeckBuilder() {
 
         if(cardData.type == "unit"){
           setUnitCardCount(unitCardCount + 1);
-          setTotalUnitStrength(totalUnitStrength + Number(cardData.strength));
+          setTotalUnitStrength(totalUnitStrength + cardData.strength);
         }
         else if(cardData.type == "special")
           setSpecialCardsCount(specialCardCount + 1);
         else if(cardData.type == "hero"){
           setUnitCardCount(unitCardCount + 1);
-          setTotalUnitStrength(totalUnitStrength + Number(cardData.strength));
+          setTotalUnitStrength(totalUnitStrength + cardData.strength);
           setHeroCardCount(heroCardCount + 1);
         }
 
@@ -123,13 +123,13 @@ export default function DeckBuilder() {
 
       if(cardData.type == "unit"){
         setUnitCardCount(unitCardCount - 1);
-        setTotalUnitStrength(totalUnitStrength - Number(cardData.strength));
+        setTotalUnitStrength(totalUnitStrength - cardData.strength);
       }
       else if(cardData.type == "special")
         setSpecialCardsCount(specialCardCount - 1);
       else if(cardData.type == "hero"){
         setUnitCardCount(unitCardCount - 1);
-        setTotalUnitStrength(totalUnitStrength - Number(cardData.strength));
+        setTotalUnitStrength(totalUnitStrength - cardData.strength);
         setHeroCardCount(heroCardCount - 1);
       }
 
@@ -157,7 +157,7 @@ export default function DeckBuilder() {
       let used = currentDeck.has(keyy) ? currentDeck.get(keyy) : 0;
       let available = value.available - used;
       if(available != 0)
-        cardViews.push(<li><CardView
+        cardViews.push(<li><LargeCardView
                             cardData={value}
                             handleClick={addCardToDeck}
                             key={value.name}
@@ -173,7 +173,7 @@ export default function DeckBuilder() {
       if(currentDeck.get(keyy) == 0)
         continue;
 
-      cardViews.push(<li><CardView
+      cardViews.push(<li><LargeCardView
                           cardData={cardMap.get(keyy)}
                           handleClick={removeCardFromDeck}
                           key={value.name + "2"}
