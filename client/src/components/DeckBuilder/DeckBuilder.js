@@ -273,7 +273,7 @@ export default function DeckBuilder() {
           <p>(filters)</p>
           <p>Available Cards</p>
           <div className="card_panel">
-            <ul>{createAvailableCards()}</ul>
+            {createAvailableCards()}
           </div>
         </div>
         <div className="two">
@@ -302,7 +302,7 @@ export default function DeckBuilder() {
           <p>(filters)</p>
           <p>Cards in Deck</p>
           <div className="card_panel">
-            <ul>{createUsedCards()}</ul>
+            {createUsedCards()}
           </div>
         </div>
       </div>
