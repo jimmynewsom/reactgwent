@@ -1,8 +1,9 @@
 .large_card {
     height: 320px;
-    width: 150px;
+    width: 180px;
     border-style: solid;
     margin: 5px;
+    border-radius: 10px;
 }
 
 .card-img-area {

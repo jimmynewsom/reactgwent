@@ -247,11 +247,13 @@ export default function DeckBuilder() {
 
     const fetchUserDecks = async () => {
       try {
-        let result = await fetch("http://localhost:5000/getUserDecks", {
+        let decks = await fetch("http://localhost:5000/getUserDecks", {
           headers: {"Authorization": authHeader().split(" ")[1]}
         });
-        result = await result.json();
-        console.log(result);
+        decks = await decks.json();
+        
+        console.log(decks);
+
       } catch (error){
         console.log(error);
       }
