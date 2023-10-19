@@ -197,7 +197,7 @@ export default function DeckBuilder() {
                           cardData={cardMap.get(keyy)}
                           handleClick={removeCardFromDeck}
                           key={keyy + "2"}
-                          available={currentDeck.get(keyy)}
+                          available={value}
                       />)
     }
     return cardViews;
@@ -256,10 +256,26 @@ export default function DeckBuilder() {
         for(let deck of decks){
           let map = new Map(Object.entries(deck.cards));
           console.log(map);
-          // if(deck.faction == "Northern Realms"){
-          //   console.log(map);
-          //   setCurrentDeck(map);
-          // }
+          if(deck.faction == "Northern Realms"){
+            setCurrentDeck(map);
+            setNorthernRealmsDeck(map);
+            setTotalCardCount(deck.totalCardCount);
+            setUnitCardCount(deck.unitCardCount);
+            setSpecialCardsCount(deck.specialCardCount);
+            setTotalUnitStrength(deck.totalUnitStrength);
+            setHeroCardCount(deck.heroCardCount);
+          }
+
+          //I'm leaving this commented out for now, because if there are any typos in my card names this will explode
+          //I'll add them back in one by one later
+          // else if(deck.faction == "Monsters")
+          //   setMonsterDeck(map);
+          // else if(deck.faction == "Skellige")
+          //   setSkelligeDeck(map);
+          // else if(deck.faction == "Nilfgaard")
+          //   setNilfgaardDeck(map);
+          // else if(deck.faction == "Scoiatael")
+          //   setScoiataelDeck(map);
         }
       } catch (error){
         console.log(error);
@@ -303,7 +319,7 @@ export default function DeckBuilder() {
           <p>hero cards</p>
           <p>{heroCardCount}</p>
 
-          <button> Start Game </button>
+          <button onClick={()=>{console.log(currentDeck)}}> Start Game </button>
 
 
         </div>
