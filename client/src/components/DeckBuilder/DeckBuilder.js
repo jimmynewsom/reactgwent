@@ -171,18 +171,18 @@ export default function DeckBuilder() {
   function createAvailableCards(){
     let cardViews = [];
     for(let [keyy, value] of cardMap){
-      if(value.faction != currentFaction.toLowerCase() && value.faction != "neutral")
+      if(value.faction != currentFaction && value.faction != "neutral")
         continue;
 
       let used = currentDeck.has(keyy) ? currentDeck.get(keyy) : 0;
       let available = value.available - used;
       if(available != 0)
-        cardViews.push(<li><LargeCardView
+        cardViews.push(<LargeCardView
                             cardData={value}
                             handleClick={addCardToDeck}
                             key={value.name}
                             available={available}
-                        /></li>)
+                        />)
     }
     return cardViews;
   }
@@ -193,12 +193,12 @@ export default function DeckBuilder() {
       if(currentDeck.get(keyy) == 0)
         continue;
 
-      cardViews.push(<li><LargeCardView
+      cardViews.push(<LargeCardView
                           cardData={cardMap.get(keyy)}
                           handleClick={removeCardFromDeck}
-                          key={value.name + "2"}
+                          key={keyy + "2"}
                           available={currentDeck.get(keyy)}
-                      /></li>)
+                      />)
     }
     return cardViews;
   }
@@ -251,9 +251,16 @@ export default function DeckBuilder() {
           headers: {"Authorization": authHeader().split(" ")[1]}
         });
         decks = await decks.json();
-        
-        console.log(decks);
+        //console.log(decks);
 
+        for(let deck of decks){
+          let map = new Map(Object.entries(deck.cards));
+          console.log(map);
+          // if(deck.faction == "Northern Realms"){
+          //   console.log(map);
+          //   setCurrentDeck(map);
+          // }
+        }
       } catch (error){
         console.log(error);
       }

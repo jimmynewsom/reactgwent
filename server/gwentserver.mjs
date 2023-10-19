@@ -114,21 +114,22 @@ app.get("/userStats", authenticateToken, async (req, res) => {
 
 app.get("/getUserDecks", authenticateToken, async (req, res) => {
   try {
-    let factions = ["northern realms", "nilfgaard", "scoiatael", "monsters"];
-
     let collection = await db.collection("decks");
     let decks = await collection.find({"owner": req.username}).toArray();
+    //console.log(decks);
     
     //the actual game in the witcher 3 only has a default deck for the Northern Realms faction
     //so if the user doesn't have a northern reams deck saved, I will load the default. the others start empty like in the actual game
     let userHasNRDeck = false;
     for(let deck of decks){
-      if(deck.faction == "northern realms")
+      if(deck.faction == "Northern Realms")
         userHasNRDeck = true;
     }
 
     if(!userHasNRDeck)
-      decks.push(await collection.findOne({"owner": "default", "faction": "northern realms"}));
+      decks.push(await collection.findOne({"owner": "default", "faction": "Northern Realms"}));
+
+    //console.log(decks);
 
     res.status(200).json(decks);
   } catch (error) {
