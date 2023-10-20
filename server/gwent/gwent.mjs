@@ -47,7 +47,7 @@ export function validateDeck(deck){
   let deckMap = new Map(Object.entries(deck.cards));
   for(let [cardName, numberInDeck] of deckMap){
     let card = cardMap.get(cardName);
-    totalCardCount = totalCardCount + numberInDeck;
+    totalCardCount += numberInDeck;
 
     if(numberInDeck > card.available)
       isValid = false;
@@ -58,15 +58,15 @@ export function validateDeck(deck){
     if(card.type == "hero"){
       heroCount++;
       unitCount++;
-      totalUnitStrength = totalUnitStrength + card.strength;
+      totalUnitStrength += card.strength;
     }
 
     if(card.type == "special")
       specialCount = specialCount + numberInDeck;
 
     if(card.type == "unit"){
-      unitCount = unitCount + numberInDeck;
-      totalUnitStrength = totalUnitStrength + (numberInDeck * card.strength);
+      unitCount += numberInDeck;
+      totalUnitStrength += (numberInDeck * card.strength);
     }
   }
 
@@ -84,7 +84,6 @@ export function validateDeck(deck){
 //GAME LOGIC!!!!
 
 
-
 class Player{
   lives = 2;
   passed = false;
@@ -96,15 +95,63 @@ class Player{
 }
 
 class Board{
-  rows = [{close: [], ranged: [], siege: [], graveyard: []},
+  field = [{close: [], ranged: [], siege: [], graveyard: []},
           {close: [], ranged: [], siege: [], graveyard: []}];
   
-  weather = {"snow": false, "fog": false, "rain": false};
+  weather = {close: false, ranged: false, siege: false};
 
-  morale = [{close: false, ranged: false, siege: false},
+  rallyHorn = [{close: false, ranged: false, siege: false},
              {close: false, ranged: false, siege: false}];
 
-  clearBoardForNextRound(){
+  clearWeather(){
+    this.weather = {close: false, ranged: false, siege: false};
+  }
+
+  clearRallyHorns(){
+    this.rallyHorn = [{close: false, ranged: false, siege: false},
+                      {close: false, ranged: false, siege: false}];
+  }
+
+  getCardStrength(playerIndex, row, cardIndex){
+    let card = this.field[playerIndex][row][cardIndex];
+    if(card.type == "hero")
+      return card.strength;
+
+    let tightBond = 1, morale = 0;
+
+    for(let [c, i] of this.field[playerIndex][row]){
+      if(i == cardIndex)
+        continue;
+      else if(c.special == "morale")
+        morale++;
+      else if(c.special == "tight bond" && c.name == card.name)
+        tightBond++;
+    }
+
+    let currentStrength = card.strength;
+    if(weather[row] == true)
+      currentStrength = 1;
+
+    currentStrength = (currentStrength + morale)**tightBond;
+    
+    if(this.rallyHorn[playerIndex][row])
+      currentStrength = currentStrength * 2;
+
+    return currentStrength;
+  }
+
+  getRowStrength(playerIndex, row){
+    let totalStrength = 0;
+    for(let i=0; i<field[playerIndex][row].length; i++){
+      totalStrength = totalStrength + this.getCardStrength(playerIndex, row, i);
+    }
+    return totalStrength;
+  }
+
+  endRoundAndCalculateWinner(faction1, faction2){
+    let p1Total = this.getRowStrength(0, "close") + this.getRowStrength(0, "ranged") + this.getRowStrength(0, "siege");
+    let p2Total = this.getRowStrength(1, "close") + this.getRowStrength(1, "ranged") + this.getRowStrength(1, "siege");
+
     for(let i=0; i<2; i++){
       this.rows[i].graveyard.push(...rows[i].close);
       this.rows[i].graveyard.push(...rows[i].ranged);
@@ -115,14 +162,32 @@ class Board{
     }
 
     this.clearWeather();
-
-    this.morale = [{close: false, ranged: false, siege: false},
-                   {close: false, ranged: false, siege: false}];
+    this.clearRallyHorns();
+      
+    if(p1Total > p2Total)
+      return 1;
+    else if(p1Total < p2Total)
+      return -1;
+    else{
+      //nilfgaard wins ties if only 1 faction is nilfgaard
+      if(faction1 == "Nilfgaard" && faction2 != "Nilfgaard")
+        return 1;
+      else if(faction2 == "Nilfgaard" && faction1 != "Nilfgaard")
+        return -1;
+      else
+        return 0;
+    }
   }
 
-  clearWeather(){
-    this.weather = {"snow": false, "fog": false, "rain": false};
-  }
+  // scorch(playerIndex, range){
+  //   if(range){
+
+  //   }
+  //   else {
+
+  //   }
+  // }
+
 }
 
 function shuffle(array){ 
@@ -179,6 +244,25 @@ class Game{
     for(let [card, i] of this.players[playerIndex].player.hand){
       if(card.name == cardName){
         this.players[playerIndex].hand.splice(i, 1);
+
+        if(card.special == "none"){
+          if(card.range == "close")
+            this.board[playerIndex].close.push(card);
+          else if(card.range == "ranged")
+            this.board[playerIndex].ranged.push(card);
+          else if(card.range == "siege")
+            this.board[playerIndex].siege.push(card);
+          else if(card.range == "agile"){
+            if(target = "close")
+              this.board[playerIndex].close.push(card);
+            else if(target == "ranged")
+              this.board[playerIndex].ranged.push(card);
+          }
+        }
+        else if(card.special == "scorch - close"){
+          this.board.scorch();
+        }
+
         if(card.type == "unit" || card.type == "hero"){
           if(card.special == "spy"){
             this.players[playerIndex].player.hand.push(...draw(playerIndex, 2));
