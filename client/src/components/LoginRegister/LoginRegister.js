@@ -36,7 +36,7 @@ export default function LoginRegister({ setToken }) {
       });
 
       result = await result.json();
-      console.log(result);
+      //console.log(result);
 
       signIn({
         token: result.token,
@@ -76,7 +76,7 @@ export default function LoginRegister({ setToken }) {
       });
 
       result = await result.json();
-      console.log(result);
+      //console.log(result);
 
       signIn({
         token: result.token,

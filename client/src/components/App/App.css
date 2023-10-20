@@ -11,6 +11,11 @@ nav li {
   padding-right: 10px;
 }
 
+nav button {
+  display: inline;
+  float: right;
+}
+
 * {
   box-sizing: border-box;
 }
