@@ -53,7 +53,7 @@ app.post("/register", async (req, res) => {
     
   } catch (error) {
     console.log(error);
-    return "error creating new user, please try again", 500
+    res.status(500).json({ "error": 'error creating new user, please try again' });
   }
 });
 
@@ -87,7 +87,7 @@ app.post("/login", async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    return "error logging in, please try again", 500
+    res.status(500).json({"error": "error logging in, please try again"});
   }
 });
 
@@ -107,7 +107,7 @@ app.get("/userStats", authenticateToken, async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    return 500;
+    res.status(500);
   }
 });
 
@@ -134,33 +134,42 @@ app.get("/getUserDecks", authenticateToken, async (req, res) => {
     res.status(200).json(decks);
   } catch (error) {
     console.log(error);
-    return 500;
+    res.status(500);
   }
 });
 
 
-// this is commented out because I haven't tested it yet
-// I will uncomment and test it shortly
-// app.post("saveUserDeck", authenticateToken, async (req, res) => {
-//   try {
-//     let deck = req.body.deck;
-//     deck.owner = req.body.username;
-//     if(!validateDeck(req.body.deck)){
-//       return "invalid deck", 400
-//     } else {
-//       let query = { owner: deck.owner, faction: deck.faction};
-//       let update = {$set: deck};
-//       let options = {upsert: true};
+app.post("/saveUserDeck", authenticateToken, async (req, res) => {
+  try {
+    let deck = req.body;
+    deck.owner = req.username;
+    
+    console.log(deck);
 
-//       let collection = await db.collection("decks");
-//       collection.updateOne(query, update, options);
-//       return "deck saved to database", 200;
-//     } 
-//   } catch (error) {
-//     console.log(error);
-//     return 500;
-//   }
-// });
+    let result = validateDeck(deck);
+    if(!result.isValid){
+      console.log("invalid deck");
+      res.status(400).json({error: "error - invalid deck"});
+    } else {
+      deck.heroCardCount = result.heroCount;
+      deck.specialCardcount = result.specialCount;
+      deck.unitCardCount = result.unitCount;
+      deck.totalCardCount = result.totalCardCount;
+      deck.totalUnitStrength = result.totalUnitStrength;
+
+      let query = { owner: deck.owner, faction: deck.faction};
+      let update = {$set: deck};
+      let options = {upsert: true};
+
+      let collection = await db.collection("decks");
+      collection.updateOne(query, update, options);
+      res.status(200).json({message: "deck saved to database"});
+    } 
+  } catch (error) {
+    console.log(error);
+    res.status(500);
+  }
+});
 
 
 

@@ -203,6 +203,32 @@ export default function DeckBuilder() {
     return cardViews;
   }
 
+  async function saveCurrentDeck(){
+    let button = document.getElementById("save_button");
+    button.disabled = true;
+    try {
+      let cards = Object.fromEntries(currentDeck.entries());
+      let result = await fetch("http://localhost:5000/saveUserDeck", {
+        method: 'POST',
+        headers: {
+          "headers": {"Authorization": authHeader().split(" ")[1]},
+          "Accept": 'application/json',
+          "Content-Type": 'application/json'
+        },
+        body: JSON.stringify({
+          "faction": currentFaction,
+          "leader": "Foltest, King of the North",
+          "cards": cards
+        })
+      });
+      console.log(result);
+    }
+    catch (error){
+      console.log(error);
+    }
+    button.disabled = false;
+  }
+
   //this is a big one. loads data for deckbuilder component
   //first, checks for cardRows in localStorage
   //if it's there already, use that data to build the cardMap
@@ -247,10 +273,10 @@ export default function DeckBuilder() {
 
     const fetchUserDecks = async () => {
       try {
-        let decks = await fetch("http://localhost:5000/getUserDecks", {
+        let result = await fetch("http://localhost:5000/getUserDecks", {
           headers: {"Authorization": authHeader().split(" ")[1]}
         });
-        decks = await decks.json();
+        let decks = await result.json();
         //console.log(decks);
 
         for(let deck of decks){
@@ -259,6 +285,7 @@ export default function DeckBuilder() {
           if(deck.faction == "Northern Realms"){
             setCurrentDeck(map);
             setNorthernRealmsDeck(map);
+            setCurrentFaction("Northern Realms");
             setTotalCardCount(deck.totalCardCount);
             setUnitCardCount(deck.unitCardCount);
             setSpecialCardsCount(deck.specialCardCount);
@@ -267,6 +294,7 @@ export default function DeckBuilder() {
           }
 
           //I'm leaving this commented out for now, because if there are any typos in my card names this will explode
+          //(because looking up the card name in the card map fails, so it passes undefined to my LargeCardView components in createUsedCards)
           //I'll add them back in one by one later
           // else if(deck.faction == "Monsters")
           //   setMonsterDeck(map);
@@ -319,7 +347,7 @@ export default function DeckBuilder() {
           <p>hero cards</p>
           <p>{heroCardCount}</p>
 
-          <button onClick={()=>{console.log(currentDeck)}}> Start Game </button>
+          <button id="save_button" onClick={saveCurrentDeck}> Start Game </button>
 
 
         </div>

@@ -38,36 +38,44 @@ fs.readFile("./gwent/unit_cards.csv", function (err, fileData) {
 export {cardMap, cardRows};
 
 export function validateDeck(deck){
-  let heroCount = 0, specialCount = 0, unitCount = 0;
+  let isValid = true, heroCount = 0, specialCount = 0, unitCount = 0, totalCardCount = 0, totalUnitStrength = 0;
   
   //TODO - validate leader exists and is the correct faction
-
-  for(let [cardName, numberInDeck] of deck.cards){
+  let deckMap = new Map(Object.entries(deck.cards));
+  for(let [cardName, numberInDeck] of deckMap){
     let card = cardMap.get(cardName);
+    totalCardCount = totalCardCount + numberInDeck;
 
     if(numberInDeck > card.available)
-      return false;
+      isValid = false;
 
     if(card.faction != deck.faction || card.faction != "neutral")
-      return false;
+      isValid = false;
 
     if(card.type == "hero"){
       heroCount++;
       unitCount++;
+      totalUnitStrength = totalUnitStrength + card.strength;
     }
 
     if(card.type == "special")
-      specialCount++;
+      specialCount = specialCount + numberInDeck;
 
-    if(card.type == "unit")
-      unitCount++;
+    if(card.type == "unit"){
+      unitCount = unitCount + numberInDeck;
+      totalUnitStrength = totalUnitStrength + (numberInDeck * card.strength);
+    }
   }
 
   if(specialCount > 10)
-    return false;
+    isValid = false;
 
   if(unitCount < 22)
-    return false;
+    isValid = false;
 
-  return true;
+  console.log("validation complete: valid = ", isValid)
+
+  let result = {isValid, unitCount, heroCount, specialCount, totalCardCount, totalUnitStrength};
+  console.log(result);
+  return result;
 }
