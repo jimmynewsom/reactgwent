@@ -211,7 +211,7 @@ export default function DeckBuilder() {
       let result = await fetch("http://localhost:5000/saveUserDeck", {
         method: 'POST',
         headers: {
-          "headers": {"Authorization": authHeader().split(" ")[1]},
+          "Authorization": authHeader().split(" ")[1],
           "Accept": 'application/json',
           "Content-Type": 'application/json'
         },
@@ -221,7 +221,8 @@ export default function DeckBuilder() {
           "cards": cards
         })
       });
-      console.log(result);
+      let message = await result.json();
+      console.log(message);
     }
     catch (error){
       console.log(error);
@@ -277,11 +278,10 @@ export default function DeckBuilder() {
           headers: {"Authorization": authHeader().split(" ")[1]}
         });
         let decks = await result.json();
-        console.log(decks);
+        //console.log(decks);
 
         for(let deck of decks){
           let map = new Map(Object.entries(deck.cards));
-          console.log(map);
           if(deck.faction == "Northern Realms"){
             setCurrentDeck(map);
             setNorthernRealmsDeck(map);

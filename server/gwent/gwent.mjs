@@ -75,6 +75,5 @@ export function validateDeck(deck){
     isValid = false;
 
   let result = {isValid, unitCount, heroCount, specialCount, totalCardCount, totalUnitStrength};
-  console.log(result);
   return result;
 }

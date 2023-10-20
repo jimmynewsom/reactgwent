@@ -144,8 +144,6 @@ app.post("/saveUserDeck", authenticateToken, async (req, res) => {
     let deck = req.body;
     deck.owner = req.username;
     
-    console.log(deck);
-
     let result = validateDeck(deck);
     if(!result.isValid){
       console.log("invalid deck");
