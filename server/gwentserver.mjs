@@ -152,7 +152,7 @@ app.post("/saveUserDeck", authenticateToken, async (req, res) => {
       res.status(400).json({error: "error - invalid deck"});
     } else {
       deck.heroCardCount = result.heroCount;
-      deck.specialCardcount = result.specialCount;
+      deck.specialCardCount = result.specialCount;
       deck.unitCardCount = result.unitCount;
       deck.totalCardCount = result.totalCardCount;
       deck.totalUnitStrength = result.totalUnitStrength;

@@ -41,6 +41,7 @@ export function validateDeck(deck){
   let isValid = true, heroCount = 0, specialCount = 0, unitCount = 0, totalCardCount = 0, totalUnitStrength = 0;
   
   //TODO - validate leader exists and is the correct faction
+
   let deckMap = new Map(Object.entries(deck.cards));
   for(let [cardName, numberInDeck] of deckMap){
     let card = cardMap.get(cardName);
@@ -49,7 +50,7 @@ export function validateDeck(deck){
     if(numberInDeck > card.available)
       isValid = false;
 
-    if(card.faction != deck.faction || card.faction != "neutral")
+    if(card.faction != deck.faction && card.faction != "neutral")
       isValid = false;
 
     if(card.type == "hero"){
@@ -72,8 +73,6 @@ export function validateDeck(deck){
 
   if(unitCount < 22)
     isValid = false;
-
-  console.log("validation complete: valid = ", isValid)
 
   let result = {isValid, unitCount, heroCount, specialCount, totalCardCount, totalUnitStrength};
   console.log(result);

@@ -277,7 +277,7 @@ export default function DeckBuilder() {
           headers: {"Authorization": authHeader().split(" ")[1]}
         });
         let decks = await result.json();
-        //console.log(decks);
+        console.log(decks);
 
         for(let deck of decks){
           let map = new Map(Object.entries(deck.cards));
@@ -347,7 +347,7 @@ export default function DeckBuilder() {
           <p>hero cards</p>
           <p>{heroCardCount}</p>
 
-          <button id="save_button" onClick={saveCurrentDeck}> Start Game </button>
+          <button id="save_button" onClick={saveCurrentDeck}> Save current deck </button>
 
 
         </div>
