@@ -101,7 +101,7 @@ class Board{
   
   weather = {close: false, ranged: false, siege: false};
 
-  rallyHorn = [{close: false, ranged: false, siege: false},
+  rallyHorns = [{close: false, ranged: false, siege: false},
                {close: false, ranged: false, siege: false}];
 
   clearWeather(){
@@ -109,7 +109,7 @@ class Board{
   }
 
   clearRallyHorns(){
-    this.rallyHorn = [{close: false, ranged: false, siege: false},
+    this.rallyHorns = [{close: false, ranged: false, siege: false},
                       {close: false, ranged: false, siege: false}];
   }
 
@@ -120,12 +120,12 @@ class Board{
 
     let tightBond = 1, morale = 0;
 
-    for(let [c, i] of this.field[playerIndex][row]){
+    for(let [card2, i] of this.field[playerIndex][row]){
       if(i == cardIndex)
         continue;
-      else if(c.special == "morale")
+      else if(card2.special == "morale")
         morale++;
-      else if(c.special == "tight bond" && c.name == card.name)
+      else if(card2.special == "tight bond" && card2.name == card.name)
         tightBond++;
     }
 
@@ -135,7 +135,7 @@ class Board{
 
     currentStrength = (currentStrength + morale)**tightBond;
     
-    if(this.rallyHorn[playerIndex][row])
+    if(this.rallyHorns[playerIndex][row])
       currentStrength = currentStrength * 2;
 
     return currentStrength;
@@ -180,14 +180,14 @@ class Board{
     }
   }
 
-  // scorch(playerIndex, range){
-  //   if(range){
-
-  //   }
-  //   else {
-
-  //   }
-  // }
+  scorch(playerIndex, range){
+    if(range){
+      console.log("scorch - range");
+    }
+    else {
+      console.log("scorch everywhere");
+    }
+  }
 
 }
 
@@ -245,41 +245,71 @@ class Game{
     let card = this.players[playerIndex].hand[cardIndex];
     this.players[playerIndex].hand.splice(cardIndex, 1);
     
-    if(card.special == "none"){
+    if((card.type == "unit" || card.type == "hero") && card.special != "spy"){
       if(card.range == "close")
-        this.board[playerIndex].close.push(card);
+        this.board.field[playerIndex].close.push(card);
       else if(card.range == "ranged")
-        this.board[playerIndex].ranged.push(card);
+        this.board.field[playerIndex].ranged.push(card);
       else if(card.range == "siege")
-        this.board[playerIndex].siege.push(card);
+        this.board.field[playerIndex].siege.push(card);
       else if(card.range == "agile"){
         if(target = "close")
-          this.board[playerIndex].close.push(card);
+          this.board.field[playerIndex].close.push(card);
         else if(target == "ranged")
-          this.board[playerIndex].ranged.push(card);
-    }
-    else if(card.special == "scorch - close"){
-      this.board.scorch();
-    }
-
-        if(card.type == "unit" || card.type == "hero"){
-          if(card.special == "spy"){
-            this.players[playerIndex].player.hand.push(...draw(playerIndex, 2));
-            
-          }
-          if(card.range == "close")
-            this.board.rows[playerIndex].close.cards.push(card);
-          else if(card.range == "ranged")
-            this.board.rows[playerIndex].ranged.cards.push(card);
-          else if(card.range == "siege")
-            this.board.rows[playerIndex]
-        }
+          this.board.field[playerIndex].ranged.push(card);
       }
+
+      //unit cards can have 4 abilities that trigger when placed - medic, spy, scorchClose, & muster
+      //(morale & tight bond don't trigger until I calculate the card strength)
+      if(card.special == "scorchClose")
+        this.board.scorch(playerIndex, "close");
+      //if the player plays a medic card, target should specify index in graveyard
+      else if(card.special == "medic"){
+        let card2 = this.board.field[playerIndex].graveyard[target];
+        this.board.field[playerIndex].graveyard.splice(target, 1);
+        console.log("what if they revive a medic...");
+      }
+      else if(card.special == "spy"){
+        this.draw(playerIndex, 2);
+
+        if(card.range == "close")
+          this.board.field[(playerIndex + 1) % 2].close.push(card);
+        else if(card.range == "ranged")
+          this.board.field[(playerIndex + 1) % 2].ranged.push(card);
+        else if(card.range == "siege")
+          this.board.field[(playerIndex + 1) % 2].siege.push(card);
+      }
+      else if(card.special == "muster"){
+        console.log("TODO: implement muster");
+      }
+
+    }
+    //7 special cards - 4 weather cards, scorch, commander's horn, & decoy
+    else if(card.type == "special"){
+      if(card.name == "Biting Frost")
+        this.board.weather.close = true;
+      else if(card.name == "Impenetrable Fog")
+        this.board.weather.ranged = true;
+      else if(card.name == "Torrential Rain")
+        this.board.weather.siege = true;
+      else if(card.name == "Clear Weather")
+        this.board.clearWeather();
+      else if(card.name == "Scorch")
+        this.board.scorch();
+      //if the player plays a commanders horn, target should specify the row
+      else if(card.name == "Commanders Horn")
+        this.board.rallyHorns[playerIndex][target] = true;
+      //if the player plays a decoy, target should specify row & index, eg. {row: "close", index: 3}
+      else if(card.name == "Decoy"){
+        let card2 = this.board.field[playerIndex][target.row][target.index];
+        this.board.field[playerIndex][target.row][target.index] = card;
+        this.players[playerIndex].hand.push(card2);
+      }
+
+      //finally, every card except decoys get put in the graveyard
+      //except maybe weather cards and commanders horns shouldnt, but since you cant recover them from the graveyard its basically the same thing
+      if(card.name != "Decoy")
+        this.board[playerIndex].graveyard.push(card);
     }
   }
-
-  pass(playerIndex){
-    players[playerIndex].player.passed = true;
-  }
-
 }
