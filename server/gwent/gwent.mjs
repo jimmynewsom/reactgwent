@@ -82,12 +82,13 @@ export function validateDeck(deck){
 
 
 //GAME LOGIC!!!!
-
+//a lot of this might need to get optimized, and if it's really slow this might block my event loop
+//but I'm just going to write a sloppy v1 first and then optimize later if necessary
+//also, I only have to do this at the end of rounds. Normal turns I can getCardStrength and getRowStrength client-side
 
 class Player{
   lives = 2;
   passed = false;
-  hand = [];
 
   constructor(playerName){
     this.playerName = playerName;
@@ -96,12 +97,12 @@ class Player{
 
 class Board{
   field = [{close: [], ranged: [], siege: [], graveyard: []},
-          {close: [], ranged: [], siege: [], graveyard: []}];
+           {close: [], ranged: [], siege: [], graveyard: []}];
   
   weather = {close: false, ranged: false, siege: false};
 
   rallyHorn = [{close: false, ranged: false, siege: false},
-             {close: false, ranged: false, siege: false}];
+               {close: false, ranged: false, siege: false}];
 
   clearWeather(){
     this.weather = {close: false, ranged: false, siege: false};
@@ -196,7 +197,7 @@ function shuffle(array){
 
 /*
 Here is where the game logic will go.
-On the server I will track everything. player names & stuff, cards on the board, cards in the decks, & cards in the hands.
+On the server I will track everything. player names & stuff, cards on the board & graveyards, cards in the decks, & cards in the hands.
 I will also validate all attempted moves on the server.
 
 Then, the server needs to send both clients all of the data they need every turn
@@ -215,7 +216,7 @@ class Game{
     deck1 = shuffle(deck1);
     deck2 = shuffle(deck2);
 
-    this.players = [{player: Player(playerName1), deck: deck1}, {player: Player(playerName2), deck: deck2}];
+    this.players = [{player: Player(playerName1), deck: deck1, hand: []}, {player: Player(playerName2), deck: deck2, hand: []}];
     this.board = new Board();
     this.players[0].hand = draw(0, 10);
     this.players[1].hand = draw(1, 10);
@@ -227,41 +228,39 @@ class Game{
     return this.players[playerIndex].deck.splice(0, numCards);
   }
 
-  validateMove(playerIndex, cardName){
-    isValid = false;
-    for(let card in this.players[playerIndex].player.hand){
-      if(card.name == cardName)
-        isValid = true;
-    }
-    return isValid;
-  }
+  // validateMove(playerIndex, cardName){
+  //   isValid = false;
+  //   for(let card in this.players[playerIndex].player.hand){
+  //     if(card.name == cardName)
+  //       isValid = true;
+  //   }
+  //   return isValid;
+  // }
 
   /*
   One more big function...
   play cards, following all gwent rules
   */
-  playCard(playerIndex, cardName, target){
-    for(let [card, i] of this.players[playerIndex].player.hand){
-      if(card.name == cardName){
-        this.players[playerIndex].hand.splice(i, 1);
-
-        if(card.special == "none"){
-          if(card.range == "close")
-            this.board[playerIndex].close.push(card);
-          else if(card.range == "ranged")
-            this.board[playerIndex].ranged.push(card);
-          else if(card.range == "siege")
-            this.board[playerIndex].siege.push(card);
-          else if(card.range == "agile"){
-            if(target = "close")
-              this.board[playerIndex].close.push(card);
-            else if(target == "ranged")
-              this.board[playerIndex].ranged.push(card);
-          }
-        }
-        else if(card.special == "scorch - close"){
-          this.board.scorch();
-        }
+  playCard(playerIndex, cardIndex, target){
+    let card = this.players[playerIndex].hand[cardIndex];
+    this.players[playerIndex].hand.splice(cardIndex, 1);
+    
+    if(card.special == "none"){
+      if(card.range == "close")
+        this.board[playerIndex].close.push(card);
+      else if(card.range == "ranged")
+        this.board[playerIndex].ranged.push(card);
+      else if(card.range == "siege")
+        this.board[playerIndex].siege.push(card);
+      else if(card.range == "agile"){
+        if(target = "close")
+          this.board[playerIndex].close.push(card);
+        else if(target == "ranged")
+          this.board[playerIndex].ranged.push(card);
+    }
+    else if(card.special == "scorch - close"){
+      this.board.scorch();
+    }
 
         if(card.type == "unit" || card.type == "hero"){
           if(card.special == "spy"){
