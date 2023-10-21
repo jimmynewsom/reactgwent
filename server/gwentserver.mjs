@@ -1,6 +1,8 @@
 import express from "express";
-import sanitize from "sanitize";
-import mongoSanitize from 'express-mongo-sanitize';
+//import * as sanitize from "sanitize";
+//const sanitizeMiddleware = sanitize.middleware;
+//import * as expressMongoSanitize from 'express-mongo-sanitize';
+//const mongoSanitize = expressMongoSanitize.default; 
 import cors from "cors";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -11,10 +13,12 @@ import {cardMap, cardRows, validateDeck} from './gwent/gwent.mjs';
 
 const app = express();
 const port = process.env.PORT || 5000;
-//app.use(sanitize.middleware);
-//app.use(mongoSanitize());
 app.use(cors());
 app.use(express.json());
+//app.use(sanitizeMiddleware);
+//app.use(mongoSanitize());
+
+
 
 
 app.get("/", (req, res) => {
