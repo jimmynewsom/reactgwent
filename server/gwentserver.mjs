@@ -1,5 +1,6 @@
 import express from "express";
 import sanitize from "sanitize";
+import mongoSanitize from 'express-mongo-sanitize';
 import cors from "cors";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -10,13 +11,22 @@ import {cardMap, cardRows, validateDeck} from './gwent/gwent.mjs';
 
 const app = express();
 const port = process.env.PORT || 5000;
-app.use(sanitize.middleware);
+//app.use(sanitize.middleware);
+//app.use(mongoSanitize());
 app.use(cors());
 app.use(express.json());
 
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
+});
+
+
+app.post("/test-sanitize", (req, res) => {
+  console.log(req.body);
+  console.log(req.query);
+  console.log(req.params);
+  res.send("body: " + req.body + "/n query: " + req.query + "/n params: " + req.params);
 });
 
 
