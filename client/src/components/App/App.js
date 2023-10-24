@@ -6,6 +6,7 @@ import { Route, Routes, useNavigate } from "react-router-dom";
 import Dashboard from '../Dashboard/Dashboard';
 import LoginRegister from '../LoginRegister/LoginRegister';
 import DeckBuilder from '../DeckBuilder/DeckBuilder';
+import GwentClient from '../GwentClient/GwentClient';
 import {CardView, CardData} from '../Card/Card';
 
 
@@ -40,6 +41,11 @@ function App() {
         <Route path="/deckbuilder" element={
           <RequireAuth loginPath='/loginregister'>
             <DeckBuilder />
+          </RequireAuth>
+        }/>
+        <Route path="/gwent" element={
+          <RequireAuth loginPath='/loginregister'>
+            <GwentClient />
           </RequireAuth>
         }/>
         <Route path="loginregister" element={<LoginRegister />} />
