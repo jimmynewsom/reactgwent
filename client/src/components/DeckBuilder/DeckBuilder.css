@@ -6,7 +6,7 @@
   text-align: center;
 }
 
-.grid {
+.deckbuilder_grid {
   display: grid;
   grid-template-columns: 40% 20% 40%;
 }

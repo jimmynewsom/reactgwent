@@ -231,12 +231,9 @@ export default function DeckBuilder() {
     button.disabled = false;
   }
 
-  //this is a big one. loads data for deckbuilder component
-  //first, checks for cardRows in localStorage
-  //if it's there already, use that data to build the cardMap
-  //otherwise, pull it from the server, save it to localStorage for later, and then build the map
-  //(Also, I need to build the map inside the async function, so there's a little duplicate code here)
-  //then load the users decks from the server (or the default decks if the user has no saved decks, handled by server-side logic)
+
+  //uses getCardData function from GwentClient class
+  //then loads the users decks from the server (or the default decks if the user has no saved decks, handled by server-side logic)
   useEffect(() => {
     getCardData(setCardMap, authHeader);
 
@@ -289,7 +286,7 @@ export default function DeckBuilder() {
         <p> {currentFaction} </p>
         <p> (next faction) </p>
       </div>
-      <div className="grid">
+      <div className="deckbuilder_grid">
         <div className="one">
           <p>(filters)</p>
           <p>Available Cards</p>

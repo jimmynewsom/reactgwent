@@ -1,4 +1,42 @@
 .gwent_client {
+  height: 80%;
+  width: 100%;
+  padding: 10px;
+  border-style: solid;
+  text-align: center;
+}
+
+.gwent_client_grid {
   display: grid;
-  grid-template-columns: 3fr 7fr;
+  grid-template-columns: 20% 60% 10% 10%;
+}
+
+.stats_panel {
+  border: 2px solid black;
+  padding-bottom: 10px;
+}
+
+.weather_grid {
+  display: grid;
+  grid-template-columns: 33% 33% 33%;
+}
+
+.board_panel {
+  border: 2px solid black;
+  height: 100%;
+}
+
+.board {
+  height: 90%;
+}
+
+.board_grid {
+  display: grid;
+  grid-template-rows:auto auto auto 5% auto auto auto;
+  row-gap: 10px;
+  height: 100%;
+}
+
+.board_grid div {
+  text-align: center;
 }

@@ -1,7 +1,3 @@
-import * as pkg1 from "sanitize";
+import {check} from 'express-validator';
 
-
-import * as pkg2 from 'express-mongo-sanitize';
-const mongoSanitize = pkg2.default; 
-
-console.log(pkg1.middleware);
+console.log(check);
