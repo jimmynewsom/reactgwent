@@ -19,7 +19,7 @@ function PlayerStatsPanel({player}){
       <p>{player.faction}</p>
       <p>(number of cards in hand)</p>
       <p>lives: {player.lives}</p>
-      {player.passed ? <p>passed</p> : <p></p>}
+      {player.passed ? <p><b>passed</b></p> : <p></p>}
     </div>
   );
 }
@@ -36,10 +36,10 @@ function WeatherPanel({weather}){
   );
 }
 
-function Board(){
+function Field(){
   return(
-    <div className="board">
-      <div className="board_grid">
+    <div className="field">
+      <div className="field_grid">
         <div>one</div>
         <div>two</div>
         <div>three</div>
@@ -123,7 +123,7 @@ export default function GwentClient() {
           <button>Pass</button>
         </div>
         <div className="board_panel">
-          <Board />
+          <Field />
           <div className="player_hand">
             player hand
           </div>

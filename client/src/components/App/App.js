@@ -7,7 +7,7 @@ import Dashboard from '../Dashboard/Dashboard';
 import LoginRegister from '../LoginRegister/LoginRegister';
 import DeckBuilder from '../DeckBuilder/DeckBuilder';
 import GwentClient from '../GwentClient/GwentClient';
-import {CardView, CardData} from '../Card/Card';
+import {CardData, SmallCardView, LargeCardView} from '../Card/Card';
 
 
 function App() {
@@ -19,6 +19,8 @@ function App() {
     signOut();
     navigate("/loginregister");
   }
+
+  let card = new CardData("Geralt of Rivia", "geralt_of_rivia.png", "hero", "neutral", "15", "close", "none", "1", "");
 
   return(
     <div className="app-wrapper">
@@ -48,7 +50,11 @@ function App() {
             <GwentClient />
           </RequireAuth>
         }/>
-        <Route path="loginregister" element={<LoginRegister />} />
+        <Route path="/loginregister" element={<LoginRegister />} />
+
+        <Route path="/smallcardview" element={<SmallCardView cardData={card}/>} />
+        <Route path="/largecardview" element={<LargeCardView cardData={card} handleClick={() => console.log("nothing")}/>} />
+
       </Routes>
     </div>
   );

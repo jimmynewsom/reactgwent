@@ -32,28 +32,12 @@ export function LargeCardView ({cardData, handleClick, available = 0}) {
   )
 }
 
-// function SmallCardView ({cardData}){
-//   return <p></p>
-// }
+export function SmallCardView ({cardData}){
+  console.log(cardData.image_url);
 
-// return (
-//     <div className="card">
-//         <div className="card_img_area">
-//             {/* eventually I should fill this href attribute with a img url from my card data, but not today*/}
-            
-//             <a className="card_img" href="{}"></a>
-//             <div className="card_icon_column">
-
-//                 { (this.props.card.type != "creature") ? <p>{this.props.card.type}</p> : <p></p>}
-//                 { (this.props.card.strength != -1) ? <p>{this.props.card.strength}</p> : <p></p>}
-//                 { (this.props.card.type != "none") ? <p>{this.props.card.range}</p> : <p></p>}
-//                 { (this.props.card.type != "special") ? <p>{this.props.card.none}</p> : <p></p>}
-//             </div>
-
-
-//         </div>
-//         <div className="card_txt_area">
-//             <p className="card_name"> {this.props.card.name} </p>
-//             <p className="card_total"> (number available / in deck) </p>
-//         </div>
-//     </div>)
+  return (
+    <div className="small_card">
+      <img src={process.env.PUBLIC_URL + "/" + cardData.image_url} alt="image url is wrong" width="60" height="100" />
+    </div>
+  );
+  }

@@ -26,17 +26,17 @@
   height: 100%;
 }
 
-.board {
+.field {
   height: 90%;
 }
 
-.board_grid {
+.field_grid {
   display: grid;
   grid-template-rows:auto auto auto 5% auto auto auto;
   row-gap: 10px;
   height: 100%;
 }
 
-.board_grid div {
+.field_grid div {
   text-align: center;
 }

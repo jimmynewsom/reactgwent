@@ -5,8 +5,11 @@
 /server/node_modules
 /.pnp
 .pnp.js
+
+# environment variables and tests
 /server/config.env
 /server/test.mjs
+/client/public/geralt_of_rivia.png
 
 # testing
 /coverage
