@@ -124,6 +124,7 @@ export default function GwentClient() {
   let dummyFieldData = [{close: ["Geralt of Rivia"], ranged: ["Yennefer of Vengerberg"], siege: ["Triss Merigold"]},
                         {close: [], ranged: [], siege: []}];
   
+  const [handData, setHandData] = useState(["Geralt of Rivia"]);
   const [fieldData, setFieldData] = useState(dummyFieldData);
   const [rallyHorns, setRallyHorns] = useState([{close: false, ranged: false, siege: false}, {close: false, ranged: false, siege: false}]);
   const [focusCard, setFocusCard] = useState(card);
@@ -132,6 +133,28 @@ export default function GwentClient() {
   useEffect(() => {
     getCardData(setCardMap, authHeader);
   }, []);
+
+  //this function is kind of a repeat of my createCardRows function inside my Field component..... might refactor later
+  function createHandViews(){
+    let cardViews = [];
+    let cardNames = handData;
+
+    if(cardMap.size == 0)
+      return;
+    
+    for(let j=0; j < cardNames.length; j++){
+      let cardName = cardNames[j];
+      let card = cardMap.get(cardName);
+
+      cardViews.push(<SmallCardView
+                        cardData={card}
+                        key={"hand" + j}
+                    />)
+    }
+    return cardViews;
+  }
+
+
 
   return(
     <div className="gwent_client">
@@ -155,9 +178,9 @@ export default function GwentClient() {
             playerIndex={playerIndex}
             cardMap={cardMap}
           />
-          <div></div>
+          <br />
           <div className="player_hand">
-            player hand
+            {createHandViews()}
           </div>
         </div>
         <div className="right_panel">

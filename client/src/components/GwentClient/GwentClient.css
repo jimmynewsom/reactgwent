@@ -49,9 +49,8 @@
 }
 
 .player_hand {
-  height: 15%;
+  height: 14%;
   border: 2px solid black;
-  display: block;
   text-align: center;
 }
 
