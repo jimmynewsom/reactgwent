@@ -29,18 +29,42 @@ function WeatherPanel({weather}){
   );
 }
 
-function Field({fieldData, rallyHorns, playerIndex}){
+function Field({fieldData, rallyHorns, playerIndex, cardMap}){
+
+  //technically this is basically a React component, but that was an accident...
+  function createCardRows(range, i){
+    let cardViews = [];
+    let cardNames = fieldData[(playerIndex + i) % 2][range];
+
+    if(cardMap.size == 0)
+      return;
+    
+    for(let j=0; j < cardNames.length; j++){
+      let cardName = cardNames[j];
+      let card = cardMap.get(cardName);
+
+      cardViews.push(<SmallCardView
+                        cardData={card}
+                        key={(range + i) + j}
+                    />)
+    }
+    let rallyHorn = rallyHorns[(playerIndex + i) % 2][range];
+    return (<>
+              <div className="rallyhorn">{"" + rallyHorn}</div>
+              <div className="cardrow">{cardViews}</div>
+            </>);
+  }
 
   return(
     <div className="field">
       <div className="field_grid">
-        <div>one</div>
-        <div>two</div>
-        <div>three</div>
-        <div>gap</div>
-        <div>four</div>
-        <div>five</div>
-        <div>six</div>
+        {createCardRows("siege", 1)}
+        {createCardRows("ranged", 1)}
+        {createCardRows("close", 1)}
+        
+        {createCardRows("close", 0)}
+        {createCardRows("ranged", 0)}
+        {createCardRows("siege", 0)}
       </div>
     </div>
   );
@@ -99,40 +123,13 @@ export default function GwentClient() {
   const [playerIndex, setPlayerIndex] = useState(0);
 
   let card = new CardData("Geralt of Rivia", "geralt_of_rivia.png", "hero", "neutral" , "15", "close", "none", "1", "");
-  let dummyFieldData = [{close: ["Geralt of Rivia"], ranged: [], siege: []}, {close: [], ranged: [], siege: []}];
+  let dummyFieldData = [{close: ["Geralt of Rivia"], ranged: ["Yennefer of Vengerberg"], siege: ["Triss Merigold"]},
+                        {close: [], ranged: [], siege: []}];
   
   const [fieldData, setFieldData] = useState(dummyFieldData);
   const [rallyHorns, setRallyHorns] = useState([{close: false, ranged: false, siege: false}, {close: false, ranged: false, siege: false}]);
   const [focusCard, setFocusCard] = useState(card);
 
-
-
-
-
-
-  function createCardViews(range, i){
-    console.log(cardMap);
-    let cardViews = [];
-    let cardNames = fieldData[(playerIndex + i) % 2][range];
-    console.log(cardNames);
-
-    if(cardMap.size == 0)
-      return;
-    
-
-    for(let j=0; j < cardNames.length; j++){
-      let cardName = cardNames[j];
-      console.log(cardName);
-      let card = cardMap.get(cardName);
-      console.log(card);
-
-      cardViews.push(<SmallCardView
-                        cardData={card}
-                        key={(range + i) + j}
-                    />)
-    }
-    return cardViews;
-  }
 
   useEffect(() => {
     getCardData(setCardMap, authHeader);
@@ -154,7 +151,12 @@ export default function GwentClient() {
           <button>Pass</button>
         </div>
         <div className="board_panel">
-          <div>{createCardViews("close", 0)}</div>
+          <Field 
+            fieldData={fieldData}
+            rallyHorns={rallyHorns}
+            playerIndex={playerIndex}
+            cardMap={cardMap}
+          />
           <div className="player_hand">
             player hand
           </div>

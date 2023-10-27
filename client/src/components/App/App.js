@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useState } from 'react';
+import React from 'react';
 import { RequireAuth, useIsAuthenticated, useSignOut } from 'react-auth-kit';
 import { Route, Routes, useNavigate } from "react-router-dom";
 

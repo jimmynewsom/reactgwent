@@ -13,17 +13,3 @@
   right: 0;
   background-color: rgb(255, 255, 255, 0);
 }
-
-.card-img-area {
-    height: 60%;
-    width: 100%;
-}
-
-.card-text-area {
-    height: 40%;
-    width: 100%;
-}
-
-.card_icon_column {
-    text-align: left;
-}

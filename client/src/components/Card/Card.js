@@ -1,5 +1,5 @@
 import './Card.css';
-import React, {useState} from 'react';
+import React from 'react';
 
 export class CardData {
   constructor(name, image_url, type, faction, strength, range, special, available, description){
@@ -25,7 +25,7 @@ export function LargeCardView ({cardData, handleClick, available = 0}) {
         width="180"
         height="320"
       />
-      <div className="available"><p>available: {available}</p></div>
+      {available ? <div className="available"><p>available: {available}</p></div> : <></>}
     </div>
   );
   
@@ -52,8 +52,8 @@ export function SmallCardView ({cardData}){
       <img 
         src={"https://res.cloudinary.com/dli8kk5qz/image/upload/v1698336601/gwent/unit%20cards/" + cardData.image_url}
         alt={"image url is wrong for " + cardData.name + " with image url " + cardData.image_url}
-        width="60"
-        height="100"
+        width="40"
+        height="60"
       />
     </div>
   );
