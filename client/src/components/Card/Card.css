@@ -4,6 +4,14 @@
     border-style: solid;
     margin: 5px;
     border-radius: 10px;
+    position: relative;
+}
+
+.available {
+  position: absolute;
+  top: 200px;
+  right: 0;
+  background-color: rgb(255, 255, 255, 0);
 }
 
 .card-img-area {
