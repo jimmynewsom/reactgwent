@@ -102,16 +102,14 @@ export default function GwentClient() {
   const [player, setPlayer] = useState({name: "player", faction: "Northern Realms", lives: 2, passed: false});
   const [opponent, setOpponent] = useState({name: "opponent", faction: "Northern Realms", lives: 2, passed: false});
   const [weather, setWeather] = useState({close: false, ranged: false, siege: false});
+  //const [playerIndex, setPlayerIndex] = useState(0);
+  //const [fieldData, setFieldData] = useState();
+  //const [rallyHorns, setRallyHorns] = useState();
+  //const [focusCard, setFocusCard] = useState();
 
-  //const [playerIndex, setPlayerIndex] = useState();
-
-  const [focusCard, setFocusCard] = useState();
-
-
-
-  let dummyData = ["Geralt of Rivia", "Yen"];
-
-
+  let card = new CardData("Geralt of Rivia", "geralt_of_rivia.png", "hero", "neutral" , "15", "close", "none", "1", "");
+  let dummyFieldData = [{close: [card], ranged: [], siege: []}, {close: [], ranged: [], siege: []}];
+  //setFieldData(dummyFieldData);
 
 
 
@@ -143,10 +141,6 @@ export default function GwentClient() {
         <div className="right_panel">
           <p>graveyards</p>
           <p>decks & card focus</p>
-          <LargeCardView
-            cardData={focusCard}
-            handleClick={()=>{}}
-          />
         </div>
       </div>
     </div>
