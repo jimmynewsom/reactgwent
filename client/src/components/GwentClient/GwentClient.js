@@ -2,14 +2,7 @@ import './GwentClient.css';
 import React, { useState, useEffect } from 'react';
 import { useAuthHeader } from 'react-auth-kit';
 
-import {LargeCardView, CardData} from '../Card/Card';
-
-
-// function GwentBoard(){
-//   return(
-//     <h2>Gwent Board</h2>
-//   );
-// }
+import {LargeCardView, CardData, SmallCardView} from '../Card/Card';
 
 
 function PlayerStatsPanel({player}){
@@ -36,7 +29,8 @@ function WeatherPanel({weather}){
   );
 }
 
-function Field(){
+function Field({fieldData, rallyHorns, playerIndex}){
+
   return(
     <div className="field">
       <div className="field_grid">
@@ -102,16 +96,43 @@ export default function GwentClient() {
   const [player, setPlayer] = useState({name: "player", faction: "Northern Realms", lives: 2, passed: false});
   const [opponent, setOpponent] = useState({name: "opponent", faction: "Northern Realms", lives: 2, passed: false});
   const [weather, setWeather] = useState({close: false, ranged: false, siege: false});
-  //const [playerIndex, setPlayerIndex] = useState(0);
-  //const [fieldData, setFieldData] = useState();
-  //const [rallyHorns, setRallyHorns] = useState();
-  //const [focusCard, setFocusCard] = useState();
+  const [playerIndex, setPlayerIndex] = useState(0);
 
   let card = new CardData("Geralt of Rivia", "geralt_of_rivia.png", "hero", "neutral" , "15", "close", "none", "1", "");
-  let dummyFieldData = [{close: [card], ranged: [], siege: []}, {close: [], ranged: [], siege: []}];
-  //setFieldData(dummyFieldData);
+  let dummyFieldData = [{close: ["Geralt of Rivia"], ranged: [], siege: []}, {close: [], ranged: [], siege: []}];
+  
+  const [fieldData, setFieldData] = useState(dummyFieldData);
+  const [rallyHorns, setRallyHorns] = useState([{close: false, ranged: false, siege: false}, {close: false, ranged: false, siege: false}]);
+  const [focusCard, setFocusCard] = useState(card);
 
 
+
+
+
+
+  function createCardViews(range, i){
+    console.log(cardMap);
+    let cardViews = [];
+    let cardNames = fieldData[(playerIndex + i) % 2][range];
+    console.log(cardNames);
+
+    if(cardMap.size == 0)
+      return;
+    
+
+    for(let j=0; j < cardNames.length; j++){
+      let cardName = cardNames[j];
+      console.log(cardName);
+      let card = cardMap.get(cardName);
+      console.log(card);
+
+      cardViews.push(<SmallCardView
+                        cardData={card}
+                        key={(range + i) + j}
+                    />)
+    }
+    return cardViews;
+  }
 
   useEffect(() => {
     getCardData(setCardMap, authHeader);
@@ -133,14 +154,23 @@ export default function GwentClient() {
           <button>Pass</button>
         </div>
         <div className="board_panel">
-          <Field />
+          <div>{createCardViews("close", 0)}</div>
           <div className="player_hand">
             player hand
           </div>
         </div>
         <div className="right_panel">
-          <p>graveyards</p>
-          <p>decks & card focus</p>
+          <div className="deck_and_graveyard">
+            <p>graveyards</p>
+            <p>decks & card focus</p>
+          </div>
+          <div className="card_focus">
+            {focusCard ? <LargeCardView cardData={focusCard} handleClick={()=>{}} /> : <></>}
+          </div>
+          <div className="deck_and_graveyard">
+            <p>graveyards</p>
+            <p>decks & card focus</p>
+          </div>
         </div>
       </div>
     </div>

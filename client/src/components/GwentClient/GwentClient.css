@@ -40,3 +40,11 @@
 .field_grid div {
   text-align: center;
 }
+
+.card_focus {
+  height: 350;
+  width: 200;
+  align-items: center;
+  align-self: center;
+  display: inline-block;
+}

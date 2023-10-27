@@ -189,6 +189,9 @@ export default function DeckBuilder() {
   }
 
   function createUsedCards(){
+    if(cardMap.size == 0)
+      return;
+
     let cardViews = [];
     for(let [keyy, value] of currentDeck){
       if(currentDeck.get(keyy) == 0)
