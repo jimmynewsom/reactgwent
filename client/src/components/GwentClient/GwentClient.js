@@ -31,7 +31,7 @@ function WeatherPanel({weather}){
 
 function Field({fieldData, rallyHorns, playerIndex, cardMap}){
 
-  //technically this is basically a React component, but that was an accident...
+  //technically this is also basically a React component, but that was an accident...
   function createCardRows(range, i){
     let cardViews = [];
     let cardNames = fieldData[(playerIndex + i) % 2][range];
@@ -56,16 +56,14 @@ function Field({fieldData, rallyHorns, playerIndex, cardMap}){
   }
 
   return(
-    <div className="field">
-      <div className="field_grid">
-        {createCardRows("siege", 1)}
-        {createCardRows("ranged", 1)}
-        {createCardRows("close", 1)}
-        
-        {createCardRows("close", 0)}
-        {createCardRows("ranged", 0)}
-        {createCardRows("siege", 0)}
-      </div>
+    <div className="field_grid">
+      {createCardRows("siege", 1)}
+      {createCardRows("ranged", 1)}
+      {createCardRows("close", 1)}
+      
+      {createCardRows("close", 0)}
+      {createCardRows("ranged", 0)}
+      {createCardRows("siege", 0)}
     </div>
   );
 }
@@ -157,6 +155,7 @@ export default function GwentClient() {
             playerIndex={playerIndex}
             cardMap={cardMap}
           />
+          <div></div>
           <div className="player_hand">
             player hand
           </div>
