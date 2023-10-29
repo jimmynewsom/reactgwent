@@ -36,8 +36,10 @@ function Field({fieldData, rallyHorns, playerIndex, cardMap}){
     let cardViews = [];
     let cardNames = fieldData[(playerIndex + i) % 2][range];
 
-    if(cardMap.size == 0)
+    if(cardMap.size == 0){
+      console.log("cardMap hasn't loaded yet.");
       return;
+    }
     
     for(let j=0; j < cardNames.length; j++){
       let cardName = cardNames[j];
