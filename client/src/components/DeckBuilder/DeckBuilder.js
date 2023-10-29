@@ -10,7 +10,7 @@ import {LargeCardView, CardData} from '../Card/Card';
 So, in retrospect, this component sucks as a React component, because the best way for me to track cards in a deck is a map,
 but React uses shallow comparison to check for changes in state. So to get React to notice my changes I need to make new objects everytime.
 Which is probably expensive and wasteful, but idk how else to get this to work with React
-anyway, working is better than perfect, right? v1, I'm gonna try it like this and see if it's fast enough...
+anyway, working is better than perfect, right? v1, I'm gonna try it like this and see if it's fast enough... (update: it was)
 
 So, my approach is as follows:
 1)load all the card data into a cardMap
@@ -19,7 +19,7 @@ So, my approach is as follows:
 4)load the right panel by looking at the currentDeck
 5)when a user clicks a card in the left panel
   - check if there is already the max # of that card in the current deck. if so, do nothing
-  - if there is less than the max #, make a new map and add 1 to that card in the current deck map. set current deck equal to the new map
+  - if there is less than the max #, make a new map from the old map and add 1 to that card. set current deck equal to the new map
   - finally, set the respective faction deck map equal to the new current deck map. this will save changes if a user switches factions later
 
 6)when a user clicks a card in the right panel
@@ -140,6 +140,13 @@ export default function DeckBuilder() {
   
   function removeCardFromDeck(cardData){
     return (() => {
+      if(currentDeck.get(cardData.name) == 0){
+        //I'm pretty sure this check is unneccessary, because if there are 0 in the deck the card shouldn't be in the view and thus unclickable
+        //but I'm including check this in case people click really fast or something
+        console.log("error! current deck already has 0 of this card!");
+        return;
+      }
+
       setTotalCardCount(totalCardCount - 1);
 
       if(cardData.type == "unit"){
@@ -189,8 +196,10 @@ export default function DeckBuilder() {
   }
 
   function createUsedCards(){
-    if(cardMap.size == 0)
+    if(cardMap.size == 0){
+      console.log("cardMap hasn't loaded yet");
       return;
+    }
 
     let cardViews = [];
     for(let [keyy, value] of currentDeck){
