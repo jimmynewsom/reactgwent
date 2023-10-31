@@ -66,6 +66,7 @@
     "type-is": "^1.6.18",
     "unpipe": "^1.0.0",
     "utils-merge": "^1.0.1",
+    "validator": "^13.11.0",
     "vary": "^1.1.2"
   },
   "scripts": {

@@ -1,8 +1,5 @@
 import express from "express";
-//import * as sanitize from "sanitize";
-//const sanitizeMiddleware = sanitize.middleware;
-//import * as expressMongoSanitize from 'express-mongo-sanitize';
-//const mongoSanitize = expressMongoSanitize.default; 
+import validator from "validator";
 import cors from "cors";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -15,10 +12,12 @@ const app = express();
 const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
-//app.use(sanitizeMiddleware);
-//app.use(mongoSanitize());
 
 
+//I wanted to use middleware for this, but I keep finding common.js libraries that don't work, so I'm just doing this for now
+function sanitizeInput(input){
+  return validator.blacklist(input + "", "$.<>");
+}
 
 
 app.get("/", (req, res) => {
@@ -26,18 +25,18 @@ app.get("/", (req, res) => {
 });
 
 
-app.post("/test-sanitize", (req, res) => {
-  console.log(req.body);
-  console.log(req.query);
-  console.log(req.params);
-  return res.send("body: " + req.body + "/n query: " + req.query + "/n params: " + req.params);
-});
+// app.post("/test-sanitize", (req, res) => {
+//   res.send(req.body);
+// });
 
 
 app.post("/register", async (req, res) => {
   try {
+    let username = sanitizeInput(req.body.username);
+    let password = sanitizeInput(req.body.password);
+
     let collection = await db.collection("users");
-    let user = await collection.findOne({"_id": req.body.username});
+    let user = await collection.findOne({"_id": username});
 
     //if the user exists already, return an error message
     if(user){
@@ -45,9 +44,9 @@ app.post("/register", async (req, res) => {
     }
 
     //otherwise, register the new user and return a token
-    let hash = await bcrypt.hash(req.body.password, 10);
+    let hash = await bcrypt.hash(password, 10);
     let newUser = {
-      _id: req.body.username,
+      _id: username,
       passwordHash: hash,
       wins: 0,
       losses: 0,
@@ -57,11 +56,11 @@ app.post("/register", async (req, res) => {
     let result = await collection.insertOne(newUser);
 
     //this creates a jwt token asynchronously (await syntax didn't work for some reason)
-    jwt.sign(req.body.username, process.env.JWT_SECRET, function(error, token) {
+    jwt.sign(username, process.env.JWT_SECRET, function(error, token) {
       res.status(201).json({
         message: "registration successful",
         token: token,
-        username: req.body.username
+        username: username
       });
     });
     
@@ -74,15 +73,18 @@ app.post("/register", async (req, res) => {
 
 app.post("/login", async (req, res) => {
   try {
+    let username = sanitizeInput(req.body.username);
+    let password = sanitizeInput(req.body.password);
+
     let collection = await db.collection("users");
-    let user = await collection.findOne({"_id": req.body.username});
+    let user = await collection.findOne({"_id": username});
 
     //if the user doesn't exist, return an error
     if(!user){
       return res.status(400).json({ error: 'invalid username and/or password, please try again' });
     }
 
-    let result = await bcrypt.compare(req.body.password, user.passwordHash);
+    let result = await bcrypt.compare(password, user.passwordHash);
     
     //if the user exists and the password is wrong, return an error
     if(!result){
@@ -91,11 +93,11 @@ app.post("/login", async (req, res) => {
     //if the user exists and the password is right, log them in and return a token
     else {
       //this creates a jwt token asynchronously (await syntax didn't work for some reason)
-      jwt.sign(req.body.username, process.env.JWT_SECRET, function(error, token) {
+      jwt.sign(username, process.env.JWT_SECRET, function(error, token) {
         res.status(200).json({
           message: "login successful",
           token: token,
-          username: req.body.username
+          username: username
         });
       });
     }
@@ -113,8 +115,10 @@ app.get("/getCardData", authenticateToken, async (req, res) => {
 
 app.get("/userStats", authenticateToken, async (req, res) => {
   try {
+    let username = sanitizeInput(req.username);
+
     let collection = await db.collection("users");
-    let user = await collection.findOne({"_id": req.username});
+    let user = await collection.findOne({"_id": username});
     return res.status(200).json({
       wins: user.wins,
       losses: user.losses
@@ -128,8 +132,10 @@ app.get("/userStats", authenticateToken, async (req, res) => {
 
 app.get("/getUserDecks", authenticateToken, async (req, res) => {
   try {
+    let username = sanitizeInput(req.username);
+
     let collection = await db.collection("decks");
-    let decks = await collection.find({"owner": req.username}).toArray();
+    let decks = await collection.find({"owner": username}).toArray();
     //console.log(decks);
     
     //the actual game in the witcher 3 only has a default deck for the Northern Realms faction
@@ -155,8 +161,11 @@ app.get("/getUserDecks", authenticateToken, async (req, res) => {
 
 app.post("/saveUserDeck", authenticateToken, async (req, res) => {
   try {
-    let deck = req.body;
-    deck.owner = req.username;
+    let deck = {};
+    deck.faction = sanitizeInput(req.body.faction);
+    deck.leaderName = sanitizeInput(req.body.leaderName);
+    deck.cards = req.body.cards;
+    deck.owner = sanitizeInput(req.username);
     
     let result = validateDeck(deck);
     if(!result.isValid){

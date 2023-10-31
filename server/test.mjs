@@ -1,3 +1,7 @@
-import {check} from 'express-validator';
+import validator from "validator";
 
-console.log(check);
+function sanitizeInput(input){
+  return validator.blacklist(input, "$.<>");
+}
+
+console.log(sanitizeInput("test $$..<><> test"));
