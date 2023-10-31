@@ -35,17 +35,22 @@ export default function LoginRegister({ setToken }) {
         })
       });
 
-      result = await result.json();
-      //console.log(result);
+      if(result.status != 200){
+        console.error("error logging in! username/password invalid");
+      }
+      else {
+        result = await result.json();
+        //console.log(result);
 
-      signIn({
-        token: result.token,
-        tokenType: "Bearer",
-        expiresIn: 1440,
-        authState: {username: result.username}
-      });
+        signIn({
+          token: result.token,
+          tokenType: "Bearer",
+          expiresIn: 1440,
+          authState: {username: result.username}
+        });
 
-      navigate("/");
+        navigate("/");
+      }
     }
     catch (error) {
       console.log(error);
@@ -75,17 +80,22 @@ export default function LoginRegister({ setToken }) {
         })
       });
 
-      result = await result.json();
-      //console.log(result);
+      if(result.status != 201){
+        console.error("username already exists, please enter a different username");
+      }
+      else {
+        result = await result.json();
+        //console.log(result);
 
-      signIn({
-        token: result.token,
-        tokenType: "Bearer",
-        expiresIn: 1440,
-        authState: {username: result.username}
-      });
+        signIn({
+          token: result.token,
+          tokenType: "Bearer",
+          expiresIn: 1440,
+          authState: {username: result.username}
+        });
 
-      navigate("/");
+        navigate("/");
+      }
     }
     catch (error) {
       console.log(error);
