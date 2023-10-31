@@ -58,6 +58,11 @@ export function validateDeck(deck){
 
   let deckMap = new Map(Object.entries(deck.cards));
   for(let [cardName, numberInDeck] of deckMap){
+    //if the user submits a deck with a card name I don't recognize they're not using my app
+    if(!cardMap.has(cardName)){
+      return {isValid: false};
+    }
+
     let card = cardMap.get(cardName);
     totalCardCount += numberInDeck;
 

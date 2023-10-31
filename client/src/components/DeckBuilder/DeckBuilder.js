@@ -7,7 +7,7 @@ import {LargeCardView, CardData} from '../Card/Card';
 
 //this class is a little weird, but I need to make new objects everytime for React to notice my state changes, and this seemed like a good way to do it
 //also, I should maybe include a field for the faction, but right now it's easier to track that separately and add it when I save decks to the database
-class GwentDeck {
+export class GwentDeck {
   constructor(deck){
     if(!deck){
       this.cards = new Map();
