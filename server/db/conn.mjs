@@ -44,7 +44,7 @@ let defaultDeck = {
   "unitCount": 22
 }
 
-let test = await db.collection().findOne({"owner": "default"});
+let test = await db.collection("decks").findOne({"owner": "default"});
 
 if(!test){
   db.collection("decks").insertOne(defaultDeck);
