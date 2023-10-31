@@ -256,6 +256,7 @@ export default function DeckBuilder() {
           "Accept": 'application/json',
           "Content-Type": 'application/json'
         },
+        //I am not including the count fields here, because I will calculate those on the server, in case someone trys to cheat
         body: JSON.stringify({
           "faction": currentFaction,
           "leaderName": currentDeck.leaderName,
