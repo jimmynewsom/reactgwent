@@ -249,7 +249,7 @@ export default function DeckBuilder() {
     button.disabled = true;
     try {
       let cards = Object.fromEntries(currentDeck.cards.entries());
-      let result = await fetch("http://localhost:5000/saveUserDeck", {
+      let result = await fetch(process.env.REACT_APP_BACKEND_URL + "saveUserDeck", {
         method: 'POST',
         headers: {
           "Authorization": authHeader().split(" ")[1],
@@ -280,7 +280,7 @@ export default function DeckBuilder() {
 
     const fetchUserDecks = async () => {
       try {
-        let result = await fetch("http://localhost:5000/getUserDecks", {
+        let result = await fetch(process.env.REACT_APP_BACKEND_URL + "getUserDecks", {
           headers: {"Authorization": authHeader().split(" ")[1]}
         });
         let mongoDeckObjects = await result.json();

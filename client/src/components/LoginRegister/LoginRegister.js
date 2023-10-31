@@ -23,7 +23,7 @@ export default function LoginRegister({ setToken }) {
     register.disabled = true;
   
     try {
-      let result = await fetch("http://localhost:5000/login", {
+      let result = await fetch(process.env.REACT_APP_BACKEND_URL + "login", {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -68,7 +68,7 @@ export default function LoginRegister({ setToken }) {
     register.disabled = true;
   
     try {
-      let result = await fetch("http://localhost:5000/register", {
+      let result = await fetch(process.env.REACT_APP_BACKEND_URL + "register", {
         method: 'POST',
         headers: {
           'Accept': 'application/json',

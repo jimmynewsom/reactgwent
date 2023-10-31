@@ -92,7 +92,7 @@ export function getCardData(setcardmap, authheader) {
   else {
     const fetchCardData = async () => {
       try {
-        let result = await fetch("http://localhost:5000/getCardData", {
+        let result = await fetch(process.env.REACT_APP_BACKEND_URL + "getCardData", {
           headers: {"Authorization": authheader().split(" ")[1]}
         });
         cardRows = await result.json();
@@ -201,5 +201,4 @@ export default function GwentClient() {
       </div>
     </div>
   );
-
 }

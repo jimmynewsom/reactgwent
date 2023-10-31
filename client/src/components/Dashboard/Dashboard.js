@@ -10,7 +10,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        let result = await fetch("http://localhost:5000/userStats", {
+        let result = await fetch(process.env.REACT_APP_BACKEND_URL + "userStats", {
           headers: {"Authorization": authHeader().split(" ")[1]}
         });
         result = await result.json();
