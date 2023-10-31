@@ -22,7 +22,7 @@ app.use(express.json());
 
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  return res.send("Hello World!");
 });
 
 
@@ -30,7 +30,7 @@ app.post("/test-sanitize", (req, res) => {
   console.log(req.body);
   console.log(req.query);
   console.log(req.params);
-  res.send("body: " + req.body + "/n query: " + req.query + "/n params: " + req.params);
+  return res.send("body: " + req.body + "/n query: " + req.query + "/n params: " + req.params);
 });
 
 
@@ -41,7 +41,7 @@ app.post("/register", async (req, res) => {
 
     //if the user exists already, return an error message
     if(user){
-      res.status(400).json({ error: 'username already exists, please enter a different username' });
+      return res.status(400).json({ error: 'username already exists, please enter a different username' });
     }
 
     //otherwise, register the new user and return a token
@@ -67,7 +67,7 @@ app.post("/register", async (req, res) => {
     
   } catch (error) {
     console.log(error);
-    res.status(500).json({ "error": 'error creating new user, please try again' });
+    return res.status(500).json({ "error": 'error creating new user, please try again' });
   }
 });
 
@@ -79,14 +79,14 @@ app.post("/login", async (req, res) => {
 
     //if the user doesn't exist, return an error
     if(!user){
-      res.status(400).json({ error: 'invalid username and/or password, please try again' });
+      return res.status(400).json({ error: 'invalid username and/or password, please try again' });
     }
 
     let result = await bcrypt.compare(req.body.password, user.passwordHash);
     
     //if the user exists and the password is wrong, return an error
     if(!result){
-      res.status(400).json({ error: 'invalid username and/or password, please try again' });
+      return res.status(400).json({ error: 'invalid username and/or password, please try again' });
     }
     //if the user exists and the password is right, log them in and return a token
     else {
@@ -101,13 +101,13 @@ app.post("/login", async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    res.status(500).json({"error": "error logging in, please try again"});
+    return res.status(500).json({"error": "error logging in, please try again"});
   }
 });
 
 
 app.get("/getCardData", authenticateToken, async (req, res) => {
-  res.json(cardRows);
+  return res.json(cardRows);
 });
 
 
@@ -115,13 +115,13 @@ app.get("/userStats", authenticateToken, async (req, res) => {
   try {
     let collection = await db.collection("users");
     let user = await collection.findOne({"_id": req.username});
-    res.status(200).json({
+    return res.status(200).json({
       wins: user.wins,
       losses: user.losses
     });
   } catch (error) {
     console.log(error);
-    res.status(500);
+    return res.status(500);
   }
 });
 
@@ -145,10 +145,10 @@ app.get("/getUserDecks", authenticateToken, async (req, res) => {
 
     //console.log(decks);
 
-    res.status(200).json(decks);
+    return res.status(200).json(decks);
   } catch (error) {
     console.log(error);
-    res.status(500);
+    return res.status(500);
   }
 });
 
@@ -161,7 +161,7 @@ app.post("/saveUserDeck", authenticateToken, async (req, res) => {
     let result = validateDeck(deck);
     if(!result.isValid){
       console.log("invalid deck");
-      res.status(400).json({error: "error - invalid deck"});
+      return res.status(400).json({error: "error - invalid deck"});
     } else {
       deck.heroCount = result.heroCount;
       deck.specialCount = result.specialCount;
@@ -175,11 +175,11 @@ app.post("/saveUserDeck", authenticateToken, async (req, res) => {
 
       let collection = await db.collection("decks");
       collection.updateOne(query, update, options);
-      res.status(200).json({message: "deck saved to database"});
+      return res.status(200).json({message: "deck saved to database"});
     } 
   } catch (error) {
     console.log(error);
-    res.status(500);
+    return res.status(500);
   }
 });
 
