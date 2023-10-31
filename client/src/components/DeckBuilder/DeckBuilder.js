@@ -5,13 +5,33 @@ import { useAuthHeader } from 'react-auth-kit';
 import {getCardData} from '../GwentClient/GwentClient';
 import {LargeCardView, CardData} from '../Card/Card';
 
+//this class is a little weird, but I need to make new objects everytime for React to notice my state changes, and this seemed like a good way to do it
+//also, I should maybe include a field for the faction, but right now it's easier to track that separately and add it when I save decks to the database
+class GwentDeck {
+  constructor(deck){
+    if(!deck){
+      this.cards = new Map();
+      this.heroCount = 0;
+      this.specialCount = 0;
+      this.unitCount = 0;
+      this.totalCardCount = 0;
+      this.totalUnitStrength = 0;
+      this.leaderName = "Foltest, King of Temeria";
+    }
+    else {
+      this.cards = deck.cards;
+      this.heroCount = deck.heroCount;
+      this.specialCount = deck.specialCount;
+      this.unitCount = deck.unitCount;
+      this.totalCardCount = deck.totalCardCount;
+      this.totalUnitStrength = deck.totalUnitStrength;
+      this.leaderName = deck.leaderName;
+    }
+  }
+}
+
 
 /*
-So, in retrospect, this component sucks as a React component, because the best way for me to track cards in a deck is a map,
-but React uses shallow comparison to check for changes in state. So to get React to notice my changes I need to make new objects everytime.
-Which is probably expensive and wasteful, but idk how else to get this to work with React
-anyway, working is better than perfect, right? v1, I'm gonna try it like this and see if it's fast enough... (update: it was)
-
 So, my approach is as follows:
 1)load all the card data into a cardMap
 2)track currentFaction, currentDeck, and 1 deck per faction
@@ -19,18 +39,18 @@ So, my approach is as follows:
 4)load the right panel by looking at the currentDeck
 5)when a user clicks a card in the left panel
   - check if there is already the max # of that card in the current deck. if so, do nothing
-  - if there is less than the max #, make a new map from the old map and add 1 to that card. set current deck equal to the new map
-  - finally, set the respective faction deck map equal to the new current deck map. this will save changes if a user switches factions later
+  - if there is less than the max #, add 1 to that card in the deck, and make a new deck object from the old deck object. set current deck equal to the new deck
+  - finally, set the respective faction deck equal to the new current deck. this will save changes if a user switches factions later
 
 6)when a user clicks a card in the right panel
-  - (if there are 0 in the deck there shouldn't be a card showing in the right panel, so we don't need to check that first)
-  - make a new map and subtract 1 from that card in the current deck map. set current deck equal to the new map
-  - finally, set the respective faction deck map equal to the new current deck map. same reason as above
+  - if there are 0 in the deck there shouldn't be a card showing in the right panel, but I will check that first just in case
+  - then, subtract 1 from that card in the current deck, and a make a new deck object from the old deck object. set current deck equal to the new deck
+  - finally, set the respective faction deck equal to the new current deck. same reason as above
 
 7)when a user switches factions
   - update currentFaction, then set currentDeck equal to the respective faction deck
 
-8)also, I'm only implementing Northern Realms to start. but this is my plan for adding the other factions later
+8)also, I don't have images for the skellige deck yet, so that is TODO for now / maybe forever
 */
 
 
@@ -38,33 +58,30 @@ export default function DeckBuilder() {
   const authHeader = useAuthHeader();
   const [cardMap, setCardMap] = useState(new Map());
   const [currentFaction, setCurrentFaction] = useState("Northern Realms");
-  const [currentDeck, setCurrentDeck] = useState(new Map());
+  const [currentDeck, setCurrentDeck] = useState(new GwentDeck());
   const [northernRealmsDeck, setNorthernRealmsDeck] = useState(currentDeck);
-  const [nilfgaardDeck, setNilfgaardDeck] = useState(new Map());
-  const [scoiataelDeck, setScoiataelDeck] = useState(new Map());
-  const [monsterDeck, setMonsterDeck] = useState(new Map());
-  const [skelligeDeck, setSkelligeDeck] = useState(new Map());
-
-  const [totalCardCount, setTotalCardCount] = useState(0);
-  const [unitCardCount, setUnitCardCount] = useState(0);
-  const [specialCardCount, setSpecialCardsCount] = useState(0);
-  const [totalUnitStrength, setTotalUnitStrength] = useState(0);
-  const [heroCardCount, setHeroCardCount] = useState(0);
+  const [nilfgaardDeck, setNilfgaardDeck] = useState(new GwentDeck());
+  const [scoiataelDeck, setScoiataelDeck] = useState(new GwentDeck());
+  const [monsterDeck, setMonsterDeck] = useState(new GwentDeck());
+  const [skelligeDeck, setSkelligeDeck] = useState(new GwentDeck());
 
 
+  //commenting out the skelligeDeck because I don't have images for those cards yet
   function nextFaction(){
     if(currentFaction == "Northern Realms"){
       setCurrentFaction("Monsters");
       setCurrentDeck(monsterDeck);
     }
     else if(currentFaction == "Monsters"){
-      setCurrentFaction("Skellige");
-      setCurrentDeck(skelligeDeck);
-    }
-    else if(currentFaction == "Skellige"){
+      //setCurrentFaction("Skellige");
+      //setCurrentDeck(skelligeDeck);
       setCurrentFaction("Nilfgaard");
       setCurrentDeck(nilfgaardDeck);
     }
+    // else if(currentFaction == "Skellige"){
+    //   setCurrentFaction("Nilfgaard");
+    //   setCurrentDeck(nilfgaardDeck);
+    // }
     else if(currentFaction == "Nilfgaard"){
       setCurrentFaction("Scoiatael");
       setCurrentDeck(scoiataelDeck);
@@ -85,13 +102,15 @@ export default function DeckBuilder() {
       setCurrentDeck(nilfgaardDeck);
     }
     else if(currentFaction == "Nilfgaard"){
-      setCurrentFaction("Skellige");
-      setCurrentDeck(skelligeDeck);
-    }
-    else if(currentFaction == "Skellige"){
+      // setCurrentFaction("Skellige");
+      // setCurrentDeck(skelligeDeck);
       setCurrentFaction("Monsters");
       setCurrentDeck(monsterDeck);
     }
+    // else if(currentFaction == "Skellige"){
+    //   setCurrentFaction("Monsters");
+    //   setCurrentDeck(monsterDeck);
+    // }
     else if(currentFaction == "Monsters"){
       setCurrentFaction("Northern Realms");
       setCurrentDeck(northernRealmsDeck);
@@ -100,30 +119,36 @@ export default function DeckBuilder() {
   
   function addCardToDeck(cardData){
     return (() => {
-      if(currentDeck.has(cardData.name) && currentDeck.get(cardData.name) == cardData.available){
+      if(currentDeck.cards.has(cardData.name) && currentDeck.cards.get(cardData.name) == cardData.available){
         console.log("error! maximum number of card " + cardData.name + " already in deck!");
       }
       else {
-        //this might be faster / rerender less times if I group some of these states into an object
-        //will optimize later if necessary
-        setTotalCardCount(totalCardCount + 1);
+        currentDeck.totalCardCount++;
 
         if(cardData.type == "unit"){
-          setUnitCardCount(unitCardCount + 1);
-          setTotalUnitStrength(totalUnitStrength + cardData.strength);
+          currentDeck.unitCount++;
+          currentDeck.totalUnitStrength += cardData.strength;
         }
-        else if(cardData.type == "special")
-          setSpecialCardsCount(specialCardCount + 1);
+        else if(cardData.type == "special"){
+          currentDeck.specialCount++;
+        }
         else if(cardData.type == "hero"){
-          setUnitCardCount(unitCardCount + 1);
-          setTotalUnitStrength(totalUnitStrength + cardData.strength);
-          setHeroCardCount(heroCardCount + 1);
+          currentDeck.unitCount++;
+          currentDeck.totalUnitStrength += cardData.strength;
+          currentDeck.heroCount++;
         }
 
-        setCurrentDeck(new Map(currentDeck.set(cardData.name, currentDeck.has(cardData.name) ? currentDeck.get(cardData.name) + 1 : 1)));
+        if(currentDeck.cards.has(cardData.name)){
+          currentDeck.cards.set(cardData.name, currentDeck.cards.get(cardData.name) + 1);
+        }
+        else {
+          currentDeck.cards.set(cardData.name, 1);
+        }
+
+        setCurrentDeck(new GwentDeck(currentDeck));
         
         //I was going to use another map, faction decks, with all the decks in it
-        //but since state is supposed to immutable, I think this is better
+        //but since state is supposed to immutable, I think this is better, and will cause less re-renders... I think...
         if(currentFaction == "Northern Realms")
           setNorthernRealmsDeck(currentDeck);
         else if(currentFaction == "Monsters")
@@ -140,28 +165,31 @@ export default function DeckBuilder() {
   
   function removeCardFromDeck(cardData){
     return (() => {
-      if(currentDeck.get(cardData.name) == 0){
+      if(currentDeck.cards.get(cardData.name) == 0){
         //I'm pretty sure this check is unneccessary, because if there are 0 in the deck the card shouldn't be in the view and thus unclickable
-        //but I'm including check this in case people click really fast or something
+        //but I'm including this in case people click really fast or something
         console.log("error! current deck already has 0 of this card!");
         return;
       }
 
-      setTotalCardCount(totalCardCount - 1);
+      currentDeck.totalCardCount--;
 
       if(cardData.type == "unit"){
-        setUnitCardCount(unitCardCount - 1);
-        setTotalUnitStrength(totalUnitStrength - cardData.strength);
+        currentDeck.unitCount--;
+        currentDeck.totalUnitStrength -= cardData.strength;
       }
-      else if(cardData.type == "special")
-        setSpecialCardsCount(specialCardCount - 1);
+      else if(cardData.type == "special"){
+        currentDeck.specialCount--;
+      }
       else if(cardData.type == "hero"){
-        setUnitCardCount(unitCardCount - 1);
-        setTotalUnitStrength(totalUnitStrength - cardData.strength);
-        setHeroCardCount(heroCardCount - 1);
+        currentDeck.unitCount--;
+        currentDeck.totalUnitStrength -= cardData.strength;
+        currentDeck.heroCount--;
       }
 
-      setCurrentDeck(new Map(currentDeck.set(cardData.name, currentDeck.get(cardData.name) - 1)));
+      currentDeck.cards.set(cardData.name, currentDeck.cards.get(cardData.name) - 1);
+
+      setCurrentDeck(new GwentDeck(currentDeck));
 
       if(currentFaction == "Northern Realms")
           setNorthernRealmsDeck(currentDeck);
@@ -182,7 +210,7 @@ export default function DeckBuilder() {
       if(value.faction != currentFaction && value.faction != "neutral")
         continue;
 
-      let used = currentDeck.has(keyy) ? currentDeck.get(keyy) : 0;
+      let used = currentDeck.cards.has(keyy) ? currentDeck.cards.get(keyy) : 0;
       let available = value.available - used;
       if(available != 0)
         cardViews.push(<LargeCardView
@@ -202,8 +230,8 @@ export default function DeckBuilder() {
     }
 
     let cardViews = [];
-    for(let [keyy, value] of currentDeck){
-      if(currentDeck.get(keyy) == 0)
+    for(let [keyy, value] of currentDeck.cards){
+      if(currentDeck.cards.get(keyy) == 0)
         continue;
 
       cardViews.push(<LargeCardView
@@ -220,7 +248,7 @@ export default function DeckBuilder() {
     let button = document.getElementById("save_button");
     button.disabled = true;
     try {
-      let cards = Object.fromEntries(currentDeck.entries());
+      let cards = Object.fromEntries(currentDeck.cards.entries());
       let result = await fetch("http://localhost:5000/saveUserDeck", {
         method: 'POST',
         headers: {
@@ -230,7 +258,7 @@ export default function DeckBuilder() {
         },
         body: JSON.stringify({
           "faction": currentFaction,
-          "leader": "Foltest, King of the North",
+          "leader": currentDeck.leaderName,
           "cards": cards
         })
       });
@@ -254,33 +282,33 @@ export default function DeckBuilder() {
         let result = await fetch("http://localhost:5000/getUserDecks", {
           headers: {"Authorization": authHeader().split(" ")[1]}
         });
-        let decks = await result.json();
+        let mongoDeckObjects = await result.json();
         //console.log(decks);
 
-        for(let deck of decks){
-          let map = new Map(Object.entries(deck.cards));
-          if(deck.faction == "Northern Realms"){
-            setCurrentDeck(map);
-            setNorthernRealmsDeck(map);
-            setCurrentFaction("Northern Realms");
-            setTotalCardCount(deck.totalCardCount);
-            setUnitCardCount(deck.unitCardCount);
-            setSpecialCardsCount(deck.specialCardCount);
-            setTotalUnitStrength(deck.totalUnitStrength);
-            setHeroCardCount(deck.heroCardCount);
-          }
+        for(let mongoDeck of mongoDeckObjects){
+          let map = new Map(Object.entries(mongoDeck.cards));
+          let gwentClientDeck = new GwentDeck();
+          gwentClientDeck.cards = map;
+          gwentClientDeck.totalCardCount = mongoDeck.totalCardCount;
+          gwentClientDeck.unitCount = mongoDeck.unitCount;
+          gwentClientDeck.specialCount = mongoDeck.specialCount;
+          gwentClientDeck.totalUnitStrength = mongoDeck.totalUnitStrength;
+          gwentClientDeck.heroCount = mongoDeck.heroCount;
+          gwentClientDeck.leaderName = mongoDeck.leaderName;
 
-          //I'm leaving this commented out for now, because if there are any typos in my card names this will explode
-          //(because looking up the card name in the card map fails, so it passes undefined to my LargeCardView components in createUsedCards)
-          //I'll add them back in one by one later
-          // else if(deck.faction == "Monsters")
-          //   setMonsterDeck(map);
-          // else if(deck.faction == "Skellige")
+          if(mongoDeck.faction == "Northern Realms"){
+            setCurrentDeck(gwentClientDeck);
+            setNorthernRealmsDeck(gwentClientDeck);
+            setCurrentFaction("Northern Realms");
+          }
+          else if(mongoDeck.faction == "Monsters")
+            setMonsterDeck(gwentClientDeck);
+          // else if(mongoDeck.faction == "Skellige")
           //   setSkelligeDeck(map);
-          // else if(deck.faction == "Nilfgaard")
-          //   setNilfgaardDeck(map);
-          // else if(deck.faction == "Scoiatael")
-          //   setScoiataelDeck(map);
+          else if(mongoDeck.faction == "Nilfgaard")
+            setNilfgaardDeck(gwentClientDeck);
+          else if(mongoDeck.faction == "Scoiatael")
+            setScoiataelDeck(gwentClientDeck);
         }
       } catch (error){
         console.log(error);
@@ -294,9 +322,9 @@ export default function DeckBuilder() {
     <div className="deckbuilder">
       <h3>DeckBuilder</h3>
       <div className="faction_select">
-        <p> (previous faction) </p>
+        <button onClick={previousFaction}> previous faction </button>
         <p> {currentFaction} </p>
-        <p> (next faction) </p>
+        <button onClick={nextFaction}> next faction </button>
       </div>
       <div className="deckbuilder_grid">
         <div className="one">
@@ -307,22 +335,22 @@ export default function DeckBuilder() {
           </div>
         </div>
         <div className="two">
-          <p>leader</p>
-          <h3>leader card</h3>
-          <p>total cards in deck</p>
-          <p>{totalCardCount}</p>
-          <p>number of unit cards</p>
+          <p>Leader</p>
+          <h3>{currentDeck.leaderName}</h3>
+          <p>Total cards in deck</p>
+          <p>{currentDeck.totalCardCount}</p>
+          <p>Number of Unit Cards</p>
 
-          {unitCardCount >= 22 ? <p style={{color:"green"}}>{unitCardCount}</p> : <p style={{color:"red"}}>{unitCardCount}/22</p>}
+          {currentDeck.unitCount >= 22 ? <p style={{color:"green"}}>{currentDeck.unitCount}</p> : <p style={{color:"red"}}>{currentDeck.unitCount}/22</p>}
 
-          <p>special cards</p>
+          <p>Special Cards</p>
 
-          {specialCardCount <= 10 ? <p style={{color:"green"}}>{specialCardCount}/10</p> : <p style={{color:"red"}}>{specialCardCount}/10</p>}
+          {currentDeck.specialCount <= 10 ? <p style={{color:"green"}}>{currentDeck.specialCount}/10</p> : <p style={{color:"red"}}>{currentDeck.specialCount}/10</p>}
           
-          <p>total unit card strength</p>
-          <p>{totalUnitStrength}</p>
-          <p>hero cards</p>
-          <p>{heroCardCount}</p>
+          <p>Total Unit Card Strength</p>
+          <p>{currentDeck.totalUnitStrength}</p>
+          <p>Hero Cards</p>
+          <p>{currentDeck.heroCount}</p>
 
           <button id="save_button" onClick={saveCurrentDeck}> Save current deck </button>
 

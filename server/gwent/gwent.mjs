@@ -5,7 +5,7 @@ import { parse } from 'csv-parse';
 //CARD AND DECK LOGIC!!!!
 
 
-class CardData {
+export class CardData {
   constructor(name, image_url, type, faction, strength, range, special, available, description){
     this.name = name;
     this.image_url = image_url;
@@ -16,6 +16,18 @@ class CardData {
     this.special = special;
     this.available = Number(available);
     this.description = description;
+  }
+}
+
+export class GwentDeck {
+  constructor(cards = new Map(), heroCount = 0, specialCount = 0, unitCount = 0, totalCardCount = 0, totalUnitStrength = 0, leaderName = "Foltest, King of Temeria"){
+    this.cards = cards;
+    this.heroCount = heroCount;
+    this.specialCount = specialCount;
+    this.unitCount = unitCount;
+    this.totalCardCount = totalCardCount;
+    this.totalUnitStrength = totalUnitStrength;
+    this.leaderName = leaderName;
   }
 }
 
