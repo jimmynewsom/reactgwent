@@ -258,7 +258,7 @@ export default function DeckBuilder() {
         },
         body: JSON.stringify({
           "faction": currentFaction,
-          "leader": currentDeck.leaderName,
+          "leaderName": currentDeck.leaderName,
           "cards": cards
         })
       });
