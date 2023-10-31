@@ -8,6 +8,7 @@
 
 # environment variables and tests
 /server/config.env
+/client/.env
 /server/test.mjs
 /client/public/geralt_of_rivia.png
 
