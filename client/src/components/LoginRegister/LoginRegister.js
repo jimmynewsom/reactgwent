@@ -11,6 +11,8 @@ import './LoginRegister.css';
 export default function LoginRegister({ setToken }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [toastMessage, setToastMessage] = useState("");
+  const [showToastMessage, setShowToastMessage] = useState(false);
   const signIn = useSignIn();
   const navigate = useNavigate();
 
@@ -37,27 +39,36 @@ export default function LoginRegister({ setToken }) {
 
       if(result.status != 200){
         console.error("error logging in! username/password invalid");
+        setToastMessage("error logging in! username/password invalid");
+        setShowToastMessage(true);
+        setTimeout(()=>{setShowToastMessage(false)}, 3000);
+        login.disabled = false;
+        register.disabled = false;
       }
       else {
         result = await result.json();
         //console.log(result);
 
-        signIn({
-          token: result.token,
-          tokenType: "Bearer",
-          expiresIn: 1440,
-          authState: {username: result.username}
-        });
+        setToastMessage("Sign in successful! Redirecting to dashboard");
+        setShowToastMessage(true);
+        setTimeout(()=> {
+          signIn({
+            token: result.token,
+            tokenType: "Bearer",
+            expiresIn: 1440,
+            authState: {username: result.username}
+          });
 
-        navigate("/");
+          navigate("/");
+        
+        }, 1000);
       }
     }
     catch (error) {
       console.log(error);
+      login.disabled = false;
+      register.disabled = false;
     }
-
-    login.disabled = false;
-    register.disabled = false;
   }
 
   async function register(){
@@ -82,31 +93,39 @@ export default function LoginRegister({ setToken }) {
 
       if(result.status != 201){
         console.error("username already exists, please enter a different username");
+        setToastMessage("username already exists, please enter a different username");
+        setShowToastMessage(true);
+        setTimeout(()=>{setShowToastMessage(false)}, 3000);
+        login.disabled = false;
+        register.disabled = false;
       }
       else {
         result = await result.json();
         //console.log(result);
 
-        signIn({
-          token: result.token,
-          tokenType: "Bearer",
-          expiresIn: 1440,
-          authState: {username: result.username}
-        });
+        setToastMessage("Registration successful! Redirecting to dashboard");
+        setShowToastMessage(true);
+        setTimeout(() => {
+          signIn({
+            token: result.token,
+            tokenType: "Bearer",
+            expiresIn: 1440,
+            authState: {username: result.username}
+          });
 
-        navigate("/");
+          navigate("/");
+        }, 1000);
       }
     }
     catch (error) {
       console.log(error);
+      login.disabled = false;
+      register.disabled = false;
     }
-
-    login.disabled = false;
-    register.disabled = false;
   }
 
   return(
-    <div className="login-wrapper">
+    <div className="login_wrapper">
       <h2>Login</h2>
       <form>
         <label>
@@ -120,6 +139,7 @@ export default function LoginRegister({ setToken }) {
         <div>
           <button id="login" onClick={login}>Login</button>
           <button id="register" onClick={register}>Register</button>
+          {showToastMessage ? <div id="login_toast">{toastMessage}</div> : <></>}
         </div>
       </form>
     </div>
