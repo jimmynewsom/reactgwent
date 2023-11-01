@@ -9,8 +9,18 @@ import DeckBuilder from '../DeckBuilder/DeckBuilder';
 import GwentClient from '../GwentClient/GwentClient';
 import {CardData, SmallCardView, LargeCardView} from '../Card/Card';
 
+import {socket} from"../../socket";
 
-function App() {
+export function connectSocket(){
+  socket.connect();
+}
+
+export function disconnectSocket(){
+  socket.disconnect();
+}
+
+
+export default function App() {
   const isAuthenticated = useIsAuthenticated()
   const signOut = useSignOut();
   const navigate = useNavigate();
@@ -37,17 +47,17 @@ function App() {
       <Routes>
         <Route path="/" element={
           <RequireAuth loginPath='/loginregister'>
-            <Dashboard />
+            <Dashboard socket={socket}/>
           </RequireAuth>
         }/>
         <Route path="/deckbuilder" element={
           <RequireAuth loginPath='/loginregister'>
-            <DeckBuilder />
+            <DeckBuilder socket={socket}/>
           </RequireAuth>
         }/>
         <Route path="/gwent" element={
           <RequireAuth loginPath='/loginregister'>
-            <GwentClient />
+            <GwentClient socket={socket}/>
           </RequireAuth>
         }/>
         <Route path="/loginregister" element={<LoginRegister />} />
@@ -59,5 +69,3 @@ function App() {
     </div>
   );
 }
-
-export default App;

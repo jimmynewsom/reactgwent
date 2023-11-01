@@ -8,12 +8,15 @@ import jwt from "jsonwebtoken";
 import db from "./db/conn.mjs";
 import authenticateToken from './middleware/authenticateToken.mjs';
 import {cardMap, cardRows, leaderRows, validateDeck} from './gwent/gwent.mjs';
-import { game_router } from "./routes/game_routes.mjs";
+import create_game_router from "./routes/game_routes.mjs";
 
 
 const app = express();
 const server = createServer(app);
-const io = new Server(server, {connectionStateRecovery: {}});
+const io = new Server(server, {
+  connectionStateRecovery: {},
+  cors: {origin: "*"}
+});
 const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
@@ -203,20 +206,7 @@ app.post("/saveUserDeck", authenticateToken, async (req, res) => {
 });
 
 
-app.use("/gwent", game_router);
-
-
-io.on('connection', (socket) => {
-  console.log('a user connected');
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
-  });
-});
-
-
-// io.on('connection', (client) => {
-//   gameLogic.initializeGame(io, client);
-// });
+app.use("/gwent", create_game_router(io));
 
 
 server.listen(port, () => {

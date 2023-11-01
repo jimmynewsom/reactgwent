@@ -54,7 +54,7 @@ So, my approach is as follows:
 */
 
 
-export default function DeckBuilder() {
+export default function DeckBuilder({socket}) {
   const authHeader = useAuthHeader();
   const [cardMap, setCardMap] = useState(new Map());
   const [currentFaction, setCurrentFaction] = useState("Northern Realms");
