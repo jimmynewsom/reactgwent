@@ -20,7 +20,7 @@ export function LargeCardView ({cardData, handleClick, available = 0}) {
   return(
     <div className="large_card" onClick={handleClick(cardData)}>
       <img 
-        src={process.env.REACT_APP_IMAGE_HOST_BASE_URL + cardData.image_url}
+        src={process.env.REACT_APP_UNIT_IMAGE_BASE_URL + cardData.image_url}
         alt={"image url is wrong for " + cardData.name + " with image url " + cardData.image_url}
         width="180"
         height="320"
@@ -35,7 +35,7 @@ export function SmallCardView ({cardData}){
   return (
     <div className="small_card">
       <img 
-        src={process.env.REACT_APP_IMAGE_HOST_BASE_URL + cardData.image_url}
+        src={process.env.REACT_APP_UNIT_IMAGE_BASE_URL + cardData.image_url}
         alt={"image url is wrong for " + cardData.name + " with image url " + cardData.image_url}
         width="40"
         height="60"
