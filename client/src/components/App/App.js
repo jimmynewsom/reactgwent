@@ -1,5 +1,5 @@
 import './App.css';
-import React from 'react';
+import React, {useState} from 'react';
 import { RequireAuth, useIsAuthenticated, useSignOut } from 'react-auth-kit';
 import { Route, Routes, useNavigate } from "react-router-dom";
 
@@ -11,19 +11,24 @@ import {CardData, SmallCardView, LargeCardView} from '../Card/Card';
 
 import {socket} from"../../socket";
 
-export function connectSocket(){
-  socket.connect();
-}
-
-export function disconnectSocket(){
-  socket.disconnect();
-}
-
 
 export default function App() {
   const isAuthenticated = useIsAuthenticated()
   const signOut = useSignOut();
   const navigate = useNavigate();
+  //this would maybe be better as a context instead of state
+  const [isConnected, setIsConnected] = useState(socket.connected);
+
+  //these connect & disconnect functions will get passed to child components as props
+  function connectSocket(){
+    socket.connect();
+    setIsConnected(true);
+  }
+  
+  function disconnectSocket(){
+    socket.disconnect();
+    setIsConnected(false);
+  }
 
   function signOutAndRedirectToLogin(){
     signOut();
@@ -47,17 +52,17 @@ export default function App() {
       <Routes>
         <Route path="/" element={
           <RequireAuth loginPath='/loginregister'>
-            <Dashboard socket={socket}/>
+            <Dashboard socket={socket} connectSocket={connectSocket}/>
           </RequireAuth>
         }/>
         <Route path="/deckbuilder" element={
           <RequireAuth loginPath='/loginregister'>
-            <DeckBuilder socket={socket}/>
+            <DeckBuilder socket={socket} isConnected={isConnected}/>
           </RequireAuth>
         }/>
         <Route path="/gwent" element={
           <RequireAuth loginPath='/loginregister'>
-            <GwentClient socket={socket}/>
+            <GwentClient socket={socket} isConnected={isConnected}/>
           </RequireAuth>
         }/>
         <Route path="/loginregister" element={<LoginRegister />} />
