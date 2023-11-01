@@ -9,10 +9,8 @@ import DeckBuilder from '../DeckBuilder/DeckBuilder';
 import GwentClient from '../GwentClient/GwentClient';
 import {CardData, SmallCardView, LargeCardView} from '../Card/Card';
 
-import {socket} from"../../socket";
 
-
-export default function App() {
+export default function App({socket}) {
   const isAuthenticated = useIsAuthenticated()
   const signOut = useSignOut();
   const navigate = useNavigate();

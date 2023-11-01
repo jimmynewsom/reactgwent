@@ -4,8 +4,11 @@ import { AuthProvider } from 'react-auth-kit';
 import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 
+import App from './components/App/App';
 
-import App from './components/App/App'
+//I think if I import my socket here, it won't get reimported when my App component re-renders,
+//so I can reuse one connection for the whole app
+import {socket} from "./socket";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
@@ -18,7 +21,7 @@ root.render(
         cookieSecure={false}
     >
       <BrowserRouter>
-        <App />
+        <App socket={socket}/>
       </BrowserRouter>
     </AuthProvider>
   </React.StrictMode>

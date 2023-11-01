@@ -114,7 +114,7 @@ export function getCardData(setcardmap, authheader) {
 }
 
 
-export default function GwentClient({socket}) {
+export default function GwentClient({socket, isConnected}) {
   const authHeader = useAuthHeader();
   const [cardMap, setCardMap] = useState(new Map());
   const [player, setPlayer] = useState({name: "player", faction: "Northern Realms", lives: 2, passed: false});

@@ -13,7 +13,7 @@ export default function create_game_router(io){
     }
   }
 
-  const games = [];
+  var games = [];
   const MAX_GAMES = 5;
 
   function sanitizeInput(input){
@@ -41,6 +41,18 @@ export default function create_game_router(io){
   });
 
 
+  game_router.get("/getGameList", authenticateToken, (req, res) => {
+    let gamePlayersList = [];
+    for(let game of games){
+      if(game.user2)
+        gamePlayersList.push([game.user1, game.user2]);
+      else
+        gamePlayersList.push([game.user1]);
+    }
+    res.json(gamePlayersList);
+  });
+
+
   game_router.get("/joinGame/:targetOpponent", authenticateToken, (req, res) => {
     let username = sanitizeInput(req.username);
 
@@ -61,6 +73,15 @@ export default function create_game_router(io){
   });
 
 
+  //temporary
+  game_router.get("/resetGames", (req, res) => {
+    console.log("resetting games");
+    games = [];
+    console.log(games);
+    return res.status(200).json({message: "games reset"});
+  });
+
+
   io.on('connection', (socket) => {
     console.log('a user connected');
 
@@ -72,8 +93,10 @@ export default function create_game_router(io){
       console.log(test_message);
     });
 
-    socket.on("join_game", (user1) => {
-      socket.join(user1);
+    //roomName will be the same as user1 in the games array
+    socket.on("join_game", (roomName, username) => {
+      socket.join(roomName);
+      io.to(roomName).emit("info", "user " + username + " joined room " + roomName);
     });
   });
 
