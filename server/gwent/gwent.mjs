@@ -71,6 +71,8 @@ fs.readFile("./gwent/leader_cards.csv", function (err, fileData) {
 export {cardMap, cardRows, leaderRows, leaderMap};
 
 
+//deck should have faction, leaderName, cards, and owner fields, from /saveUserDeck route in server.mjs
+//TODO - validate leader exists and is the correct faction
 export function validateDeck(deck){
   let isValid = true, heroCount = 0, specialCount = 0, unitCount = 0, totalCardCount = 0, totalUnitStrength = 0;
   
@@ -116,9 +118,6 @@ export function validateDeck(deck){
   let result = {isValid, unitCount, heroCount, specialCount, totalCardCount, totalUnitStrength};
   return result;
 }
-
-//TODO
-//export function validateLeader()
 
 
 //GAME LOGIC!!!!
@@ -251,7 +250,7 @@ And then clients will tell the server their move every turn, which can be 1 of 3
 
 I think that's all I need to make this work
 */
-class Game{
+export class Game{
   constructor(playerName1, playerName2, deck1, deck2){
     deck1 = shuffle(deck1);
     deck2 = shuffle(deck2);

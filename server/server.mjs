@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import db from "./db/conn.mjs";
 import authenticateToken from './middleware/authenticateToken.mjs';
 import {cardMap, cardRows, leaderRows, validateDeck} from './gwent/gwent.mjs';
+import { game_router } from "./routes/game_routes.mjs";
 
 
 const app = express();
@@ -20,9 +21,9 @@ function sanitizeInput(input){
 }
 
 
-app.get("/", (req, res) => {
-  return res.send("Hello World!");
-});
+// app.get("/", (req, res) => {
+//   return res.send("Hello World!");
+// });
 
 
 // app.post("/test-sanitize", (req, res) => {
@@ -108,12 +109,12 @@ app.post("/login", async (req, res) => {
 });
 
 
-app.get("/getCardData", authenticateToken, async (req, res) => {
+app.get("/getCardData", authenticateToken, (req, res) => {
   return res.json(cardRows);
 });
 
 
-app.get("/getLeaderData", authenticateToken, async (req, res) => {
+app.get("/getLeaderData", authenticateToken, (req, res) => {
   return res.json(leaderRows);
 });
 
@@ -197,6 +198,8 @@ app.post("/saveUserDeck", authenticateToken, async (req, res) => {
   }
 });
 
+
+app.use("/gwent", game_router);
 
 
 app.listen(port, () => {
