@@ -1,6 +1,7 @@
 import './App.css';
 import React, {useState} from 'react';
-import { RequireAuth, useIsAuthenticated, useSignOut } from 'react-auth-kit';
+import { io } from 'socket.io-client';
+import { RequireAuth, useIsAuthenticated, useAuthUser, useSignOut } from 'react-auth-kit';
 import { Route, Routes, useNavigate } from "react-router-dom";
 
 import Dashboard from '../Dashboard/Dashboard';
@@ -9,23 +10,23 @@ import DeckBuilder from '../DeckBuilder/DeckBuilder';
 import GwentClient from '../GwentClient/GwentClient';
 import {CardData, SmallCardView, LargeCardView} from '../Card/Card';
 
+const SOCKET_URL = process.env.REACT_APP_BACKEND_URL;
+const socket = io(SOCKET_URL);
 
-export default function App({socket}) {
-  const isAuthenticated = useIsAuthenticated()
+socket.on('info_message', (msg) => {
+  console.log(msg);
+});
+
+
+export default function App() {
+  const isAuthenticated = useIsAuthenticated();
+  const auth = useAuthUser();
   const signOut = useSignOut();
   const navigate = useNavigate();
-  //this would maybe be better as a context instead of state
-  const [isConnected, setIsConnected] = useState(socket.connected);
+  const [isConnected, setIsConnected] = useState(false);
 
-  //these connect & disconnect functions will get passed to child components as props
-  function connectSocket(){
-    socket.connect();
-    setIsConnected(true);
-  }
-  
-  function disconnectSocket(){
-    socket.disconnect();
-    setIsConnected(false);
+  if(isAuthenticated()){
+    socket.emit("rejoin_game", auth().username);
   }
 
   function signOutAndRedirectToLogin(){
@@ -50,17 +51,17 @@ export default function App({socket}) {
       <Routes>
         <Route path="/" element={
           <RequireAuth loginPath='/loginregister'>
-            <Dashboard socket={socket} connectSocket={connectSocket}/>
+            <Dashboard socket={socket} />
           </RequireAuth>
         }/>
         <Route path="/deckbuilder" element={
           <RequireAuth loginPath='/loginregister'>
-            <DeckBuilder socket={socket} isConnected={isConnected}/>
+            <DeckBuilder socket={socket}/>
           </RequireAuth>
         }/>
         <Route path="/gwent" element={
           <RequireAuth loginPath='/loginregister'>
-            <GwentClient socket={socket} isConnected={isConnected}/>
+            <GwentClient socket={socket}/>
           </RequireAuth>
         }/>
         <Route path="/loginregister" element={<LoginRegister />} />

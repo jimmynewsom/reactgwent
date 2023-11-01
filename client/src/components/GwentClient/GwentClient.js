@@ -1,6 +1,7 @@
 import './GwentClient.css';
 import React, { useState, useEffect } from 'react';
 import { useAuthHeader } from 'react-auth-kit';
+import {useNavigate} from "react-router-dom";
 
 import {LargeCardView, CardData, SmallCardView} from '../Card/Card';
 
@@ -114,8 +115,9 @@ export function getCardData(setcardmap, authheader) {
 }
 
 
-export default function GwentClient({socket, isConnected}) {
+export default function GwentClient({socket}) {
   const authHeader = useAuthHeader();
+  const navigate = useNavigate();
   const [cardMap, setCardMap] = useState(new Map());
   const [player, setPlayer] = useState({name: "player", faction: "Northern Realms", lives: 2, passed: false});
   const [opponent, setOpponent] = useState({name: "opponent", faction: "Northern Realms", lives: 2, passed: false});

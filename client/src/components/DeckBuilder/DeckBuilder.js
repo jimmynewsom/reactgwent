@@ -1,6 +1,7 @@
 import './DeckBuilder.css';
 import React, { useState, useEffect } from 'react';
 import { useAuthHeader } from 'react-auth-kit';
+import {useNavigate} from "react-router-dom";
 
 import {getCardData} from '../GwentClient/GwentClient';
 import {LargeCardView, CardData} from '../Card/Card';
@@ -54,8 +55,9 @@ So, my approach is as follows:
 */
 
 
-export default function DeckBuilder({socket, isConnected}) {
+export default function DeckBuilder({socket}) {
   const authHeader = useAuthHeader();
+  const navigate = useNavigate();
   const [cardMap, setCardMap] = useState(new Map());
   const [currentFaction, setCurrentFaction] = useState("Northern Realms");
   const [currentDeck, setCurrentDeck] = useState(new GwentDeck());
