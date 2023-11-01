@@ -283,7 +283,7 @@ export class Game{
       else if(card.range == "siege")
         this.board.field[playerIndex].siege.push(card);
       else if(card.range == "agile"){
-        if(target = "close")
+        if(target == "close")
           this.board.field[playerIndex].close.push(card);
         else if(target == "ranged")
           this.board.field[playerIndex].ranged.push(card);
@@ -293,11 +293,17 @@ export class Game{
       //(morale & tight bond don't trigger until I calculate the card strength)
       if(card.special == "scorchClose")
         this.board.scorch(playerIndex, "close");
-      //if the player plays a medic card, target should specify index in graveyard
+      //if the player plays a medic card, target should specify indexes in graveyard
+      //since medics can revive medics, target is an array here
       else if(card.special == "medic"){
-        let card2 = this.board.field[playerIndex].graveyard[target];
-        this.board.field[playerIndex].graveyard.splice(target, 1);
-        console.log("what if they revive a medic...");
+        console.log("medic played");
+        // for(let i = 0; i < target.length; i++){
+        //   let card2 = this.board.field[playerIndex].graveyard[target[i]];
+        //   this.board.field[playerIndex].graveyard.splice(target[i], 1);
+        //   this.playCardFromGraveyard(playerIndex, card2);
+        //   if(card2.special != "medic")
+        //     break;
+        // }
       }
       else if(card.special == "spy"){
         this.draw(playerIndex, 2);
@@ -310,7 +316,20 @@ export class Game{
           this.board.field[(playerIndex + 1) % 2].siege.push(card);
       }
       else if(card.special == "muster"){
-        console.log("TODO: implement muster");
+        console.log("muster played");
+        // let musterList = musterMap.get(card.name);
+        // let i = 0;
+        // while(i < this.players[playerIndex].hand.length){
+        //   let card2;
+        //   if(musterMap.includes(this.players[playerIndex].hand[i].name)){
+        //     card2 = this.players[playerIndex].hand[i];
+        //     this.players[playerIndex].hand.splice(i, 1);
+        //     this.playCardSpecial(playerIndex, card2);
+        //   }
+        //   else {
+        //     i++;
+        //   }
+        // }
       }
 
     }
@@ -341,5 +360,9 @@ export class Game{
       if(card.name != "Decoy")
         this.board[playerIndex].graveyard.push(card);
     }
+  }
+
+  playCardSpecial(playerIndex, card){
+
   }
 }
