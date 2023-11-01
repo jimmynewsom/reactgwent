@@ -5,7 +5,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import db from "./db/conn.mjs";
 import authenticateToken from './middleware/authenticateToken.mjs';
-import {cardMap, cardRows, validateDeck} from './gwent/gwent.mjs';
+import {cardMap, cardRows, leaderRows, validateDeck} from './gwent/gwent.mjs';
 
 
 const app = express();
@@ -110,6 +110,11 @@ app.post("/login", async (req, res) => {
 
 app.get("/getCardData", authenticateToken, async (req, res) => {
   return res.json(cardRows);
+});
+
+
+app.get("/getLeaderData", authenticateToken, async (req, res) => {
+  return res.json(leaderRows);
 });
 
 

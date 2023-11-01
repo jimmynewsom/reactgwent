@@ -19,21 +19,20 @@ export class CardData {
   }
 }
 
-export class GwentDeck {
-  constructor(cards = new Map(), heroCount = 0, specialCount = 0, unitCount = 0, totalCardCount = 0, totalUnitStrength = 0, leaderName = "Foltest, King of Temeria"){
-    this.cards = cards;
-    this.heroCount = heroCount;
-    this.specialCount = specialCount;
-    this.unitCount = unitCount;
-    this.totalCardCount = totalCardCount;
-    this.totalUnitStrength = totalUnitStrength;
-    this.leaderName = leaderName;
+export class LeaderCard {
+  constructor(name, title, image_url, faction, desc){
+    this.name = name;
+    this.title = title;
+    this.image_url = image_url;
+    this.faction = faction;
+    this.desc = desc;
   }
 }
 
 let cardRows;
 const cardMap = new Map();
 
+//these should maybe be synchronous instead of async, since I need them to initialize at start up. but it's not that important
 fs.readFile("./gwent/unit_cards.csv", function (err, fileData) {
   parse(fileData, {columns: false, trim: true}, function(err, rows) {
     cardRows = rows;
@@ -49,7 +48,28 @@ fs.readFile("./gwent/unit_cards.csv", function (err, fileData) {
   });
 });
 
-export {cardMap, cardRows};
+let leaderRows;
+const leaderMap = new Map();
+
+fs.readFile("./gwent/leader_cards.csv", function (err, fileData) {
+  parse(fileData, {columns: false, trim: true}, function(err, rows) {
+    leaderRows = rows;
+
+    leaderRows.forEach((row, i) => {
+      //the first row is just the names of the columns
+      if(i!==0){
+        //each row is [0] leader name, [1] leader title, [2] image url, [3] faction, and [4] description
+        let card = new CardData(row[0], row[1], row[2], row[3], row[4]);
+        //using titles instead of leader names here, because leader names are not unique
+        leaderMap.set(row[1], card);
+      }
+    });
+  });
+});
+
+
+export {cardMap, cardRows, leaderRows, leaderMap};
+
 
 export function validateDeck(deck){
   let isValid = true, heroCount = 0, specialCount = 0, unitCount = 0, totalCardCount = 0, totalUnitStrength = 0;
@@ -96,6 +116,9 @@ export function validateDeck(deck){
   let result = {isValid, unitCount, heroCount, specialCount, totalCardCount, totalUnitStrength};
   return result;
 }
+
+//TODO
+//export function validateLeader()
 
 
 //GAME LOGIC!!!!
@@ -244,15 +267,6 @@ class Game{
   draw(playerIndex, numCards){
     return this.players[playerIndex].deck.splice(0, numCards);
   }
-
-  // validateMove(playerIndex, cardName){
-  //   isValid = false;
-  //   for(let card in this.players[playerIndex].player.hand){
-  //     if(card.name == cardName)
-  //       isValid = true;
-  //   }
-  //   return isValid;
-  // }
 
   /*
   One more big function...
