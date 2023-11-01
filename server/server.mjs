@@ -1,4 +1,6 @@
 import express from "express";
+import { createServer } from "node:http";
+import { Server } from "socket.io";
 import validator from "validator";
 import cors from "cors";
 import bcrypt from "bcrypt";
@@ -10,6 +12,8 @@ import { game_router } from "./routes/game_routes.mjs";
 
 
 const app = express();
+const server = createServer(app);
+const io = new Server(server, {connectionStateRecovery: {}});
 const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
@@ -202,6 +206,19 @@ app.post("/saveUserDeck", authenticateToken, async (req, res) => {
 app.use("/gwent", game_router);
 
 
-app.listen(port, () => {
+io.on('connection', (socket) => {
+  console.log('a user connected');
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+});
+
+
+// io.on('connection', (client) => {
+//   gameLogic.initializeGame(io, client);
+// });
+
+
+server.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
 });
