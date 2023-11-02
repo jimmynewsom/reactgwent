@@ -313,9 +313,16 @@ export default function DeckBuilder({socket}) {
   }
 
   function submitReady(){
-    //console.log()
-    socket.emit("ready_for_game", currentDeck);
+    console.log("test - socket is connected: " + socket.connected);
+
+    let cards = Object.fromEntries(currentDeck.cards.entries());
+    let serialDeck = JSON.stringify({
+      "faction": currentFaction,
+      "leaderName": currentDeck.leaderName,
+      "cards": cards
+    });
     document.getElementById("ready").disabled = true;
+    socket.emit("ready_for_game", serialDeck);
   }
 
 
@@ -324,6 +331,7 @@ export default function DeckBuilder({socket}) {
   useEffect(() => {
     getCardData(setCardMap, authHeader);
     fetchUserDecks();
+    console.log("test - roomName = " + roomName);
     if(roomName){
       console.log("connecting to websocket");
       socket.connect();

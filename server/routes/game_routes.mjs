@@ -98,7 +98,7 @@ export default function create_game_router(io){
     let game = userGameMap.get(req.params.targetOpponent);
     if(targetOpponent == game.player1.playerName && game.player2 == undefined){
       game.addPlayerTwo(username);
-      game.setStatus("deckbuilder");
+      game.setStatus("redirect to deckbuilder");
       userGameMap.set(username, game);
       return res.status(200).json({message: "game joined"});
     }
@@ -147,16 +147,21 @@ export default function create_game_router(io){
   io.on('connection', (socket) => {
     let username = socket.handshake.auth.username;
     console.log(username + " connected");
+
     if(userGameMap.has(username)){
       let game = userGameMap.get(username);
       socket.join(game.player1.playerName);
       console.log(username + " joined room " + game.player1.playerName);
       
       console.log(game.status);
-      if(game.status == "deckbuilder")
+      if(game.status == "redirect to deckbuilder"){
         io.to(game.player1.playerName).emit("redirect", "/deckbuilder/" + game.player1.playerName);
-      else if(game.status == "gameInProgress")
+        game.setStatus("deckbuilder");
+      }
+      else if(game.status == "redirect to game view"){
         io.to(game.player1.playerName).emit("redirect", "/gwent");
+        game.setStatus("gameInProgress");
+      }
     }
 
     socket.on('disconnect', () => {
@@ -179,7 +184,7 @@ export default function create_game_router(io){
         game.deck2 = deck;
 
       if(game.deck1 != undefined && game.deck2 != undefined){
-        game.setStatus("gameInProgress");
+        game.setStatus("redirect to game view");
         io.to(game.player1.playerName).emit("redirect", "/gwent");
       }
     });
