@@ -54,7 +54,7 @@ export default function Dashboard({socket}) {
         headers: {"Authorization": authHeader().split(" ")[1]}
       });
       if(result.status == 200){
-        console.log("game reset successfully");
+        console.log("games reset successfully");
         setWaitingForOpponent(false);
         socket.disconnect();
         await fetchGameList();

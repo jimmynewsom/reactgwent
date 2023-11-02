@@ -1,8 +1,8 @@
 import './App.css';
 import React, {useState} from 'react';
-import { io } from 'socket.io-client';
-import { RequireAuth, useIsAuthenticated, useAuthUser, useSignOut } from 'react-auth-kit';
-import { Route, Routes, useNavigate } from "react-router-dom";
+import {io} from 'socket.io-client';
+import {RequireAuth, useIsAuthenticated, useAuthUser, useSignOut} from 'react-auth-kit';
+import {Route, Routes, useNavigate} from "react-router-dom";
 
 import Dashboard from '../Dashboard/Dashboard';
 import LoginRegister from '../LoginRegister/LoginRegister';
@@ -31,7 +31,8 @@ export default function App() {
 
     socket.on("redirect", (path) => {navigate(path);});
 
-    socket.on("game_update", (gameState) => {setGameState(gameState);});
+    //maybe this should inside my GwentClient component
+    //socket.on("game_update", (gameState) => {setGameState(gameState);});
   }
 
   function signOutAndRedirectToLogin(){
@@ -64,6 +65,11 @@ export default function App() {
             <DeckBuilder socket={socket}/>
           </RequireAuth>
         }/>
+        <Route path="/deckbuilder/:roomName" element={
+          <RequireAuth loginPath='/loginregister'>
+            <DeckBuilder socket={socket}/>
+          </RequireAuth>
+        }/>
         <Route path="/gwent" element={
           <RequireAuth loginPath='/loginregister'>
             <GwentClient socket={socket} gameState={gameState}/>
@@ -73,7 +79,6 @@ export default function App() {
 
         <Route path="/smallcardview" element={<SmallCardView cardData={card}/>} />
         <Route path="/largecardview" element={<LargeCardView cardData={card} handleClick={() => console.log("nothing")}/>} />
-
       </Routes>
     </div>
   );

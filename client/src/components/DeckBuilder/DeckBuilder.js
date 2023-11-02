@@ -68,7 +68,6 @@ export default function DeckBuilder({socket}) {
 
   const { roomName } = useParams();
 
-
   //commenting out the skelligeDeck because I don't have images for those cards yet
   function nextFaction(){
     if(currentFaction == "Northern Realms"){
@@ -313,12 +312,24 @@ export default function DeckBuilder({socket}) {
     }
   }
 
+  function submitReady(){
+    socket.emit("ready", currentDeck);
+  }
+
 
   //uses getCardData function from GwentClient class
   //then loads the users decks from the server (or the default decks if the user has no saved decks, handled by server-side logic)
   useEffect(() => {
     getCardData(setCardMap, authHeader);
     fetchUserDecks();
+    if(roomName){
+      console.log("connecting to websocket");
+      socket.connect();
+      return (() => {
+        socket.disconnect();
+        console.log("disconnecting socket");
+      });
+    }
   },  []);
 
 
@@ -332,14 +343,14 @@ export default function DeckBuilder({socket}) {
       </div>
       <div className="deckbuilder_grid">
         <div className="one">
-          <p>(filters)</p>
+          <p>(filters - todo)</p>
           <p>Available Cards</p>
           <div className="card_panel">
             {createAvailableCards()}
           </div>
         </div>
         <div className="two">
-          <p>Leader</p>
+          <p>Leader - todo</p>
           <h3>{currentDeck.leaderName}</h3>
           <p>Total cards in deck</p>
           <p>{currentDeck.totalCardCount}</p>
@@ -356,12 +367,12 @@ export default function DeckBuilder({socket}) {
           <p>Hero Cards</p>
           <p>{currentDeck.heroCount}</p>
 
-          {!roomName ? <button onClick={saveCurrentDeck}> Save current deck </button> : <button> Ready (use this deck) </button>}
+          {!roomName ? <button onClick={saveCurrentDeck}> Save current deck </button> : <button onClick={submitReady}> Ready (use current deck) </button>}
 
 
         </div>
         <div className="three">
-          <p>(filters)</p>
+          <p>filters - todo</p>
           <p>Cards in Deck</p>
           <div className="card_panel">
             {createUsedCards()}
