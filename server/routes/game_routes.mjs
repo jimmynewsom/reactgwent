@@ -24,9 +24,10 @@ class MultiplayerGwent{
     this.status = status;
   }
 
-  startGame(deck1, deck2){
-    this.game = new Gwent(player1, player2, deck1, deck2);
+  startGame(){
+    this.game = new Gwent(player1, player2, this.deck1, this.deck2);
   }
+
 
   getGameState(playerName){
     let playerIndex = this.playerIndexMap.get(playerName);
@@ -154,8 +155,8 @@ export default function create_game_router(io){
       console.log(game.status);
       if(game.status == "deckbuilder")
         io.to(game.player1.playerName).emit("redirect", "/deckbuilder/" + game.player1.playerName);
-
-
+      else if(game.status == "gameInProgress")
+        io.to(game.player1.playerName).emit("redirect", "/gwent");
     }
 
     socket.on('disconnect', () => {
@@ -170,6 +171,17 @@ export default function create_game_router(io){
     //todo - add step for deck validation, but I want to get a working prototype first
     socket.on("ready_for_game", (deck) => {
       console.log("username ready: " + username);
+      let game = userGameMap.get(username);
+      let playerIndex = game.playerIndexMap.get(username);
+      if(playerIndex == 0)
+        game.deck1 = deck;
+      else
+        game.deck2 = deck;
+
+      if(game.deck1 != undefined && game.deck2 != undefined){
+        game.setStatus("gameInProgress");
+        io.to(game.player1.playerName).emit("redirect", "/gwent");
+      }
     });
 
     socket.on("submit_move", (cardIndex, target) => {
