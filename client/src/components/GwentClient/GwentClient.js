@@ -1,7 +1,6 @@
 import './GwentClient.css';
 import React, { useState, useEffect } from 'react';
 import { useAuthHeader } from 'react-auth-kit';
-import {useNavigate} from "react-router-dom";
 
 import {LargeCardView, CardData, SmallCardView} from '../Card/Card';
 
@@ -9,9 +8,9 @@ import {LargeCardView, CardData, SmallCardView} from '../Card/Card';
 function PlayerStatsPanel({player}){
   return(
     <div className="player_stats_panel">
-      <p>{player.name}</p>
-      <p>{player.faction}</p>
-      <p>(number of cards in hand)</p>
+      <p>{player.playerName}</p>
+      <p>(player.faction)</p>
+      <p>{player.hand.length}</p>
       <p>lives: {player.lives}</p>
       {player.passed ? <p><b>passed</b></p> : <p></p>}
     </div>
@@ -30,21 +29,17 @@ function WeatherPanel({weather}){
   );
 }
 
-function Field({fieldData, rallyHorns, playerIndex, cardMap}){
+function Field({fieldState, rallyHorns, playerIndex}){
 
   //technically this is also basically a React component, but that was an accident...
   function createCardRows(range, i){
     let cardViews = [];
-    let cardNames = fieldData[(playerIndex + i) % 2][range];
-
-    if(cardMap.size == 0){
-      console.log("cardMap hasn't loaded yet.");
-      return;
-    }
+    let cards = fieldState[(playerIndex + i) % 2][range];
     
-    for(let j=0; j < cardNames.length; j++){
-      let cardName = cardNames[j];
-      let card = cardMap.get(cardName);
+    for(let j=0; j < cards.length; j++){
+      //let cardName = cardNames[j];
+      //let card = cardMap.get(cardName);
+      let card = cards[j];
 
       cardViews.push(<SmallCardView
                         cardData={card}
@@ -117,20 +112,21 @@ export function getCardData(setcardmap, authheader) {
 
 export default function GwentClient({socket, gameState}) {
   const authHeader = useAuthHeader();
-  const navigate = useNavigate();
   const [cardMap, setCardMap] = useState(new Map());
-  const [player, setPlayer] = useState({name: "player", faction: "Northern Realms", lives: 2, passed: false});
-  const [opponent, setOpponent] = useState({name: "opponent", faction: "Northern Realms", lives: 2, passed: false});
-  const [weather, setWeather] = useState({close: false, ranged: false, siege: false});
-  const [playerIndex, setPlayerIndex] = useState(0);
+
+  let initialGameState = {
+    playerIndex: 0,
+    player: {name: "player", faction: "Northern Realms", lives: 2, passed: false, hand: []},
+    opponent: {name: "opponent", faction: "Northern Realms", lives: 2, passed: false, hand: []},
+    board: {
+      field: [{close: [], ranged: [], siege: []}, {close: [], ranged: [], siege: []}],
+      weather: {close: false, ranged: true, siege: false},
+      rallyHorns: [{close: false, ranged: false, siege: false}, {close: false, ranged: false, siege: false}]
+    }
+  }
 
   let card = new CardData("Geralt of Rivia", "geralt_of_rivia.png", "hero", "neutral" , "15", "close", "none", "1", "");
-  let dummyFieldData = [{close: ["Geralt of Rivia"], ranged: ["Yennefer of Vengerberg"], siege: ["Triss Merigold"]},
-                        {close: [], ranged: [], siege: []}];
   
-  const [handData, setHandData] = useState(["Geralt of Rivia"]);
-  const [fieldData, setFieldData] = useState(dummyFieldData);
-  const [rallyHorns, setRallyHorns] = useState([{close: false, ranged: false, siege: false}, {close: false, ranged: false, siege: false}]);
   const [focusCard, setFocusCard] = useState(card);
 
   useEffect(() => {
@@ -149,14 +145,15 @@ export default function GwentClient({socket, gameState}) {
   //this function is kind of a repeat of my createCardRows function inside my Field component..... might refactor later
   function createHandViews(){
     let cardViews = [];
-    let cardNames = handData;
+    let cards = gameState.hand;
 
     if(cardMap.size == 0)
       return;
     
-    for(let j=0; j < cardNames.length; j++){
-      let cardName = cardNames[j];
-      let card = cardMap.get(cardName);
+    for(let j=0; j < cards.length; j++){
+      //let cardName = cardNames[j];
+      //let card = cardMap.get(cardName);
+      let card = cards[j];
 
       cardViews.push(<SmallCardView
                         cardData={card}
@@ -166,29 +163,29 @@ export default function GwentClient({socket, gameState}) {
     return cardViews;
   }
 
-
+  if(gameState == undefined)
+    return;
 
   return(
     <div className="gwent_client">
       <div className="gwent_client_grid">
         <div className="stats_panel">
           <PlayerStatsPanel
-            player={opponent}
+            player={gameState.opponent}
           />
           <WeatherPanel
-            weather={weather}
+            weather={gameState.board.weather}
           />
           <PlayerStatsPanel
-            player={player}
+            player={gameState.player}
           />
           <button>Pass</button>
         </div>
         <div className="board_panel">
           <Field 
-            fieldData={fieldData}
-            rallyHorns={rallyHorns}
-            playerIndex={playerIndex}
-            cardMap={cardMap}
+            fieldState={gameState.board.field}
+            rallyHorns={gameState.board.rallyHorns}
+            playerIndex={gameState.playerIndex}
           />
           <br />
           <div className="player_hand">

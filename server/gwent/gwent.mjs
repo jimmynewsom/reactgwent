@@ -399,4 +399,8 @@ export class Gwent{
   playCardSpecial(playerIndex, card){
     console.log("nothing for now");
   }
+
+  playLeaderAbility(playerIndex){
+    console.log("nothing for now");
+  }
 }

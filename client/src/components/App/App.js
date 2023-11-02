@@ -37,7 +37,10 @@ export default function App() {
     });
 
     //maybe this be should inside my GwentClient component
-    socket.on("game_update", (gameState) => {setGameState(gameState); console.log(gameState)});
+    socket.on("game_update", (gameState) => {
+      setGameState(gameState);
+      console.log(gameState)
+    });
   }
 
   function signOutAndRedirectToLogin(){

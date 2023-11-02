@@ -42,10 +42,11 @@ class MultiplayerGwent{
   getGameState(playerIndex){
     let gameState = {
       playerIndex: playerIndex,
-      boardState: this.game.board,
-      playerState: this.game.players[playerIndex].player,
-      handState: this.game.players[playerIndex].hand
+      board: this.game.board,
+      player: this.game.players[playerIndex].player,
+      opponent: this.game.players[(playerIndex + 1) % 2].player
     }
+    gameState.player.hand = this.game.players[(playerIndex + 1) % 2].hand;
     return gameState;
   }
 
