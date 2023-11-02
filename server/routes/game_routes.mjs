@@ -86,15 +86,16 @@ export default function create_game_router(io){
   //if nothings wrong, add them as user2, then call socket.connect() on the front end
   game_router.get("/joinGame/:targetOpponent", authenticateToken, (req, res) => {
     let username = sanitizeInput(req.username);
+    let targetOpponent = req.params.targetOpponent;
 
     if(userGameMap.has(username))
       return res.status(400).json({ error: "you already have a game in progress. Fuck off! :)"});
 
-    if(!userGameMap.has(req.params.targetOpponent))
+    if(!userGameMap.has(targetOpponent))
       return res.status(400).json({error: "game not found"});
 
     let game = userGameMap.get(req.params.targetOpponent);
-    if(req.params.targetOpponent == game.user1 && game.user2 == undefined){
+    if(targetOpponent == game.player1.playerName && game.player2 == undefined){
       game.addPlayerTwo(username);
       game.setStatus("deckbuilder");
       userGameMap.set(username, game);
@@ -110,9 +111,9 @@ export default function create_game_router(io){
     let gamePlayersList = [];
     for(let game of games){
       if(game.user2)
-        gamePlayersList.push([game.user1.playerName, game.user2.playerName]);
+        gamePlayersList.push([game.player1.playerName, game.player2.playerName]);
       else
-        gamePlayersList.push([game.user1.playerName]);
+        gamePlayersList.push([game.player1.playerName]);
     }
     res.json(gamePlayersList);
   });
@@ -148,10 +149,11 @@ export default function create_game_router(io){
     if(userGameMap.has(username)){
       let game = userGameMap.get(username);
       socket.join(game.player1.playerName);
-      console.log(username + " joined room");
+      console.log(username + " joined room " + game.player1.playerName);
       
+      console.log(game.status);
       if(game.status == "deckbuilder")
-        io.to(game.user1).emit("redirect", "/deckbuilder/" + game.user1);
+        io.to(game.player1.playerName).emit("redirect", "/deckbuilder/" + game.player1.playerName);
 
 
     }
@@ -163,6 +165,11 @@ export default function create_game_router(io){
 
     socket.on("test", (test_message) => {
       console.log(test_message);
+    });
+
+    //todo - add step for deck validation, but I want to get a working prototype first
+    socket.on("ready_for_game", (deck) => {
+      console.log("username ready: " + username);
     });
 
     socket.on("submit_move", (cardIndex, target) => {

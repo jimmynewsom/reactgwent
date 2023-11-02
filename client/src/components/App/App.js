@@ -31,8 +31,14 @@ export default function App() {
     socket.on('info_message', (msg) => {console.log(msg);});
 
     socket.on("redirect", (path) => {
-      if(location.pathname != path)
+      console.log(path);
+      if(location.pathname != path){
+        console.log("redirecting to " + path);
         navigate(path);
+      }
+      else {
+        console.log("redirect event received, but we're already in the right place");
+      }
     });
 
     //maybe this be should inside my GwentClient component

@@ -313,7 +313,9 @@ export default function DeckBuilder({socket}) {
   }
 
   function submitReady(){
-    socket.emit("ready", currentDeck);
+    //console.log()
+    socket.emit("ready_for_game", currentDeck);
+    document.getElementById("ready").disabled = true;
   }
 
 
@@ -367,7 +369,7 @@ export default function DeckBuilder({socket}) {
           <p>Hero Cards</p>
           <p>{currentDeck.heroCount}</p>
 
-          {!roomName ? <button onClick={saveCurrentDeck}> Save current deck </button> : <button onClick={submitReady}> Ready (use current deck) </button>}
+          {!roomName ? <button onClick={saveCurrentDeck}> Save current deck </button> : <button id="ready" onClick={submitReady}> Ready (use current deck) </button>}
 
 
         </div>

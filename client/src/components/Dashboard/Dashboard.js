@@ -20,7 +20,7 @@ export default function Dashboard({socket}) {
         headers: {"Authorization": authHeader().split(" ")[1]}
       });
       if(result.status == 200){
-        console.log("game created successfully. attempting to connect to socket.io game room...");
+        console.log("game created successfully. connecting to socket.io game room...");
         socket.connect();
         setWaitingForOpponent(true);
         await fetchGameList();
@@ -55,7 +55,7 @@ export default function Dashboard({socket}) {
         headers: {"Authorization": authHeader().split(" ")[1]}
       });
       if(result.status == 200){
-        console.log("games reset successfully");
+        console.log("games reset successfully. disconnecting from socket.io");
         setWaitingForOpponent(false);
         socket.disconnect();
         await fetchGameList();
@@ -119,7 +119,7 @@ export default function Dashboard({socket}) {
         headers: {"Authorization": authHeader().split(" ")[1]}
       });
       result = await result.json();
-      console.log("inprogress result: "+ result.toString());
+      console.log("inprogress result: "+ result.inProgress);
       if(result.inProgress)
         socket.connect();
     } catch (error) {
