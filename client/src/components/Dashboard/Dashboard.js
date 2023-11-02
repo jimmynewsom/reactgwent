@@ -1,13 +1,11 @@
 import './Dashboard.css';
 import React, { useState, useEffect } from 'react';
 import { useAuthHeader, useAuthUser } from 'react-auth-kit';
-import {useNavigate} from "react-router-dom";
 
 
 export default function Dashboard({socket}) {
   const auth = useAuthUser();
   const authHeader = useAuthHeader();
-  const navigate = useNavigate();
   const [userStats, setUserStats] = useState({wins: "loading", losses: "loading"});
   const [gameList, setGameList] = useState([]);
   const [waitingForOpponent, setWaitingForOpponent] = useState(false);
