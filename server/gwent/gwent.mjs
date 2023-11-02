@@ -286,8 +286,8 @@ I think that's all I need to make this work
 */
 export class Gwent{
   constructor(player1, player2, deck1, deck2){
-    deck1 = shuffle(deck1);
-    deck2 = shuffle(deck2);
+    this.deck1 = shuffle(deck1);
+    this.deck2 = shuffle(deck2);
 
     this.players = [{player: player1, deck: deck1, hand: []}, {player: player2, deck: deck2, hand: []}];
     this.board = new Board();

@@ -10,7 +10,7 @@ function PlayerStatsPanel({player}){
     <div className="player_stats_panel">
       <p>{player.playerName}</p>
       <p>(player.faction)</p>
-      <p>{player.hand.length}</p>
+      <p>(player.hand.length)</p>
       <p>lives: {player.lives}</p>
       {player.passed ? <p><b>passed</b></p> : <p></p>}
     </div>
@@ -114,17 +114,6 @@ export default function GwentClient({socket, gameState}) {
   const authHeader = useAuthHeader();
   const [cardMap, setCardMap] = useState(new Map());
 
-  let initialGameState = {
-    playerIndex: 0,
-    player: {name: "player", faction: "Northern Realms", lives: 2, passed: false, hand: []},
-    opponent: {name: "opponent", faction: "Northern Realms", lives: 2, passed: false, hand: []},
-    board: {
-      field: [{close: [], ranged: [], siege: []}, {close: [], ranged: [], siege: []}],
-      weather: {close: false, ranged: true, siege: false},
-      rallyHorns: [{close: false, ranged: false, siege: false}, {close: false, ranged: false, siege: false}]
-    }
-  }
-
   let card = new CardData("Geralt of Rivia", "geralt_of_rivia.png", "hero", "neutral" , "15", "close", "none", "1", "");
   
   const [focusCard, setFocusCard] = useState(card);
@@ -145,19 +134,14 @@ export default function GwentClient({socket, gameState}) {
   //this function is kind of a repeat of my createCardRows function inside my Field component..... might refactor later
   function createHandViews(){
     let cardViews = [];
-    let cards = gameState.hand;
-
-    if(cardMap.size == 0)
-      return;
+    let cards = gameState.player.hand;
     
-    for(let j=0; j < cards.length; j++){
-      //let cardName = cardNames[j];
-      //let card = cardMap.get(cardName);
-      let card = cards[j];
+    for(let i=0; i < cards.length; i++){
+      let card = cards[i];
 
       cardViews.push(<SmallCardView
                         cardData={card}
-                        key={"hand" + j}
+                        key={"hand" + i}
                     />)
     }
     return cardViews;
@@ -189,7 +173,7 @@ export default function GwentClient({socket, gameState}) {
           />
           <br />
           <div className="player_hand">
-            {createHandViews()}
+            
           </div>
         </div>
         <div className="right_panel">

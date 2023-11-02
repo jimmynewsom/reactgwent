@@ -44,9 +44,14 @@ class MultiplayerGwent{
       playerIndex: playerIndex,
       board: this.game.board,
       player: this.game.players[playerIndex].player,
-      opponent: this.game.players[(playerIndex + 1) % 2].player
+      opponent: this.game.players[(playerIndex + 1) % 2].player,
+      deck1: this.game.deck1,
+      deck2: this.game.deck2
     }
     gameState.player.hand = this.game.players[(playerIndex + 1) % 2].hand;
+
+    console.log("gameState: " + gameState);
+
     return gameState;
   }
 
@@ -185,9 +190,9 @@ export default function create_game_router(io){
       console.log("username ready: " + username);
 
       let deck = [];
-      for(let [cardName, quantity] in deckObject.cards){
+      for(let cardName in deckObject.cards){
         let card = cardMap.get(cardName);
-        for(let i = 0; i < quantity; i++){
+        for(let i = 0; i < deckObject.cards[cardName]; i++){
           deck.push(card);
         }
       }

@@ -316,13 +316,13 @@ export default function DeckBuilder({socket}) {
     console.log("test - socket is connected: " + socket.connected);
 
     let cards = Object.fromEntries(currentDeck.cards.entries());
-    let serialDeck = JSON.stringify({
+    let serializableDeck = {
       "faction": currentFaction,
       "leaderName": currentDeck.leaderName,
       "cards": cards
-    });
+    };
     document.getElementById("ready").disabled = true;
-    socket.emit("ready_for_game", serialDeck);
+    socket.emit("ready_for_game", serializableDeck);
   }
 
 
