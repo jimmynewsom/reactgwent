@@ -1,7 +1,7 @@
 import express from "express";
 import validator from "validator";
 import authenticateToken from "../middleware/authenticateToken.mjs";
-import { Game } from "../gwent/gwent.mjs";
+import { Plaeyer, Gwent } from "../gwent/gwent.mjs";
 
 
 export default function create_game_router(io){
@@ -9,7 +9,20 @@ export default function create_game_router(io){
 
   class MultiplayerGwent{
     constructor(user1){
-      this.user1 = user1;
+      this.user1 = new Player(user1);
+      this.status = "waiting for player two";
+    }
+
+    addPlayerTwo(user2){
+      this.user2 = new Player(user2);
+    }
+
+    setStatus(status){
+      this.status = status;
+    }
+
+    startGame(deck1, deck){
+      this.game = new Gwent(user1, user2, deck1, deck2);
     }
   }
 
@@ -23,8 +36,8 @@ export default function create_game_router(io){
 
   //when a user tries to create a game, check if there is already more games in progress than max games or if the user is already in a game
   //if so, return an error
-  //otherwise, create a new game and add the user as user1. Then create a websocket room for the game named game1, game2, game3, etc
-  //on the front-end, switch to the Gwent component and connect to the websocket room
+  //otherwise, create a new game and add the user as user1
+  //then call connectSocket on the front end, which should add them to the right room now using the map
   game_router.get("/createGame", authenticateToken, (req, res) => {
     let username = sanitizeInput(req.username);
 
@@ -61,7 +74,8 @@ export default function create_game_router(io){
 
     let game = userGameMap.get(req.params.targetOpponent);
     if(req.params.targetOpponent == game.user1 && game.user2 == undefined){
-      game.user2 = username;
+      game.addPlayerTwo(username);
+      game.setStatus("deckbuilder");
       userGameMap.set(username, game);
       return res.status(200).json({message: "game joined"});
     }
@@ -89,19 +103,34 @@ export default function create_game_router(io){
   });
 
 
+  //I am using user1 as the name of the room for every game
+  //when a client connects, I pull their username from auth, and use that to add them to the right room
+  //I might need to use jwt for this later, but this works right now
   io.on('connection', (socket) => {
-    console.log('a user connected');
     let username = socket.handshake.auth.username;
+    console.log(username + " connected");
     if(userGameMap.has(username)){
-      socket.join(userGameMap.get(username).user1);
+      let game = userGameMap.get(username);
+      socket.join(game.user1);
+      console.log(username + " joined room");
+      
+      if(game.status == "deckbuilder")
+        io.to(game.user1).emit("redirect", "/deckbuilder/" + game.user1);
+
+
     }
 
     socket.on('disconnect', () => {
-      console.log('a user disconnected');
+      console.log(username + ' disconnected');
+      //todo - add logic for counting user dcs. If someone dcs a lot, they quit
     });
 
     socket.on("test", (test_message) => {
       console.log(test_message);
+    });
+
+    socket.on("submit_move", (cardIndex, target) => {
+      console.log(cardIndex + " " + target);
     });
   });
 

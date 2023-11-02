@@ -67,8 +67,41 @@ fs.readFile("./gwent/leader_cards.csv", function (err, fileData) {
   });
 });
 
+const defaultDeck = {
+  "owner": "default",
+  "faction": "Northern Realms",
+  "cards": {
+    "Biting Frost": 2,
+    "Impenetrable Fog": 2,
+    "Torrential Rain": 2,
+    "Clear Weather": 2,
+    "Dethmold": 1,
+    "Trebuchet": 2,
+    "Ballista": 2,
+    "Ves": 1,
+    "Keira Metz": 1,
+    "Sile de Tansarville": 1,
+    "Prince Stennis": 1,
+    "Dun Banner Medic": 1,
+    "Sabrina Glevissig": 1,
+    "Sheldon Skaggs": 1,
+    "Blue Stripes Commando": 2,
+    "Poor Fucking Infantry": 2,
+    "Redanian Foot Soldier": 1,
+    "Kaedweni Siege Expert": 3,
+    "Yarpen Zigrin": 1,
+    "Siegfried of Denesle": 1
+  },
+  "totalCardCount": 30,
+  "totalUnitStrength": 84,
+  "heroCount": 0,
+  "leaderName": "Foltest, King of Temeria",
+  "specialCount": 8,
+  "unitCount": 22
+}
 
-export {cardMap, cardRows, leaderRows, leaderMap};
+
+export {cardMap, cardRows, leaderRows, leaderMap, defaultDeck};
 
 
 //deck should have faction, leaderName, cards, and owner fields, from /saveUserDeck route in server.mjs
@@ -125,7 +158,7 @@ export function validateDeck(deck){
 //but I'm just going to write a sloppy v1 first and then optimize later if necessary
 //also, I only have to do this at the end of rounds. Normal turns I can getCardStrength and getRowStrength client-side
 
-class Player{
+export class Player{
   lives = 2;
   passed = false;
 
@@ -250,12 +283,12 @@ And then clients will tell the server their move every turn, which can be 1 of 3
 
 I think that's all I need to make this work
 */
-export class Game{
-  constructor(playerName1, playerName2, deck1, deck2){
+export class Gwent{
+  constructor(player, player, deck1, deck2){
     deck1 = shuffle(deck1);
     deck2 = shuffle(deck2);
 
-    this.players = [{player: Player(playerName1), deck: deck1, hand: []}, {player: Player(playerName2), deck: deck2, hand: []}];
+    this.players = [{player: player, deck: deck1, hand: []}, {player: player, deck: deck2, hand: []}];
     this.board = new Board();
     this.players[0].hand = draw(0, 10);
     this.players[1].hand = draw(1, 10);
