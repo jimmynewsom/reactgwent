@@ -2,6 +2,7 @@ import './Dashboard.css';
 import React, { useState, useEffect } from 'react';
 import { useAuthHeader, useAuthUser } from 'react-auth-kit';
 
+const instructions = "Game is a pretty simple game."
 
 export default function Dashboard({socket}) {
   const auth = useAuthUser();
@@ -114,12 +115,12 @@ export default function Dashboard({socket}) {
 
   async function checkUserHasGameInProgress(){
     try {
-      let result = await fetch(process.env.REACT_APP_BACKEND_URL + "gwent/getGameList", {
+      let result = await fetch(process.env.REACT_APP_BACKEND_URL + "gwent/checkUserHasGameInProgress", {
         headers: {"Authorization": authHeader().split(" ")[1]}
       });
       result = await result.json();
-      console.log(result);
-      if(result)
+      console.log("inprogress result: "+ result.toString());
+      if(result.inProgress)
         socket.connect();
     } catch (error) {
       console.log(error);

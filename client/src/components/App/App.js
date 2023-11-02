@@ -2,7 +2,7 @@ import './App.css';
 import React, {useState} from 'react';
 import {io} from 'socket.io-client';
 import {RequireAuth, useIsAuthenticated, useAuthUser, useSignOut} from 'react-auth-kit';
-import {Route, Routes, useNavigate} from "react-router-dom";
+import {Route, Routes, useNavigate, useLocation} from "react-router-dom";
 
 import Dashboard from '../Dashboard/Dashboard';
 import LoginRegister from '../LoginRegister/LoginRegister';
@@ -16,6 +16,7 @@ export default function App() {
   const auth = useAuthUser();
   const signOut = useSignOut();
   const navigate = useNavigate();
+  const location = useLocation();
   const [gameState, setGameState] = useState();
 
   var socket;
@@ -29,10 +30,15 @@ export default function App() {
     console.log("new websocket connection");
     socket.on('info_message', (msg) => {console.log(msg);});
 
-    socket.on("redirect", (path) => {navigate(path);});
+    socket.on("redirect", (path) => {
+      if(location.pathname != path)
+        navigate(path);
+    });
 
-    //maybe this should inside my GwentClient component
+    //maybe this be should inside my GwentClient component
     //socket.on("game_update", (gameState) => {setGameState(gameState);});
+
+    console.log(location.pathname);
   }
 
   function signOutAndRedirectToLogin(){
