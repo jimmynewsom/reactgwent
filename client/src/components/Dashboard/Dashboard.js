@@ -1,15 +1,20 @@
 import './Dashboard.css';
 import React, { useState, useEffect } from 'react';
 import { useAuthHeader, useAuthUser } from 'react-auth-kit';
+import {useNavigate} from "react-router-dom";
 
 
-export default function Dashboard({socket, connectSocket}) {
+export default function Dashboard({socket, connectSocket, disconnectSocket}) {
   const auth = useAuthUser();
   const authHeader = useAuthHeader();
+  const navigate = useNavigate();
   const [userStats, setUserStats] = useState({wins: "loading", losses: "loading"});
   const [gameList, setGameList] = useState([]);
   //I could probably use socket.connected for this, but it doesn't matter. this is a little more specific anyway
   const [waitingForOpponent, setWaitingForOpponent] = useState(false);
+
+
+  //mostly finished stuff
 
   async function createGame(){
     try {
@@ -18,9 +23,7 @@ export default function Dashboard({socket, connectSocket}) {
       });
       if(result.status == 200){
         console.log("game created successfully. attempting to connect to socket.io game room...");
-        connectSocket();
-        socket.emit("test", "this is a test");
-        socket.emit("join_game", auth().username, auth().username);
+        socket.connect();
         setWaitingForOpponent(true);
         await fetchGameList();
       }
@@ -37,10 +40,7 @@ export default function Dashboard({socket, connectSocket}) {
         });
         if(result.status == 200){
           console.log("game joined. connecting to socket.io game room...");
-          connectSocket();
-          socket.emit("test", "this is a test");
-          socket.emit("join_game", opponentName, auth().username);
-
+          socket.connect();
         }
       } catch (error) {
         console.log(error);
@@ -84,6 +84,10 @@ export default function Dashboard({socket, connectSocket}) {
       </table>
     );
   }
+
+
+
+  //fully finished stuff
 
   async function fetchUserData(){
     try {

@@ -1,30 +1,46 @@
 import express from "express";
 import validator from "validator";
 import authenticateToken from "../middleware/authenticateToken.mjs";
-import { Plaeyer, Gwent } from "../gwent/gwent.mjs";
+import { Player, Gwent, validateDeck, defaultDeck } from "../gwent/gwent.mjs";
+
+
+//wrapper class for Gwent Multiplayer
+//basically I am going to feed one move in at a time, and then send the game state back to both players
+class MultiplayerGwent{
+  constructor(user1){
+    this.user1 = new Player(user1);
+    this.status = "waiting for player two";
+  }
+
+  addPlayerTwo(user2){
+    this.user2 = new Player(user2);
+  }
+
+  setStatus(status){
+    this.status = status;
+  }
+
+  startGame(deck1, deck){
+    this.game = new Gwent(user1, user2, deck1, deck2);
+  }
+
+  getGameState(playerIndex){
+    let gameState = {
+      playerIndex: playerIndex,
+      boardState: this.game.board,
+      playerState: this.game.players[playerIndex]
+    }
+    return gameState;
+  }
+
+  playMove(playerIndex, cardIndex, target){
+    console.log("nothing for now");
+  }
+}
 
 
 export default function create_game_router(io){
   const game_router = express.Router();
-
-  class MultiplayerGwent{
-    constructor(user1){
-      this.user1 = new Player(user1);
-      this.status = "waiting for player two";
-    }
-
-    addPlayerTwo(user2){
-      this.user2 = new Player(user2);
-    }
-
-    setStatus(status){
-      this.status = status;
-    }
-
-    startGame(deck1, deck){
-      this.game = new Gwent(user1, user2, deck1, deck2);
-    }
-  }
 
   var games = [];
   var userGameMap = new Map();
@@ -72,6 +88,9 @@ export default function create_game_router(io){
     if(userGameMap.has(username))
       return res.status(400).json({ error: "you already have a game in progress. Fuck off! :)"});
 
+    if(!userGameMap.has(req.params.targetOpponent))
+      return res.status(400).json({error: "game not found"});
+
     let game = userGameMap.get(req.params.targetOpponent);
     if(req.params.targetOpponent == game.user1 && game.user2 == undefined){
       game.addPlayerTwo(username);
@@ -79,9 +98,6 @@ export default function create_game_router(io){
       userGameMap.set(username, game);
       return res.status(200).json({message: "game joined"});
     }
-
-    //if we get this far, we did not find targetOpponent in the list of games
-    return res.status(400).json({error: "game not found"});
   });
 
 

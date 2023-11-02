@@ -1,5 +1,6 @@
 import './DeckBuilder.css';
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useAuthHeader } from 'react-auth-kit';
 import {useNavigate} from "react-router-dom";
 
@@ -66,6 +67,8 @@ export default function DeckBuilder({socket}) {
   const [scoiataelDeck, setScoiataelDeck] = useState(new GwentDeck());
   const [monsterDeck, setMonsterDeck] = useState(new GwentDeck());
   const [skelligeDeck, setSkelligeDeck] = useState(new GwentDeck());
+
+  const { roomName } = useParams();
 
 
   //commenting out the skelligeDeck because I don't have images for those cards yet
@@ -355,7 +358,7 @@ export default function DeckBuilder({socket}) {
           <p>Hero Cards</p>
           <p>{currentDeck.heroCount}</p>
 
-          <button id="save_button" onClick={saveCurrentDeck}> Save current deck </button>
+          {!roomName ? <button onClick={saveCurrentDeck}> Save current deck </button> : <button> Ready (use this deck) </button>}
 
 
         </div>

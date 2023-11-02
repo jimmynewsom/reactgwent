@@ -396,6 +396,6 @@ export class Gwent{
   }
 
   playCardSpecial(playerIndex, card){
-
+    console.log("nothing for now");
   }
 }
