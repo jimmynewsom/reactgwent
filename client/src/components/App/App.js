@@ -10,13 +10,6 @@ import DeckBuilder from '../DeckBuilder/DeckBuilder';
 import GwentClient from '../GwentClient/GwentClient';
 import {CardData, SmallCardView, LargeCardView} from '../Card/Card';
 
-const SOCKET_URL = process.env.REACT_APP_BACKEND_URL;
-const socket = io(SOCKET_URL);
-
-socket.on('info_message', (msg) => {
-  console.log(msg);
-});
-
 
 export default function App() {
   const isAuthenticated = useIsAuthenticated();
@@ -24,9 +17,33 @@ export default function App() {
   const signOut = useSignOut();
   const navigate = useNavigate();
   const [isConnected, setIsConnected] = useState(false);
+  const [gameState, setGameState] = useState();
+
+  var socket, connectSocket, disconnectSocket;
 
   if(isAuthenticated()){
-    socket.emit("rejoin_game", auth().username);
+    const SOCKET_URL = process.env.REACT_APP_BACKEND_URL;
+    socket = io(SOCKET_URL, {
+      autoConnect: false,
+      auth: { username: auth().username }
+    });
+    console.log("new websocket connection");
+    socket.on('info_message', (msg) => {console.log(msg);});
+
+    socket.on("redirect", (path) => {navigate(path);});
+
+    socket.on("game_update", (gameState) => {setGameState(gameState);});
+
+    //these connect & disconnect functions will get passed to child components as props
+    connectSocket = () => {
+      socket.connect();
+      setIsConnected(true);
+    }
+
+    disconnectSocket = () => {
+      socket.disconnect();
+      setIsConnected(false);
+    }
   }
 
   function signOutAndRedirectToLogin(){
@@ -51,17 +68,17 @@ export default function App() {
       <Routes>
         <Route path="/" element={
           <RequireAuth loginPath='/loginregister'>
-            <Dashboard socket={socket} />
+            <Dashboard socket={socket} connectSocket={connectSocket} disconnectSocket={disconnectSocket}/>
           </RequireAuth>
         }/>
         <Route path="/deckbuilder" element={
           <RequireAuth loginPath='/loginregister'>
-            <DeckBuilder socket={socket}/>
+            <DeckBuilder socket={socket} connectSocket={connectSocket} disconnectSocket={disconnectSocket}/>
           </RequireAuth>
         }/>
         <Route path="/gwent" element={
           <RequireAuth loginPath='/loginregister'>
-            <GwentClient socket={socket}/>
+            <GwentClient socket={socket} connectSocket={connectSocket} disconnectSocket={disconnectSocket}/>
           </RequireAuth>
         }/>
         <Route path="/loginregister" element={<LoginRegister />} />
