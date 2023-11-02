@@ -16,10 +16,9 @@ export default function App() {
   const auth = useAuthUser();
   const signOut = useSignOut();
   const navigate = useNavigate();
-  const [isConnected, setIsConnected] = useState(false);
   const [gameState, setGameState] = useState();
 
-  var socket, connectSocket, disconnectSocket;
+  var socket;
 
   if(isAuthenticated()){
     const SOCKET_URL = process.env.REACT_APP_BACKEND_URL;
@@ -33,17 +32,6 @@ export default function App() {
     socket.on("redirect", (path) => {navigate(path);});
 
     socket.on("game_update", (gameState) => {setGameState(gameState);});
-
-    //these connect & disconnect functions will get passed to child components as props
-    connectSocket = () => {
-      socket.connect();
-      setIsConnected(true);
-    }
-
-    disconnectSocket = () => {
-      socket.disconnect();
-      setIsConnected(false);
-    }
   }
 
   function signOutAndRedirectToLogin(){
@@ -68,17 +56,17 @@ export default function App() {
       <Routes>
         <Route path="/" element={
           <RequireAuth loginPath='/loginregister'>
-            <Dashboard socket={socket} connectSocket={connectSocket} disconnectSocket={disconnectSocket}/>
+            <Dashboard socket={socket}/>
           </RequireAuth>
         }/>
         <Route path="/deckbuilder" element={
           <RequireAuth loginPath='/loginregister'>
-            <DeckBuilder socket={socket} connectSocket={connectSocket} disconnectSocket={disconnectSocket}/>
+            <DeckBuilder socket={socket}/>
           </RequireAuth>
         }/>
         <Route path="/gwent" element={
           <RequireAuth loginPath='/loginregister'>
-            <GwentClient socket={socket} connectSocket={connectSocket} disconnectSocket={disconnectSocket}/>
+            <GwentClient socket={socket} gameState={gameState}/>
           </RequireAuth>
         }/>
         <Route path="/loginregister" element={<LoginRegister />} />

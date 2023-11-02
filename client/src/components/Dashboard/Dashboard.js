@@ -4,13 +4,12 @@ import { useAuthHeader, useAuthUser } from 'react-auth-kit';
 import {useNavigate} from "react-router-dom";
 
 
-export default function Dashboard({socket, connectSocket, disconnectSocket}) {
+export default function Dashboard({socket}) {
   const auth = useAuthUser();
   const authHeader = useAuthHeader();
   const navigate = useNavigate();
   const [userStats, setUserStats] = useState({wins: "loading", losses: "loading"});
   const [gameList, setGameList] = useState([]);
-  //I could probably use socket.connected for this, but it doesn't matter. this is a little more specific anyway
   const [waitingForOpponent, setWaitingForOpponent] = useState(false);
 
 
@@ -59,6 +58,7 @@ export default function Dashboard({socket, connectSocket, disconnectSocket}) {
       if(result.status == 200){
         console.log("game reset successfully");
         setWaitingForOpponent(false);
+        socket.disconnect();
         await fetchGameList();
       }
     } catch (error) {
@@ -114,9 +114,24 @@ export default function Dashboard({socket, connectSocket, disconnectSocket}) {
     }
   }
 
+  async function checkUserHasGameInProgress(){
+    try {
+      let result = await fetch(process.env.REACT_APP_BACKEND_URL + "gwent/getGameList", {
+        headers: {"Authorization": authHeader().split(" ")[1]}
+      });
+      result = await result.json();
+      console.log(result);
+      if(result)
+        socket.connect();
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
     fetchUserData();
     fetchGameList();
+    checkUserHasGameInProgress();
   }, []);
 
   return(

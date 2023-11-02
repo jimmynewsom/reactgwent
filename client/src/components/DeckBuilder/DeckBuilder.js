@@ -1,8 +1,7 @@
 import './DeckBuilder.css';
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { useAuthHeader } from 'react-auth-kit';
-import {useNavigate} from "react-router-dom";
+import React, {useState, useEffect} from 'react';
+import {useParams} from 'react-router-dom';
+import {useAuthHeader} from 'react-auth-kit';
 
 import {getCardData} from '../GwentClient/GwentClient';
 import {LargeCardView, CardData} from '../Card/Card';
@@ -58,7 +57,6 @@ So, my approach is as follows:
 
 export default function DeckBuilder({socket}) {
   const authHeader = useAuthHeader();
-  const navigate = useNavigate();
   const [cardMap, setCardMap] = useState(new Map());
   const [currentFaction, setCurrentFaction] = useState("Northern Realms");
   const [currentDeck, setCurrentDeck] = useState(new GwentDeck());
@@ -277,49 +275,49 @@ export default function DeckBuilder({socket}) {
     button.disabled = false;
   }
 
+  async function fetchUserDecks(){
+    try {
+      let result = await fetch(process.env.REACT_APP_BACKEND_URL + "getUserDecks", {
+        headers: {"Authorization": authHeader().split(" ")[1]}
+      });
+      let mongoDeckObjects = await result.json();
+      //console.log(decks);
+
+      for(let mongoDeck of mongoDeckObjects){
+        let map = new Map(Object.entries(mongoDeck.cards));
+        let gwentClientDeck = new GwentDeck();
+        gwentClientDeck.cards = map;
+        gwentClientDeck.totalCardCount = mongoDeck.totalCardCount;
+        gwentClientDeck.unitCount = mongoDeck.unitCount;
+        gwentClientDeck.specialCount = mongoDeck.specialCount;
+        gwentClientDeck.totalUnitStrength = mongoDeck.totalUnitStrength;
+        gwentClientDeck.heroCount = mongoDeck.heroCount;
+        gwentClientDeck.leaderName = mongoDeck.leaderName;
+
+        if(mongoDeck.faction == "Northern Realms"){
+          setCurrentDeck(gwentClientDeck);
+          setNorthernRealmsDeck(gwentClientDeck);
+          setCurrentFaction("Northern Realms");
+        }
+        else if(mongoDeck.faction == "Monsters")
+          setMonsterDeck(gwentClientDeck);
+        // else if(mongoDeck.faction == "Skellige")
+        //   setSkelligeDeck(map);
+        else if(mongoDeck.faction == "Nilfgaard")
+          setNilfgaardDeck(gwentClientDeck);
+        else if(mongoDeck.faction == "Scoiatael")
+          setScoiataelDeck(gwentClientDeck);
+      }
+    } catch (error){
+      console.log(error);
+    }
+  }
+
 
   //uses getCardData function from GwentClient class
   //then loads the users decks from the server (or the default decks if the user has no saved decks, handled by server-side logic)
   useEffect(() => {
     getCardData(setCardMap, authHeader);
-
-    const fetchUserDecks = async () => {
-      try {
-        let result = await fetch(process.env.REACT_APP_BACKEND_URL + "getUserDecks", {
-          headers: {"Authorization": authHeader().split(" ")[1]}
-        });
-        let mongoDeckObjects = await result.json();
-        //console.log(decks);
-
-        for(let mongoDeck of mongoDeckObjects){
-          let map = new Map(Object.entries(mongoDeck.cards));
-          let gwentClientDeck = new GwentDeck();
-          gwentClientDeck.cards = map;
-          gwentClientDeck.totalCardCount = mongoDeck.totalCardCount;
-          gwentClientDeck.unitCount = mongoDeck.unitCount;
-          gwentClientDeck.specialCount = mongoDeck.specialCount;
-          gwentClientDeck.totalUnitStrength = mongoDeck.totalUnitStrength;
-          gwentClientDeck.heroCount = mongoDeck.heroCount;
-          gwentClientDeck.leaderName = mongoDeck.leaderName;
-
-          if(mongoDeck.faction == "Northern Realms"){
-            setCurrentDeck(gwentClientDeck);
-            setNorthernRealmsDeck(gwentClientDeck);
-            setCurrentFaction("Northern Realms");
-          }
-          else if(mongoDeck.faction == "Monsters")
-            setMonsterDeck(gwentClientDeck);
-          // else if(mongoDeck.faction == "Skellige")
-          //   setSkelligeDeck(map);
-          else if(mongoDeck.faction == "Nilfgaard")
-            setNilfgaardDeck(gwentClientDeck);
-          else if(mongoDeck.faction == "Scoiatael")
-            setScoiataelDeck(gwentClientDeck);
-        }
-      } catch (error){
-        console.log(error);
-      }
-    }
     fetchUserDecks();
   },  []);
 

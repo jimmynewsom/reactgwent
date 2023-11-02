@@ -115,7 +115,7 @@ export function getCardData(setcardmap, authheader) {
 }
 
 
-export default function GwentClient({socket}) {
+export default function GwentClient({socket, gameState}) {
   const authHeader = useAuthHeader();
   const navigate = useNavigate();
   const [cardMap, setCardMap] = useState(new Map());

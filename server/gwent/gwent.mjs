@@ -284,11 +284,11 @@ And then clients will tell the server their move every turn, which can be 1 of 3
 I think that's all I need to make this work
 */
 export class Gwent{
-  constructor(player, player, deck1, deck2){
+  constructor(player1, player2, deck1, deck2){
     deck1 = shuffle(deck1);
     deck2 = shuffle(deck2);
 
-    this.players = [{player: player, deck: deck1, hand: []}, {player: player, deck: deck2, hand: []}];
+    this.players = [{player: player1, deck: deck1, hand: []}, {player: player2, deck: deck2, hand: []}];
     this.board = new Board();
     this.players[0].hand = draw(0, 10);
     this.players[1].hand = draw(1, 10);
