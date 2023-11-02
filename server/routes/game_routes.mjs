@@ -1,7 +1,7 @@
 import express from "express";
 import validator from "validator";
 import authenticateToken from "../middleware/authenticateToken.mjs";
-import { Player, Gwent, validateDeck, defaultDeck } from "../gwent/gwent.mjs";
+import { Player, Gwent, cardMap, validateDeck, defaultDeck } from "../gwent/gwent.mjs";
 
 
 //wrapper class for Gwent Online Multiplayer
@@ -32,7 +32,7 @@ class MultiplayerGwent{
   }
 
   startGame(){
-    this.game = new Gwent(player1, player2, this.deck1, this.deck2);
+    this.game = new Gwent(this.player1, this.player2, this.deck1, this.deck2);
   }
 
   getPlayerIndex(playerName){
@@ -180,8 +180,17 @@ export default function create_game_router(io){
     });
 
     //todo - add step for deck validation, but I want to get a working prototype first
-    socket.on("ready_for_game", (deck) => {
+    socket.on("ready_for_game", (deckObject) => {
       console.log("username ready: " + username);
+
+      let deck = [];
+      for(let [cardName, quantity] in deckObject.cards){
+        let card = cardMap.get(cardName);
+        for(let i = 0; i < quantity; i++){
+          deck.push(card);
+        }
+      }
+
       if(playerIndex == 0)
         game.setDeck1(deck);
       else
@@ -189,6 +198,7 @@ export default function create_game_router(io){
 
       if(game.deck1 != undefined && game.deck2 != undefined){
         console.log("both players ready, redirecting to game view");
+        game.startGame();
         game.setStatus("gameInProgress");
         io.to(game.player1.playerName).emit("redirect", "/gwent");
       }

@@ -135,6 +135,15 @@ export default function GwentClient({socket, gameState}) {
 
   useEffect(() => {
     getCardData(setCardMap, authHeader);
+
+    console.log("connecting to websocket");
+    socket.connect();
+    socket.emit("request_game_update");
+
+    return (() => {
+      socket.disconnect();
+      console.log("disconnecting socket");
+    });
   }, []);
 
   //this function is kind of a repeat of my createCardRows function inside my Field component..... might refactor later

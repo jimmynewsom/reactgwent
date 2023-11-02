@@ -100,7 +100,6 @@ const defaultDeck = {
   "unitCount": 22
 }
 
-
 export {cardMap, cardRows, leaderRows, leaderMap, defaultDeck};
 
 
@@ -175,6 +174,8 @@ class Board{
 
   rallyHorns = [{close: false, ranged: false, siege: false},
                {close: false, ranged: false, siege: false}];
+
+  constructor(){}
 
   clearWeather(){
     this.weather = {close: false, ranged: false, siege: false};
@@ -290,8 +291,8 @@ export class Gwent{
 
     this.players = [{player: player1, deck: deck1, hand: []}, {player: player2, deck: deck2, hand: []}];
     this.board = new Board();
-    this.players[0].hand = draw(0, 10);
-    this.players[1].hand = draw(1, 10);
+    this.players[0].hand = this.draw(0, 10);
+    this.players[1].hand = this.draw(1, 10);
   }
 
   //modifies deck in players array in addition to returning cards to hand
