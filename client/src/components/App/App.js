@@ -35,9 +35,9 @@ export default function App() {
       console.log("redirecting to " + path);
       navigate(path);
     });
-    
+
     //maybe this be should inside my GwentClient component
-    //socket.on("game_update", (gameState) => {setGameState(gameState);});
+    socket.on("game_update", (gameState) => {setGameState(gameState);});
   }
 
   function signOutAndRedirectToLogin(){

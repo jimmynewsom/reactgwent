@@ -335,10 +335,10 @@ export default function DeckBuilder({socket}) {
     if(roomName){
       console.log("connecting to websocket");
       socket.connect();
-      // return (() => {
-      //   socket.disconnect();
-      //   console.log("disconnecting socket");
-      // });
+      return (() => {
+        socket.disconnect();
+        console.log("disconnecting socket");
+      });
     }
   },  []);
 

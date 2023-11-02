@@ -133,7 +133,6 @@ export default function GwentClient({socket, gameState}) {
   const [rallyHorns, setRallyHorns] = useState([{close: false, ranged: false, siege: false}, {close: false, ranged: false, siege: false}]);
   const [focusCard, setFocusCard] = useState(card);
 
-
   useEffect(() => {
     getCardData(setCardMap, authHeader);
   }, []);

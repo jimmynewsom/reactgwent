@@ -17,20 +17,29 @@ class MultiplayerGwent{
   addPlayerTwo(player2){
     this.player2 = new Player(player2);
     this.playerIndexMap.set(player2, 1);
-    this.status = "deckbuilder";
   }
 
   setStatus(status){
     this.status = status;
   }
 
+  setDeck1(deck){
+    this.deck1 = deck;
+  }
+
+  setDeck2(deck){
+    this.deck2 = deck;
+  }
+
   startGame(){
     this.game = new Gwent(player1, player2, this.deck1, this.deck2);
   }
 
+  getPlayerIndex(playerName){
+    return this.playerIndexMap.get(playerName);
+  }
 
-  getGameState(playerName){
-    let playerIndex = this.playerIndexMap.get(playerName);
+  getGameState(playerIndex){
     let gameState = {
       playerIndex: playerIndex,
       boardState: this.game.board,
@@ -50,7 +59,7 @@ class MultiplayerGwent{
 //since I am running this on one server, I am only opening websockets for players actively playing games, which made some things a little messy
 //it almost works though
 //also, on the front end, my BrowserRouter refreshes the whole page everytime I change urls, breaking my websocket connections
-//so I need a lot of logic to handle that
+//so I need a lot of logic to handle that and reconnect to the right rooms, etc
 export default function create_game_router(io){
   const game_router = express.Router();
 
@@ -92,18 +101,18 @@ export default function create_game_router(io){
     if(userGameMap.has(username))
       return res.status(400).json({ error: "you already have a game in progress. Fuck off! :)"});
 
-    if(!userGameMap.has(targetOpponent))
+    else if(!userGameMap.has(targetOpponent))
       return res.status(400).json({error: "game not found"});
 
-    let game = userGameMap.get(req.params.targetOpponent);
-    if(targetOpponent == game.player1.playerName && game.player2 == undefined){
+    else if(userGameMap.get(targetOpponent).user2 != undefined)
+      return res.status(400).json({error: "game is full"});
+
+    else{
+      let game = userGameMap.get(targetOpponent);
       game.addPlayerTwo(username);
       game.setStatus("redirect to deckbuilder");
       userGameMap.set(username, game);
       return res.status(200).json({message: "game joined"});
-    }
-    else {
-      return res.status(400).json({error: "game is full"});
     }
   });
 
@@ -141,32 +150,29 @@ export default function create_game_router(io){
   //OK. One thing that sucks about this is, because I am using BrowserRouter, everytime the user changes pages it breaks my websocket connections
   //and I don't think I can fix that. I think that's just how it works.
   //So, every connection / re-connection, I am using some logic to send them (back) where they need to go
-  //Also, I am using player1.playerName as the name of the room for every game
+  //Also, I am using game.player1.playerName as the name of the room for every game
   //when a client connects, I pull their username from auth, and use that to add them to the right room
   //I might need to use jwt for this later, but this works right now
   io.on('connection', (socket) => {
-    let username = socket.handshake.auth.username;
+    const username = socket.handshake.auth.username;
     console.log(username + " connected");
 
-    if(userGameMap.has(username)){
-      let game = userGameMap.get(username);
-      socket.join(game.player1.playerName);
-      console.log(username + " joined room " + game.player1.playerName);
-      
-      console.log(game.status);
-      if(game.status == "redirect to deckbuilder"){
-        io.to(game.player1.playerName).emit("redirect", "/deckbuilder/" + game.player1.playerName);
-        game.setStatus("deckbuilder");
-      }
-      else if(game.status == "redirect to game view"){
-        io.to(game.player1.playerName).emit("redirect", "/gwent");
-        game.setStatus("gameInProgress");
-      }
+    if(!userGameMap.has(username))
+      return;
+
+    const game = userGameMap.get(username);
+    const playerIndex = game.getPlayerIndex(username);
+    socket.join(game.player1.playerName);
+    console.log(username + " joined room " + game.player1.playerName);
+
+    if(game.status == "redirect to deckbuilder"){
+      io.to(game.player1.playerName).emit("redirect", "/deckbuilder/" + game.player1.playerName);
+      game.setStatus("deckbuilder");
     }
 
     socket.on('disconnect', () => {
       console.log(username + ' disconnected');
-      //todo - add logic for counting user dcs. If someone dcs a lot, they quit
+      //todo - add logic for game teardown if users dc
     });
 
     socket.on("test", (test_message) => {
@@ -176,17 +182,20 @@ export default function create_game_router(io){
     //todo - add step for deck validation, but I want to get a working prototype first
     socket.on("ready_for_game", (deck) => {
       console.log("username ready: " + username);
-      let game = userGameMap.get(username);
-      let playerIndex = game.playerIndexMap.get(username);
       if(playerIndex == 0)
-        game.deck1 = deck;
+        game.setDeck1(deck);
       else
-        game.deck2 = deck;
+        game.setDeck2(deck);
 
       if(game.deck1 != undefined && game.deck2 != undefined){
-        game.setStatus("redirect to game view");
+        console.log("both players ready, redirecting to game view");
+        game.setStatus("gameInProgress");
         io.to(game.player1.playerName).emit("redirect", "/gwent");
       }
+    });
+
+    socket.on("request_game_update", () => {
+      io.to(socket.id).emit("game_update", game.getGameState(playerIndex));
     });
 
     socket.on("submit_move", (cardIndex, target) => {
