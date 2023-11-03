@@ -236,10 +236,15 @@ class Board{
     return totalStrength;
   }
 
+  getTotalStrength(playerIndex){
+    let total = this.getRowStrength(playerIndex, "close") + this.getRowStrength(playerIndex, "ranged") + this.getRowStrength(playerIndex, "siege");
+    return total;
+  }
+
   //returns 1 for player1 wins, 2 for player2 wins, and 3 for ties
   endRoundAndCalculateWinner(faction1, faction2){
-    let p1Total = this.getRowStrength(0, "close") + this.getRowStrength(0, "ranged") + this.getRowStrength(0, "siege");
-    let p2Total = this.getRowStrength(1, "close") + this.getRowStrength(1, "ranged") + this.getRowStrength(1, "siege");
+    let p1Total = this.getTotalStrength(0);
+    let p2Total = this.getTotalStrength(1);
 
     for(let i = 0; i < 2; i++){
       this.field[i].graveyard.push(...this.field[i].close);

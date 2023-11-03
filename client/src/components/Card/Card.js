@@ -30,10 +30,20 @@ export function LargeCardView ({cardData, handleClick, available = 0}) {
   );
 }
 
-export function SmallCardView ({cardData, handleClick}){
+export function SmallCardView ({cardData, handleClick, currentStrength}){
+  let strength;
+  if(currentStrength){
+    if(currentStrength == cardData.strength)
+      strength = <p>{currentStrength}</p>
+    else if(currentStrength < cardData.strength)
+      strength = <p className="weaker_card">{currentStrength}</p>
+    else
+      strength = <p className="stronger_card">{currentStrength}</p>
+  }
 
   return (
     <div className="small_card" onClick={handleClick ? handleClick : ()=>{}}>
+      {currentStrength ? <>{strength}</> : <></>}
       <img 
         src={process.env.REACT_APP_UNIT_IMAGE_BASE_URL + cardData.image_url}
         alt={"image url is wrong for " + cardData.name + " with image url " + cardData.image_url}

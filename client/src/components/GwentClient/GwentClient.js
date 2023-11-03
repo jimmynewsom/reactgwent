@@ -5,7 +5,7 @@ import { useAuthHeader } from 'react-auth-kit';
 import {LargeCardView, CardData, SmallCardView} from '../Card/Card';
 
 
-function PlayerStatsPanel({player}){
+function PlayerStatsPanel({player, totalStrength}){
   return(
     <div className="player_stats_panel">
       <p>{player.playerName}</p>
@@ -13,6 +13,7 @@ function PlayerStatsPanel({player}){
       <p>cards in hand: {player.hand.length}</p>
       <p>lives: {player.lives}</p>
       <p>leader: {player.leaderName}</p>
+      <p>totalStrength: {totalStrength}</p>
       {player.passed ? <p><b>passed</b></p> : <p></p>}
     </div>
   );
@@ -56,6 +57,7 @@ function Field({board, playerIndex}){
       cardViews.push(<SmallCardView
                         cardData={card}
                         key={(range + i) + j}
+                        currentStrength={1}
                     />)
     }
 
@@ -105,15 +107,6 @@ class Board{
     }
   }
 
-  clearWeather(){
-    this.weather = {close: false, ranged: false, siege: false};
-  }
-
-  clearRallyHorns(){
-    this.rallyHorns = [{close: false, ranged: false, siege: false},
-                      {close: false, ranged: false, siege: false}];
-  }
-
   getCardStrength(playerIndex, range, cardIndex){
     let card = this.field[playerIndex][range][cardIndex];
     if(card.type == "hero")
@@ -150,45 +143,9 @@ class Board{
     return totalStrength;
   }
 
-  //returns 1 for player1 wins, 2 for player2 wins, and 3 for ties
-  endRoundAndCalculateWinner(faction1, faction2){
-    let p1Total = this.getRowStrength(0, "close") + this.getRowStrength(0, "ranged") + this.getRowStrength(0, "siege");
-    let p2Total = this.getRowStrength(1, "close") + this.getRowStrength(1, "ranged") + this.getRowStrength(1, "siege");
-
-    for(let i = 0; i < 2; i++){
-      this.field[i].graveyard.push(...this.field[i].close);
-      this.field[i].graveyard.push(...this.field[i].ranged);
-      this.field[i].graveyard.push(...this.field[i].siege);
-      this.field[i].close = [];
-      this.field[i].ranged = [];
-      this.field[i].siege = [];
-    }
-
-    this.clearWeather();
-    this.clearRallyHorns();
-      
-    if(p1Total > p2Total)
-      return 1;
-    else if(p1Total < p2Total)
-      return 2;
-    else{
-      //nilfgaard wins ties if only 1 faction is nilfgaard
-      if(faction1 == "Nilfgaard" && faction2 != "Nilfgaard")
-        return 1;
-      else if(faction2 == "Nilfgaard" && faction1 != "Nilfgaard")
-        return 2;
-      else
-        return 3;
-    }
-  }
-
-  scorch(playerIndex, range){
-    if(range){
-      console.log("scorch - range");
-    }
-    else {
-      console.log("scorch everywhere");
-    }
+  getTotalStrength(playerIndex){
+    let total = this.getRowStrength(playerIndex, "close") + this.getRowStrength(playerIndex, "ranged") + this.getRowStrength(playerIndex, "siege");
+    return total;
   }
 }
 
@@ -409,6 +366,7 @@ export default function GwentClient({socket}) {
         <div className="stats_panel">
           <PlayerStatsPanel
             player={gameState.opponent}
+            totalStrength={gameState.board.getTotalStrength((gameState.playerIndex + 1) % 2)}
           />
           <WeatherPanel
             weather={gameState.board.weather}
@@ -416,6 +374,7 @@ export default function GwentClient({socket}) {
           <p>round: {gameState.round}</p>
           <PlayerStatsPanel
             player={gameState.player}
+            totalStrength={gameState.board.getTotalStrength(gameState.playerIndex)}
           />
           <p>{gameState.playersTurn == gameState.playerIndex ? <b>YOUR TURN</b> : <b>NOT YOUR TURN</b>}</p>
           <button onClick={submitPass}>Pass</button>
