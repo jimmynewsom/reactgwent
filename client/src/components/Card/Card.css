@@ -13,3 +13,11 @@
   right: 0;
   background-color: rgb(255, 255, 255, 0);
 }
+
+.weaker_card {
+  color: red;
+}
+
+.stronger_card {
+  color: green;
+}

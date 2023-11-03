@@ -5,7 +5,7 @@ import { useAuthHeader } from 'react-auth-kit';
 import {LargeCardView, CardData, SmallCardView} from '../Card/Card';
 
 
-function PlayerStatsPanel({player}){
+function PlayerStatsPanel({player, totalStrength}){
   return(
     <div className="player_stats_panel">
       <p>{player.playerName}</p>
@@ -13,6 +13,7 @@ function PlayerStatsPanel({player}){
       <p>cards in hand: {player.hand.length}</p>
       <p>lives: {player.lives}</p>
       <p>leader: {player.leaderName}</p>
+      <p>totalStrength: {totalStrength}</p>
       {player.passed ? <p><b>passed</b></p> : <p></p>}
     </div>
   );
@@ -37,8 +38,68 @@ function WeatherPanel({weather}){
   );
 }
 
+class Board{
+  field = [{close: [], ranged: [], siege: [], graveyard: []},
+           {close: [], ranged: [], siege: [], graveyard: []}];
+  
+  weather = {close: false, ranged: false, siege: false};
+
+  rallyHorns = [{close: false, ranged: false, siege: false},
+               {close: false, ranged: false, siege: false}];
+
+  constructor(board){
+    if(board){
+      this.field = board.field;
+      this.weather = board.weather;
+      this.rallyHorns = board.rallyHorns;
+    }
+  }
+
+  getCardStrength(playerIndex, range, cardIndex){
+    let card = this.field[playerIndex][range][cardIndex];
+    if(card.type == "hero")
+      return card.strength;
+
+    let tightBond = 1, morale = 0;
+
+    for(let [card2, i] of this.field[playerIndex][range].entries()){
+      if(i == cardIndex)
+        continue;
+      else if(card2.special == "morale")
+        morale++;
+      else if(card2.special == "tight bond" && card2.name == card.name)
+        tightBond++;
+    }
+
+    let currentStrength = card.strength;
+    if(this.weather[range] == true)
+      currentStrength = 1;
+
+    currentStrength = (currentStrength + morale)**tightBond;
+    
+    if(this.rallyHorns[playerIndex][range])
+      currentStrength = currentStrength * 2;
+
+    return currentStrength;
+  }
+
+  getRowStrength(playerIndex, range){
+    let totalStrength = 0;
+    for(let i = 0; i < this.field[playerIndex][range].length; i++){
+      totalStrength = totalStrength + this.getCardStrength(playerIndex, range, i);
+    }
+    return totalStrength;
+  }
+
+  getTotalStrength(playerIndex){
+    let total = this.getRowStrength(playerIndex, "close") + this.getRowStrength(playerIndex, "ranged") + this.getRowStrength(playerIndex, "siege");
+    return total;
+  }
+}
+
 const rallyHornCard = new CardData("Commanders Horn", "commanders_horn.png", "special", "neutral", "0", "special", "horn", "3", "");
 
+//Field is basically a view for my Board class
 function Field({board, playerIndex}){
 
   //technically this is also basically a React component, but that was an accident...
@@ -55,6 +116,7 @@ function Field({board, playerIndex}){
       cardViews.push(<SmallCardView
                         cardData={card}
                         key={(range + i) + j}
+                        currentStrength={1}
                     />)
     }
 
@@ -67,7 +129,7 @@ function Field({board, playerIndex}){
 
 
     return (<>
-              <div className="range">{range}</div>
+              <div className="range">{range}<p>totalStrength: {board.getRowStrength(playerIndex, range)}</p></div>
               <div className="rallyhorn">{rallyHorn ? <SmallCardView cardData={rallyHornCard}/> : <></>}</div>
               <div className={cardViewClasses}>{cardViews}</div>
             </>);
@@ -85,6 +147,9 @@ function Field({board, playerIndex}){
     </div>
   );
 }
+
+
+
 
 
 //first, checks for cardRows in localStorage
@@ -146,13 +211,13 @@ export default function GwentClient({socket}) {
     playerIndex: 0,
     playersTurn: 0,
     round: 1,
-    board: {
+    board: new Board({
       field: [{close: [card1], ranged: [card2], siege: [card3], graveyard: [card4]},
               {close: [card2], ranged: [card4], siege: [card2], graveyard: []}],
       weather: {close: true, ranged: false, siege: true},
       rallyHorns: [{close: true, ranged: true, siege: true},
                   {close: false, ranged: false, siege: false}]
-    },
+    }),
     player: {
       lives: 2,
       passed: false,
@@ -174,6 +239,8 @@ export default function GwentClient({socket}) {
   const [gameState, setGameState] = useState(initialGameState);
 
   socket.on("game_update", (gameState) => {
+    gameState.board = new Board(gameState.board);
+    console.log(gameState.board);
     setGameState(gameState);
     console.log(gameState)
   });
@@ -298,6 +365,7 @@ export default function GwentClient({socket}) {
         <div className="stats_panel">
           <PlayerStatsPanel
             player={gameState.opponent}
+            totalStrength={gameState.board.getTotalStrength((gameState.playerIndex + 1) % 2)}
           />
           <WeatherPanel
             weather={gameState.board.weather}
@@ -305,6 +373,7 @@ export default function GwentClient({socket}) {
           <p>round: {gameState.round}</p>
           <PlayerStatsPanel
             player={gameState.player}
+            totalStrength={gameState.board.getTotalStrength(gameState.playerIndex)}
           />
           <p>{gameState.playersTurn == gameState.playerIndex ? <b>YOUR TURN</b> : <b>NOT YOUR TURN</b>}</p>
           <button onClick={submitPass}>Pass</button>

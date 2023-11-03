@@ -79,7 +79,7 @@ export default function App() {
         }/>
         <Route path="/loginregister" element={<LoginRegister />} />
 
-        <Route path="/smallcardview" element={<SmallCardView cardData={card1}/>} />
+        <Route path="/smallcardview" element={<SmallCardView cardData={card1} currentStrength={10}/>} />
         <Route path="/largecardview" element={<LargeCardView cardData={card1} handleClick={() => console.log("nothing")}/>} />
       </Routes>
     </div>
