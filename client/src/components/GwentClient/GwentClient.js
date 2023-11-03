@@ -116,7 +116,7 @@ function Field({board, playerIndex}){
       cardViews.push(<SmallCardView
                         cardData={card}
                         key={(range + i) + j}
-                        currentStrength={1}
+                        currentStrength={board.getCardStrength(i, range, j)}
                     />)
     }
 
@@ -129,7 +129,7 @@ function Field({board, playerIndex}){
 
 
     return (<>
-              <div className="range">{range}<p>totalStrength: {board.getRowStrength(playerIndex, range)}</p></div>
+              <div className="range">{range}<p>totalStrength: {board.getRowStrength(i, range)}</p></div>
               <div className="rallyhorn">{rallyHorn ? <SmallCardView cardData={rallyHornCard}/> : <></>}</div>
               <div className={cardViewClasses}>{cardViews}</div>
             </>);
