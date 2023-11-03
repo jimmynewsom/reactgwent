@@ -25,8 +25,8 @@ export default function App() {
     playerIndex: 0,
     playersTurn: 0,
     board: {
-      field: [{close: [], ranged: [], siege: [], graveyard: []},
-              {close: [], ranged: [], siege: [], graveyard: []}],
+      field: [{close: [card1], ranged: [card2], siege: [card3], graveyard: []},
+              {close: [], ranged: [card4], siege: [], graveyard: []}],
       weather: {close: false, ranged: true, siege: false},
       rallyHorns: [{close: false, ranged: false, siege: true},
                   {close: false, ranged: true, siege: false}]
