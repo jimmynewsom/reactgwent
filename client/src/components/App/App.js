@@ -16,7 +16,41 @@ export default function App() {
   const auth = useAuthUser();
   const signOut = useSignOut();
   const navigate = useNavigate();
-  const [gameState, setGameState] = useState();
+
+  let card1 = new CardData("Geralt of Rivia", "geralt_of_rivia.png", "hero", "neutral", "15", "close", "none", "1", "");
+  let card2 = new CardData("Yennefer of Vengerberg", "yennefer_of_vengerberg.png", "hero", "neutral", "7", "ranged", "medic", "1", "");
+  let card3 = new CardData("Triss Merigold", "triss_merigold.png", "hero", "neutral", "7", "close", "scorch", "1", "");
+  let card4 = new CardData("Cirilla Fiona Elen Riannon", "ciri.png", "hero", "neutral", "15", "close", "none", "1", "");
+  let initialGameState = {
+    playerIndex: 0,
+    playersTurn: 0,
+    board: {
+      field: [{close: [], ranged: [], siege: [], graveyard: []},
+              {close: [], ranged: [], siege: [], graveyard: []}],
+      weather: {close: false, ranged: true, siege: false},
+      rallyHorns: [{close: false, ranged: false, siege: true},
+                  {close: false, ranged: true, siege: false}]
+    },
+    player: {
+      lives: 2,
+      passed: false,
+      playerName: "jimmynewsom",
+      faction: "Northern Realms",
+      leaderName: "leader",
+      hand: [card1, card2, card3, card4]
+    },
+    opponent: {
+      lives: 2,
+      passed: false,
+      playerName: "opponent",
+      faction: "Northern Realms",
+      leaderName: "leaderman",
+      hand: {length: 10}//this is a hack, so I can reuse my Player panel for both players, but not send 1 player what's in the other players hand
+    }
+  }
+
+
+  const [gameState, setGameState] = useState(initialGameState);
 
   var socket;
 
@@ -48,7 +82,6 @@ export default function App() {
     navigate("/loginregister");
   }
 
-  let card = new CardData("Geralt of Rivia", "geralt_of_rivia.png", "hero", "neutral", "15", "close", "none", "1", "");
 
   return(
     <div className="app-wrapper">
@@ -85,8 +118,8 @@ export default function App() {
         }/>
         <Route path="/loginregister" element={<LoginRegister />} />
 
-        <Route path="/smallcardview" element={<SmallCardView cardData={card}/>} />
-        <Route path="/largecardview" element={<LargeCardView cardData={card} handleClick={() => console.log("nothing")}/>} />
+        <Route path="/smallcardview" element={<SmallCardView cardData={card1}/>} />
+        <Route path="/largecardview" element={<LargeCardView cardData={card1} handleClick={() => console.log("nothing")}/>} />
       </Routes>
     </div>
   );
