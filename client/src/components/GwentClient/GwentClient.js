@@ -136,6 +136,7 @@ export default function GwentClient({socket}) {
   
   //focusCard is going to look like cardIndex to start
   const [focusCard, setFocusCard] = useState();
+  const [gameOverMessage, setGameOverMessage] = useState();
 
   let card1 = new CardData("Geralt of Rivia", "geralt_of_rivia.png", "hero", "neutral", "15", "close", "none", "1", "");
   let card2 = new CardData("Yennefer of Vengerberg", "yennefer_of_vengerberg.png", "hero", "neutral", "7", "ranged", "medic", "1", "");
@@ -181,6 +182,15 @@ export default function GwentClient({socket}) {
     socket.emit("request_game_update");
   });
 
+  socket.on("game_over", (result) => {
+    if(result.winner == playerIndex)
+      setGameOverMessage("You Win!");
+    else if(result.winner != 2)
+      setGameOverMessage("You Lose!");
+    else
+      setGameOverMessage("Tie Game.");
+  });
+
   useEffect(() => {
     getCardData(setCardMap, authHeader);
 
@@ -195,6 +205,11 @@ export default function GwentClient({socket}) {
   }, []);
 
   function submitPass(){
+    if(gameState.playersTurn != gameState.playerIndex){
+      console.log("it's not your turn");
+      return;
+    }
+
     socket.emit("pass");
   }
 
@@ -207,7 +222,7 @@ export default function GwentClient({socket}) {
         //if the card is already the focus and they click it again, play the card, unless it has targeting rules
         //but first check if it's the players turn
         if(gameState.playersTurn != gameState.playerIndex){
-          console.log("it's not your turn (please work)");
+          console.log("it's not your turn");
           return;
         }
 
@@ -271,6 +286,9 @@ export default function GwentClient({socket}) {
   
   if(gameState == undefined)
     return;
+
+  if(gameOverMessage)
+    return <h3>{gameOverMessage}</h3>
 
   return(
     <div className="gwent_client">

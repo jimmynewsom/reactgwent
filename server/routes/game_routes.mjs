@@ -45,6 +45,7 @@ class MultiplayerGwent{
     let gameState = {
       playerIndex: playerIndex,
       playersTurn: this.game.playersTurn,
+      round: this.game.round,
       board: this.game.board,
       player: this.game.players[playerIndex].player,
       opponent: this.game.players[(playerIndex + 1) % 2].player,
@@ -222,13 +223,23 @@ export default function create_game_router(io){
 
     socket.on("pass", () => {
       console.log("player " + playerIndex + " passes");
-      game.game.pass(playerIndex);
-      io.to(game.player1.playerName).emit("game_update_ready");
-    })
+      let result = game.game.pass(playerIndex);
+      if(result == 0)
+        io.to(game.player1.playerName).emit("game_update_ready");
+      else{
+        console.log("game over");
 
+        if(result == 1)
+          io.to(game.player1.playerName).emit("game_over", {winner: 0});
+        else if(result == 2)
+          io.to(game.player1.playerName).emit("game_over", {winner: 1});
+        else
+          io.to(game.player1.playerName).emit("game_over", {winner: 2});
 
+        //todo - update players wins and losses in the database
+      }
+    });
   });
-
 
   return game_router;
 }

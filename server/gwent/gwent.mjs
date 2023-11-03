@@ -230,6 +230,7 @@ class Board{
     return totalStrength;
   }
 
+  //returns 1 for player1 wins, 2 for player2 wins, and 3 for ties
   endRoundAndCalculateWinner(faction1, faction2){
     let p1Total = this.getRowStrength(0, "close") + this.getRowStrength(0, "ranged") + this.getRowStrength(0, "siege");
     let p2Total = this.getRowStrength(1, "close") + this.getRowStrength(1, "ranged") + this.getRowStrength(1, "siege");
@@ -249,15 +250,15 @@ class Board{
     if(p1Total > p2Total)
       return 1;
     else if(p1Total < p2Total)
-      return -1;
+      return 2;
     else{
       //nilfgaard wins ties if only 1 faction is nilfgaard
       if(faction1 == "Nilfgaard" && faction2 != "Nilfgaard")
         return 1;
       else if(faction2 == "Nilfgaard" && faction1 != "Nilfgaard")
-        return -1;
+        return 2;
       else
-        return 0;
+        return 3;
     }
   }
 
@@ -324,10 +325,8 @@ export class Gwent{
   */
   playCard(playerIndex, cardIndex, target){
     //first check if it is the player's turn
-    if(playerIndex != this.playersTurn){
-      console.log("player tried to move, but it is not their turn");
+    if(playerIndex != this.playersTurn)
       return;
-    }
 
     let card = this.players[playerIndex].hand[cardIndex];
     this.players[playerIndex].hand.splice(cardIndex, 1);
@@ -430,37 +429,48 @@ export class Gwent{
     console.log("nothing for now");
   }
 
+  //this handles passing and calculates winners for rounds and the game
+  //when the game is over, return 1 for player1 wins, 2 for player2 wins, and 3 for ties
+  //otherwise return 0 for game still in progress;
   pass(playerIndex){
-    if(this.playersTurn == playerIndex){
-      this.players[playerIndex].passed = true;
+    if(this.playersTurn != playerIndex)
+      return;
 
-      let result;
-      if(this.game.players[(playerIndex + 1) % 2].passed){
-        //result equals 1 if player1 wins the round, -1 if player2 wins the round, and 0 for ties
-        result = this.board.endRoundAndCalculateWinner(this.player1.faction, this.player2.faction);
-        if(result == 1){
-          this.players[1].player.lives--;
-          if(this.players[1].player.lives == 0){
-            console.log("player1 wins the game");
-          }
-          this.round++;
-        }
-        else if(result == -1){
-          this.players[0].player.lives--;
-          if(this.players[0].player.lives == 0){
-            console.log("player2 wins the game");
-          }
-          this.round++;
-        }
-        else {
-          this.round++;
-        }
-        if(this.round == 4){
-          console.log("tie game");
-        }
+    this.players[playerIndex].passed = true;
+
+    let result;
+    //once both players pass, endRoundAndCalculateWinner
+    if(this.game.players[(playerIndex + 1) % 2].passed){
+      result = this.board.endRoundAndCalculateWinner(this.player1.faction, this.player2.faction);
+      if(result == 1){
+        this.players[1].player.lives--;
+        if(this.players[1].player.lives == 0)
+          return 1;
       }
-      else
-        this.playersTurn = (this.playersTurn + 1) % 2;
+      else if(result == 2){
+        this.players[0].player.lives--;
+        if(this.players[0].player.lives == 0)
+          return 2;
+      }
+
+      //if we finish round 3, there are 3 possibilities
+      //either 1) 1 player won 1 round and 2 rounds were ties, in which case 1 player wins
+      //or 2) every round was a tie, or 3) each player won 1 round and there was 1 tie, and in those cases it's a tie game
+      else if(this.round == 3){
+        if(this.players[0].player.lives > this.players[1].player.lives)
+          return 1;
+        else if(this.players[0].player.lives < this.players[1].player.lives)
+          return 2;
+        else
+          return 3;
+      }
+
+      this.round++;
     }
+    else{
+      this.playersTurn = (this.playersTurn + 1) % 2;
+    }
+
+    return 0;
   }
 }
