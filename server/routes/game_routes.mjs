@@ -6,6 +6,8 @@ import { Player, Gwent, cardMap, validateDeck, defaultDeck } from "../gwent/gwen
 
 //wrapper class for Gwent Online Multiplayer
 //basically I am going to feed one move in at a time, and then send the game state back to both players
+//Also, right now the decks in MultiplayerGwent have additional fields besides just the cards
+//but in my Gwent objects decks are just an array of card data... might fix later
 class MultiplayerGwent{
   constructor(player1){
     this.player1 = new Player(player1);
@@ -166,6 +168,7 @@ export default function create_game_router(io){
     socket.join(game.player1.playerName);
     console.log(username + " joined room " + game.player1.playerName);
 
+    //this sends the first player to deckbuilder once the second player joins
     if(game.status == "redirect to deckbuilder"){
       io.to(game.player1.playerName).emit("redirect", "/deckbuilder/" + game.player1.playerName);
       game.setStatus("deckbuilder");
@@ -214,7 +217,16 @@ export default function create_game_router(io){
     socket.on("play_card", (cardIndex, target) => {
       console.log(playerIndex + " " + cardIndex + " " + target);
       game.game.playCard(playerIndex, cardIndex, target);
+      io.to(game.player1.playerName).emit("game_update_ready");
     });
+
+    socket.on("pass", () => {
+      console.log("player " + playerIndex + " passes");
+      game.game.pass(playerIndex);
+      io.to(game.player1.playerName).emit("game_update_ready");
+    })
+
+
   });
 
 

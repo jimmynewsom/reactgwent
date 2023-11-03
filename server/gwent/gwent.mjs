@@ -170,7 +170,7 @@ export class Player{
   }
 
   setLeader(leader){
-    this.leader = leader;
+    this.leaderName = leaderName;
   }
 }
 
@@ -294,6 +294,7 @@ I think that's all I need to make this work
 */
 export class Gwent{
   constructor(player1, player2, deck1, deck2){
+    this.round = 1;
     this.deck1 = shuffle(deck1);
     this.deck2 = shuffle(deck2);
 
@@ -425,8 +426,32 @@ export class Gwent{
   pass(playerIndex){
     if(this.playersTurn == playerIndex){
       this.players[playerIndex].passed = true;
-      if(this.game.players[(playerIndex + 1) % 2].passed)
-        this.board.endRoundAndCalculateWinner(this.player1.faction, this.player2.faction);
+
+      let result;
+      if(this.game.players[(playerIndex + 1) % 2].passed){
+        //result equals 1 if player1 wins the round, -1 if player2 wins the round, and 0 for ties
+        result = this.board.endRoundAndCalculateWinner(this.player1.faction, this.player2.faction);
+        if(result == 1){
+          this.players[1].player.lives--;
+          if(this.players[1].player.lives == 0){
+            console.log("player1 wins the game");
+          }
+          this.round++;
+        }
+        else if(result == -1){
+          this.players[0].player.lives--;
+          if(this.players[0].player.lives == 0){
+            console.log("player2 wins the game");
+          }
+          this.round++;
+        }
+        else {
+          this.round++;
+        }
+        if(this.round == 4){
+          console.log("tie game");
+        }
+      }
       else
         this.playersTurn = (this.playersTurn + 1) % 2;
     }
