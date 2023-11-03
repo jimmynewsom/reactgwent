@@ -194,14 +194,14 @@ class Board{
                       {close: false, ranged: false, siege: false}];
   }
 
-  getCardStrength(playerIndex, row, cardIndex){
-    let card = this.field[playerIndex][row][cardIndex];
+  getCardStrength(playerIndex, range, cardIndex){
+    let card = this.field[playerIndex][range][cardIndex];
     if(card.type == "hero")
       return card.strength;
 
     let tightBond = 1, morale = 0;
 
-    for(let [card2, i] of this.field[playerIndex][row]){
+    for(let [card2, i] of this.field[playerIndex][range].entries()){
       if(i == cardIndex)
         continue;
       else if(card2.special == "morale")
@@ -211,21 +211,21 @@ class Board{
     }
 
     let currentStrength = card.strength;
-    if(weather[row] == true)
+    if(this.weather[range] == true)
       currentStrength = 1;
 
     currentStrength = (currentStrength + morale)**tightBond;
     
-    if(this.rallyHorns[playerIndex][row])
+    if(this.rallyHorns[playerIndex][range])
       currentStrength = currentStrength * 2;
 
     return currentStrength;
   }
 
-  getRowStrength(playerIndex, row){
+  getRowStrength(playerIndex, range){
     let totalStrength = 0;
-    for(let i=0; i<field[playerIndex][row].length; i++){
-      totalStrength = totalStrength + this.getCardStrength(playerIndex, row, i);
+    for(let i = 0; i < this.field[playerIndex][range].length; i++){
+      totalStrength = totalStrength + this.getCardStrength(playerIndex, range, i);
     }
     return totalStrength;
   }
@@ -235,13 +235,13 @@ class Board{
     let p1Total = this.getRowStrength(0, "close") + this.getRowStrength(0, "ranged") + this.getRowStrength(0, "siege");
     let p2Total = this.getRowStrength(1, "close") + this.getRowStrength(1, "ranged") + this.getRowStrength(1, "siege");
 
-    for(let i=0; i<2; i++){
-      this.rows[i].graveyard.push(...rows[i].close);
-      this.rows[i].graveyard.push(...rows[i].ranged);
-      this.rows[i].graveyard.push(...rows[i].siege);
-      this.rows[i].close = [];
-      this.rows[i].ranged = [];
-      this.rows[i].siege = [];
+    for(let i = 0; i < 2; i++){
+      this.field[i].graveyard.push(...this.field[i].close);
+      this.field[i].graveyard.push(...this.field[i].ranged);
+      this.field[i].graveyard.push(...this.field[i].siege);
+      this.field[i].close = [];
+      this.field[i].ranged = [];
+      this.field[i].siege = [];
     }
 
     this.clearWeather();
@@ -331,8 +331,8 @@ export class Gwent{
     let card = this.players[playerIndex].hand[cardIndex];
     this.players[playerIndex].hand.splice(cardIndex, 1);
     
-    //unit cards and hero cards that aren't spies get added to their respective row
-    //if the unit range is agile, target should specify the row
+    //unit cards and hero cards that aren't spies get added to their respective range
+    //if the unit range is agile, target should specify the range
     if((card.type == "unit" || card.type == "hero") && card.special != "spy"){
       if(card.range == "close")
         this.board.field[playerIndex].close.push(card);
@@ -403,13 +403,13 @@ export class Gwent{
         this.board.clearWeather();
       else if(card.name == "Scorch")
         this.board.scorch();
-      //if the player plays a commanders horn, target should specify the row
+      //if the player plays a commanders horn, target should specify the range
       else if(card.name == "Commanders Horn")
         this.board.rallyHorns[playerIndex][target] = true;
-      //if the player plays a decoy, target should specify row & index, eg. {row: "close", index: 3}
+      //if the player plays a decoy, target should specify range & index, eg. {range: "close", index: 3}
       else if(card.name == "Decoy"){
-        let card2 = this.board.field[playerIndex][target.row][target.index];
-        this.board.field[playerIndex][target.row][target.index] = card;
+        let card2 = this.board.field[playerIndex][target.range][target.index];
+        this.board.field[playerIndex][target.range][target.index] = card;
         this.players[playerIndex].hand.push(card2);
       }
 
@@ -418,7 +418,10 @@ export class Gwent{
       if(card.name != "Decoy")
         this.board.field[playerIndex].graveyard.push(card);
     }
-    this.playersTurn = (this.playersTurn + 1) % 2;
+
+    //if the other player has not passed it's their turn. Otherwise it stays the current player's turn
+    if(!this.players[(playerIndex + 1) % 2].player.passed)
+      this.playersTurn = (this.playersTurn + 1) % 2;
   }
 
   playCardSpecial(playerIndex, card){
@@ -436,12 +439,12 @@ export class Gwent{
     if(this.playersTurn != playerIndex)
       return;
 
-    this.players[playerIndex].passed = true;
+    this.players[playerIndex].player.passed = true;
 
     let result;
     //once both players pass, endRoundAndCalculateWinner
-    if(this.game.players[(playerIndex + 1) % 2].passed){
-      result = this.board.endRoundAndCalculateWinner(this.player1.faction, this.player2.faction);
+    if(this.players[(playerIndex + 1) % 2].player.passed){
+      result = this.board.endRoundAndCalculateWinner(this.players[0].player.faction, this.players[1].player.faction);
       if(result == 1){
         this.players[1].player.lives--;
         if(this.players[1].player.lives == 0)
@@ -466,6 +469,8 @@ export class Gwent{
       }
 
       this.round++;
+      this.players[0].player.passed = false;
+      this.players[1].player.passed = false;
     }
     else{
       this.playersTurn = (this.playersTurn + 1) % 2;
