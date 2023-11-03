@@ -2,8 +2,7 @@
 Hey, how's it going?
 This is a react based implementation of Gwent from the Witcher 3, with online multiplayer. Or it will be soon. It's getting there.
 
-So far in the master branch you can create accounts and edit and save decks to the database.
-In the "adding socketio" branch you can create game lobbies essentially which other players can join, and then that takes you to the deckbuilder screen,
+So far in the master branch you can create accounts, edit and save decks to the database, and create game lobbies essentially which other players can join, and then that takes you to the deckbuilder screen,
 and then once you are both ready and submit decks that takes you to the actual game screen, but I haven't quite finished the logic for making the game work yet. Working on it.
 
 To run this, first download the repo, cd into the server folder and run npm install, and then cd to the client folder and run npm install again.
