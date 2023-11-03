@@ -6,8 +6,6 @@ import {LargeCardView, CardData, SmallCardView} from '../Card/Card';
 
 
 function PlayerStatsPanel({player}){
-
-
   return(
     <div className="player_stats_panel">
       <p>{player.playerName}</p>
@@ -20,17 +18,27 @@ function PlayerStatsPanel({player}){
   );
 }
 
+const bitingFrostCard = new CardData("Biting Frost", "biting_frost.png", "special", "neutral", "0", "special", "weather", "3", "");
+const impenetrableFogCard = new CardData("Impenetrable Fog", "impenetrable_fog.png", "special", "neutral", "0", "special", "weather", "3", "");
+const torrentialRainCard = new CardData("Torrential Rain", "torrential_rain.png", "special", "neutral", "0", "special", "weather", "3", "");
+
+// const BitingFrostView = new SmallCardView({bitingFrostCard});
+const impenetrableFogView = <SmallCardView cardData={impenetrableFogCard} />;
+// const torrentialRainView = new SmallCardView({torrentialRainCard});
+
 function WeatherPanel({weather}){
   return(
     <div className="weather_panel">
       <div className="weather_grid">
-        <div>{weather.close ? <p>snow</p> : <p>no snow</p>}</div>
-        <div>{weather.ranged ? <p>fog</p> : <p>no fog</p>}</div>
-        <div>{weather.siege ? <p>rain</p> : <p>no rain</p>}</div>
+        <div>{weather.close ? <SmallCardView cardData={bitingFrostCard}/> : <></>}</div>
+        <div>{weather.ranged ? <SmallCardView cardData={impenetrableFogCard}/> : <></>}</div>
+        <div>{weather.siege ? <SmallCardView cardData={torrentialRainCard}/> : <></>}</div>
       </div>
     </div>
   );
 }
+
+const rallyHornCard = new CardData("Commanders Horn", "commanders_horn.png", "special", "neutral", "0", "special", "horn", "3", "");
 
 function Field({fieldState, rallyHorns, playerIndex}){
 
@@ -51,7 +59,7 @@ function Field({fieldState, rallyHorns, playerIndex}){
     }
     let rallyHorn = rallyHorns[(playerIndex + i) % 2][range];
     return (<>
-              <div className="rallyhorn">{"" + rallyHorn}</div>
+              <div className="rallyhorn">{rallyHorn ? <SmallCardView cardData={rallyHornCard}/> : <></>}</div>
               <div className="cardrow">{cardViews}</div>
             </>);
   }
