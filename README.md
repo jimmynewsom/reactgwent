@@ -7,9 +7,9 @@ In the "adding socketio" branch you can create game lobbies essentially which ot
 and then once you are both ready and submit decks that takes you to the actual game screen, but I haven't quite finished the logic for making the game work yet. Working on it.
 
 To run this, first download the repo, cd into the server folder and run npm install, and then cd to the client folder and run npm install again.
-You also need to have mongodb installed somewhere, and you need a .env file in the server folder with a DB_URL variable pointing to it ("mongodb://127.0.0.1:27017" for local instance),
+You also need to have mongodb installed somewhere, and you need a config.env file in the server folder with a DB_URL variable pointing to it ("mongodb://127.0.0.1:27017" for local instance),
 as well as a JWT_SECRET variable in the same file.
-You also need a .env file in the client folder with a REACT_APP_BACKEND_URL pointing to the express server (usually "http://localhost:5000/").
+You also need a .env (no config) file in the client folder with a REACT_APP_BACKEND_URL pointing to the express server (usually "http://localhost:5000/").
 If you want the images to work, you would also need REACT_APP_UNIT_IMAGE_BASE_URL and REACT_APP_LEADER_IMAGE_BASE_URL variables pointing to where you're hosting your images...
 But I'm using free image hosting so you can't use mine, you'll use up my data.
 
