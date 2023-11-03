@@ -10,7 +10,7 @@ function PlayerStatsPanel({player}){
     <div className="player_stats_panel">
       <p>{player.playerName}</p>
       <p>(player.faction)</p>
-      <p>(player.hand.length)</p>
+      <p>{player.hand.length}</p>
       <p>lives: {player.lives}</p>
       {player.passed ? <p><b>passed</b></p> : <p></p>}
     </div>
@@ -173,7 +173,7 @@ export default function GwentClient({socket, gameState}) {
           />
           <br />
           <div className="player_hand">
-            
+            {createHandViews()}
           </div>
         </div>
         <div className="right_panel">

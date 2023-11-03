@@ -293,12 +293,20 @@ export class Gwent{
     this.board = new Board();
     this.players[0].hand = this.draw(0, 10);
     this.players[1].hand = this.draw(1, 10);
+    if(this.flipCoin())
+      this.playersTurn = 0;
+    else
+      this.playersTurn = 1;
   }
 
   //modifies deck in players array in addition to returning cards to hand
   //also, if you try to draw more cards than are left in the deck it only returns the remaining cards and doesn't throw an exception
   draw(playerIndex, numCards){
     return this.players[playerIndex].deck.splice(0, numCards);
+  }
+
+  flipCoin(){
+    return Math.random() - 0.5 > 0;
   }
 
   /*

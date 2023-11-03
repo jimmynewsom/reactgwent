@@ -45,12 +45,11 @@ class MultiplayerGwent{
       board: this.game.board,
       player: this.game.players[playerIndex].player,
       opponent: this.game.players[(playerIndex + 1) % 2].player,
-      deck1: this.game.deck1,
-      deck2: this.game.deck2
+      playersTurn: this.game.playersTurn
     }
-    gameState.player.hand = this.game.players[(playerIndex + 1) % 2].hand;
-
-    console.log("gameState: " + gameState);
+    gameState.player.hand = this.game.players[(playerIndex) % 2].hand;
+    //little hack, because my PlayerPanel components expect a player.hand.length, but I don't want to reveal the opponent's cards
+    gameState.opponent.hand = {length: this.game.players[(playerIndex + 1) % 2].hand.length}
 
     return gameState;
   }
