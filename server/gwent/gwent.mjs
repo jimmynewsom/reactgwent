@@ -183,7 +183,13 @@ class Board{
   rallyHorns = [{close: false, ranged: false, siege: false},
                {close: false, ranged: false, siege: false}];
 
-  constructor(){}
+  constructor(board){
+    if(board){
+      this.field = board.field;
+      this.weather = board.weather;
+      this.rallyHorns = board.rallyHorns;
+    }
+  }
 
   clearWeather(){
     this.weather = {close: false, ranged: false, siege: false};
@@ -270,7 +276,6 @@ class Board{
       console.log("scorch everywhere");
     }
   }
-
 }
 
 function shuffle(array){ 

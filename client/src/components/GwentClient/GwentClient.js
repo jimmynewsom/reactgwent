@@ -39,6 +39,7 @@ function WeatherPanel({weather}){
 
 const rallyHornCard = new CardData("Commanders Horn", "commanders_horn.png", "special", "neutral", "0", "special", "horn", "3", "");
 
+//Field is basically a view for my Board class
 function Field({board, playerIndex}){
 
   //technically this is also basically a React component, but that was an accident...
@@ -67,7 +68,7 @@ function Field({board, playerIndex}){
 
 
     return (<>
-              <div className="range">{range}</div>
+              <div className="range">{range}<p>totalStrength: {board.getRowStrength(playerIndex, range)}</p></div>
               <div className="rallyhorn">{rallyHorn ? <SmallCardView cardData={rallyHornCard}/> : <></>}</div>
               <div className={cardViewClasses}>{cardViews}</div>
             </>);
@@ -85,6 +86,114 @@ function Field({board, playerIndex}){
     </div>
   );
 }
+
+
+class Board{
+  field = [{close: [], ranged: [], siege: [], graveyard: []},
+           {close: [], ranged: [], siege: [], graveyard: []}];
+  
+  weather = {close: false, ranged: false, siege: false};
+
+  rallyHorns = [{close: false, ranged: false, siege: false},
+               {close: false, ranged: false, siege: false}];
+
+  constructor(board){
+    if(board){
+      this.field = board.field;
+      this.weather = board.weather;
+      this.rallyHorns = board.rallyHorns;
+    }
+  }
+
+  clearWeather(){
+    this.weather = {close: false, ranged: false, siege: false};
+  }
+
+  clearRallyHorns(){
+    this.rallyHorns = [{close: false, ranged: false, siege: false},
+                      {close: false, ranged: false, siege: false}];
+  }
+
+  getCardStrength(playerIndex, range, cardIndex){
+    let card = this.field[playerIndex][range][cardIndex];
+    if(card.type == "hero")
+      return card.strength;
+
+    let tightBond = 1, morale = 0;
+
+    for(let [card2, i] of this.field[playerIndex][range].entries()){
+      if(i == cardIndex)
+        continue;
+      else if(card2.special == "morale")
+        morale++;
+      else if(card2.special == "tight bond" && card2.name == card.name)
+        tightBond++;
+    }
+
+    let currentStrength = card.strength;
+    if(this.weather[range] == true)
+      currentStrength = 1;
+
+    currentStrength = (currentStrength + morale)**tightBond;
+    
+    if(this.rallyHorns[playerIndex][range])
+      currentStrength = currentStrength * 2;
+
+    return currentStrength;
+  }
+
+  getRowStrength(playerIndex, range){
+    let totalStrength = 0;
+    for(let i = 0; i < this.field[playerIndex][range].length; i++){
+      totalStrength = totalStrength + this.getCardStrength(playerIndex, range, i);
+    }
+    return totalStrength;
+  }
+
+  //returns 1 for player1 wins, 2 for player2 wins, and 3 for ties
+  endRoundAndCalculateWinner(faction1, faction2){
+    let p1Total = this.getRowStrength(0, "close") + this.getRowStrength(0, "ranged") + this.getRowStrength(0, "siege");
+    let p2Total = this.getRowStrength(1, "close") + this.getRowStrength(1, "ranged") + this.getRowStrength(1, "siege");
+
+    for(let i = 0; i < 2; i++){
+      this.field[i].graveyard.push(...this.field[i].close);
+      this.field[i].graveyard.push(...this.field[i].ranged);
+      this.field[i].graveyard.push(...this.field[i].siege);
+      this.field[i].close = [];
+      this.field[i].ranged = [];
+      this.field[i].siege = [];
+    }
+
+    this.clearWeather();
+    this.clearRallyHorns();
+      
+    if(p1Total > p2Total)
+      return 1;
+    else if(p1Total < p2Total)
+      return 2;
+    else{
+      //nilfgaard wins ties if only 1 faction is nilfgaard
+      if(faction1 == "Nilfgaard" && faction2 != "Nilfgaard")
+        return 1;
+      else if(faction2 == "Nilfgaard" && faction1 != "Nilfgaard")
+        return 2;
+      else
+        return 3;
+    }
+  }
+
+  scorch(playerIndex, range){
+    if(range){
+      console.log("scorch - range");
+    }
+    else {
+      console.log("scorch everywhere");
+    }
+  }
+}
+
+
+
 
 
 //first, checks for cardRows in localStorage
@@ -146,13 +255,13 @@ export default function GwentClient({socket}) {
     playerIndex: 0,
     playersTurn: 0,
     round: 1,
-    board: {
+    board: new Board({
       field: [{close: [card1], ranged: [card2], siege: [card3], graveyard: [card4]},
               {close: [card2], ranged: [card4], siege: [card2], graveyard: []}],
       weather: {close: true, ranged: false, siege: true},
       rallyHorns: [{close: true, ranged: true, siege: true},
                   {close: false, ranged: false, siege: false}]
-    },
+    }),
     player: {
       lives: 2,
       passed: false,
@@ -174,6 +283,8 @@ export default function GwentClient({socket}) {
   const [gameState, setGameState] = useState(initialGameState);
 
   socket.on("game_update", (gameState) => {
+    gameState.board = new Board(gameState.board);
+    console.log(gameState.board);
     setGameState(gameState);
     console.log(gameState)
   });
