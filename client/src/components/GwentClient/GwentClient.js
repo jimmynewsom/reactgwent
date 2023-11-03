@@ -134,12 +134,51 @@ export function getCardData(setcardmap, authheader) {
 
 
 
-export default function GwentClient({socket, gameState}) {
+export default function GwentClient({socket}) {
   const authHeader = useAuthHeader();
   const [cardMap, setCardMap] = useState(new Map());
   
   //focusCard is going to look like cardIndex to start
   const [focusCard, setFocusCard] = useState([0]);
+
+  let card1 = new CardData("Geralt of Rivia", "geralt_of_rivia.png", "hero", "neutral", "15", "close", "none", "1", "");
+  let card2 = new CardData("Yennefer of Vengerberg", "yennefer_of_vengerberg.png", "hero", "neutral", "7", "ranged", "medic", "1", "");
+  let card3 = new CardData("Triss Merigold", "triss_merigold.png", "hero", "neutral", "7", "close", "scorch", "1", "");
+  let card4 = new CardData("Cirilla Fiona Elen Riannon", "ciri.png", "hero", "neutral", "15", "close", "none", "1", "");
+  let initialGameState = {
+    playerIndex: 0,
+    playersTurn: 0,
+    board: {
+      field: [{close: [card1], ranged: [card2], siege: [card3], graveyard: [card4]},
+              {close: [card2], ranged: [card4], siege: [card2], graveyard: []}],
+      weather: {close: true, ranged: false, siege: true},
+      rallyHorns: [{close: true, ranged: true, siege: true},
+                  {close: false, ranged: false, siege: false}]
+    },
+    player: {
+      lives: 2,
+      passed: false,
+      playerName: "jimmynewsom",
+      faction: "Northern Realms",
+      leaderName: "leaderwoman",
+      hand: [card1, card2, card3, card4]
+    },
+    opponent: {
+      lives: 2,
+      passed: false,
+      playerName: "opponent",
+      faction: "Northern Realms",
+      leaderName: "leaderman",
+      hand: {length: 10}//this is a hack, so I can reuse my Player panel for both players, but not send 1 player what's in the other players hand
+    }
+  }
+
+  const [gameState, setGameState] = useState(initialGameState);
+
+  socket.on("game_update", (gameState) => {
+    setGameState(gameState);
+    console.log(gameState)
+  });
 
   useEffect(() => {
     getCardData(setCardMap, authHeader);
@@ -154,7 +193,55 @@ export default function GwentClient({socket, gameState}) {
     });
   }, []);
 
-  //this function is kind of a repeat of my createCardRows function inside my Field component..... might refactor later
+  function submitPass(){
+    socket.emit("pass");
+  }
+
+   function handleHandClick(cardIndex){
+    return () => {
+      if(focusCard[0] != cardIndex)
+        setFocusCard([cardIndex]);
+      else {
+        //if the card is already the focus and they click it again, play the card, unless it has targeting rules
+        let card = gameState.player.hand[cardIndex];
+
+        if(card.type == "unit" || card.type == "hero"){
+          console.log("unit or hero card played");
+          if(card.special != "medic" && card.range != "agile"){
+            console.log("socket connected: " + socket.connected);
+            socket.emit("play_card", cardIndex);
+          }
+          else if(card.range == "agile"){
+            //todo - implement agile targeting logic
+            socket.emit("play_card", cardIndex, "close");
+          }
+          else {
+            //todo - implement medic targeting logic
+            socket.emit("play_card", cardIndex);
+          }
+        }
+        else {
+          //if the card is not type hero or unit it is type special
+          //decoys and rally horns have targets, but the other special cards do not
+          console.log("special card played");
+          if(card.name != "Decoy" && card.name !="Commanders Horn"){
+            socket.emit("play_card", cardIndex);
+          }
+          else if(card.name == "Commanders Horn"){
+            //todo - add rally horn targeting logic
+            socket.emit("play_card", cardIndex, "close");
+          }
+          else {
+            //todo - add decoy targeting logic
+            console.log("decoy played");
+          }
+        }
+        socket.emit("request_game_update");
+      }
+    }
+   }
+
+   //this function is kind of a repeat of my createCardRows function inside my Field component..... might refactor later
   function createHandViews(){
     let cardViews = [];
     let cards = gameState.player.hand;
@@ -164,22 +251,12 @@ export default function GwentClient({socket, gameState}) {
 
       cardViews.push(<SmallCardView
                         cardData={card}
+                        handleClick={handleHandClick(i)}
                         key={"hand" + i}
                     />)
     }
     return cardViews;
   }
-
-  function submitPass(){
-    socket.emit("pass");
-  }
-
-
-
-
-
-
-
 
 
   

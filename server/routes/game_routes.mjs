@@ -176,10 +176,6 @@ export default function create_game_router(io){
       //todo - add logic for game teardown if users dc
     });
 
-    socket.on("test", (test_message) => {
-      console.log(test_message);
-    });
-
     //todo - add step for deck validation, but I want to get a working prototype first
     socket.on("ready_for_game", (deckObject) => {
       console.log("username ready: " + username);
@@ -215,8 +211,9 @@ export default function create_game_router(io){
       io.to(socket.id).emit("game_update", game.getGameState(playerIndex));
     });
 
-    socket.on("submit_move", (cardIndex, target) => {
-      console.log(cardIndex + " " + target);
+    socket.on("play_card", (cardIndex, target) => {
+      console.log(playerIndex + " " + cardIndex + " " + target);
+      game.game.playCard(playerIndex, cardIndex, target);
     });
   });
 

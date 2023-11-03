@@ -18,39 +18,6 @@ export default function App() {
   const navigate = useNavigate();
 
   let card1 = new CardData("Geralt of Rivia", "geralt_of_rivia.png", "hero", "neutral", "15", "close", "none", "1", "");
-  let card2 = new CardData("Yennefer of Vengerberg", "yennefer_of_vengerberg.png", "hero", "neutral", "7", "ranged", "medic", "1", "");
-  let card3 = new CardData("Triss Merigold", "triss_merigold.png", "hero", "neutral", "7", "close", "scorch", "1", "");
-  let card4 = new CardData("Cirilla Fiona Elen Riannon", "ciri.png", "hero", "neutral", "15", "close", "none", "1", "");
-  let initialGameState = {
-    playerIndex: 0,
-    playersTurn: 0,
-    board: {
-      field: [{close: [card1], ranged: [card2], siege: [card3], graveyard: [card4]},
-              {close: [card2], ranged: [card4], siege: [card2], graveyard: []}],
-      weather: {close: true, ranged: false, siege: true},
-      rallyHorns: [{close: true, ranged: true, siege: true},
-                  {close: false, ranged: false, siege: false}]
-    },
-    player: {
-      lives: 2,
-      passed: false,
-      playerName: "jimmynewsom",
-      faction: "Northern Realms",
-      leaderName: "leaderwoman",
-      hand: [card1, card2, card3, card4]
-    },
-    opponent: {
-      lives: 2,
-      passed: false,
-      playerName: "opponent",
-      faction: "Northern Realms",
-      leaderName: "leaderman",
-      hand: {length: 10}//this is a hack, so I can reuse my Player panel for both players, but not send 1 player what's in the other players hand
-    }
-  }
-
-
-  const [gameState, setGameState] = useState(initialGameState);
 
   var socket;
 
@@ -68,12 +35,6 @@ export default function App() {
     socket.on("redirect", (path) => {
       console.log("redirecting to " + path);
       navigate(path);
-    });
-
-    //maybe this be should inside my GwentClient component
-    socket.on("game_update", (gameState) => {
-      setGameState(gameState);
-      console.log(gameState)
     });
   }
 
@@ -113,7 +74,7 @@ export default function App() {
         }/>
         <Route path="/gwent" element={
           <RequireAuth loginPath='/loginregister'>
-            <GwentClient socket={socket} gameState={gameState}/>
+            <GwentClient socket={socket}/>
           </RequireAuth>
         }/>
         <Route path="/loginregister" element={<LoginRegister />} />

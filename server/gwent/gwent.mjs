@@ -410,7 +410,7 @@ export class Gwent{
       //finally, every special card except decoys gets put in the graveyard
       //except maybe weather cards and commanders horns shouldnt, but since you cant recover them from the graveyard its basically the same thing
       if(card.name != "Decoy")
-        this.board[playerIndex].graveyard.push(card);
+        this.board[playerIndex].field.graveyard.push(card);
     }
   }
 
