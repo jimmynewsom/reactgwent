@@ -32,11 +32,15 @@
 .field_grid {
   display: grid;
   grid-template-rows: auto auto auto auto auto auto;
-  grid-template-columns: 10% 90%;
+  grid-template-columns: 10% 10% 80%;
   height: 85%;
 }
 
 .rallyhorn {
+  border: 2px solid black;
+}
+
+.range {
   border: 2px solid black;
 }
 
@@ -46,6 +50,10 @@
   flex-direction: row;
   justify-content: center;
   height: 74px;
+}
+
+.weather_active {
+  border: 4px solid red
 }
 
 .player_hand {

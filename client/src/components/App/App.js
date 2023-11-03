@@ -25,9 +25,9 @@ export default function App() {
     playerIndex: 0,
     playersTurn: 0,
     board: {
-      field: [{close: [card1], ranged: [card2], siege: [card3], graveyard: []},
-              {close: [], ranged: [card4], siege: [], graveyard: []}],
-      weather: {close: true, ranged: true, siege: true},
+      field: [{close: [card1], ranged: [card2], siege: [card3], graveyard: [card4]},
+              {close: [card2], ranged: [card4], siege: [card2], graveyard: []}],
+      weather: {close: true, ranged: false, siege: true},
       rallyHorns: [{close: true, ranged: true, siege: true},
                   {close: false, ranged: false, siege: false}]
     },
@@ -36,7 +36,7 @@ export default function App() {
       passed: false,
       playerName: "jimmynewsom",
       faction: "Northern Realms",
-      leaderName: "leader",
+      leaderName: "leaderwoman",
       hand: [card1, card2, card3, card4]
     },
     opponent: {

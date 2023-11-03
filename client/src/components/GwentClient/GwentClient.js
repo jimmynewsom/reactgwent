@@ -10,7 +10,7 @@ function PlayerStatsPanel({player}){
     <div className="player_stats_panel">
       <p>{player.playerName}</p>
       <p>{player.faction}</p>
-      <p>{player.hand.length}</p>
+      <p>cards in hand: {player.hand.length}</p>
       <p>lives: {player.lives}</p>
       <p>leader: {player.leaderName}</p>
       {player.passed ? <p><b>passed</b></p> : <p></p>}
@@ -39,12 +39,13 @@ function WeatherPanel({weather}){
 
 const rallyHornCard = new CardData("Commanders Horn", "commanders_horn.png", "special", "neutral", "0", "special", "horn", "3", "");
 
-function Field({fieldState, rallyHorns, playerIndex}){
+function Field({board, playerIndex}){
 
   //technically this is also basically a React component, but that was an accident...
   function createCardRows(range, i){
     let cardViews = [];
-    let cards = fieldState[(playerIndex + i) % 2][range];
+    let cards = board.field[(playerIndex + i) % 2][range];
+    let rowWeather = board.weather[range];
     
     for(let j=0; j < cards.length; j++){
       //let cardName = cardNames[j];
@@ -56,10 +57,19 @@ function Field({fieldState, rallyHorns, playerIndex}){
                         key={(range + i) + j}
                     />)
     }
-    let rallyHorn = rallyHorns[(playerIndex + i) % 2][range];
+
+    let rallyHorn = board.rallyHorns[(playerIndex + i) % 2][range];
+
+    let cardViewClasses = "cardrow";
+    if(rowWeather)
+      cardViewClasses += " weather_active";
+    //todo - if this row is targetable
+
+
     return (<>
+              <div className="range">{range}</div>
               <div className="rallyhorn">{rallyHorn ? <SmallCardView cardData={rallyHornCard}/> : <></>}</div>
-              <div className="cardrow">{cardViews}</div>
+              <div className={cardViewClasses}>{cardViews}</div>
             </>);
   }
 
@@ -120,13 +130,16 @@ export function getCardData(setcardmap, authheader) {
 }
 
 
+
+
+
+
 export default function GwentClient({socket, gameState}) {
   const authHeader = useAuthHeader();
   const [cardMap, setCardMap] = useState(new Map());
-
-  let card = new CardData("Geralt of Rivia", "geralt_of_rivia.png", "hero", "neutral" , "15", "close", "none", "1", "");
   
-  const [focusCard, setFocusCard] = useState(card);
+  //focusCard is going to look like cardIndex to start
+  const [focusCard, setFocusCard] = useState([0]);
 
   useEffect(() => {
     getCardData(setCardMap, authHeader);
@@ -166,9 +179,10 @@ export default function GwentClient({socket, gameState}) {
 
 
 
+
+
+
   
-
-
   if(gameState == undefined)
     return;
 
@@ -189,8 +203,7 @@ export default function GwentClient({socket, gameState}) {
         </div>
         <div className="board_panel">
           <Field 
-            fieldState={gameState.board.field}
-            rallyHorns={gameState.board.rallyHorns}
+            board={gameState.board}
             playerIndex={gameState.playerIndex}
           />
           <br />
@@ -204,7 +217,7 @@ export default function GwentClient({socket, gameState}) {
             <p>decks & card focus</p>
           </div>
           <div className="card_focus">
-            {focusCard ? <LargeCardView cardData={focusCard} handleClick={()=>{}} /> : <></>}
+            {focusCard ? <LargeCardView cardData={gameState.player.hand[focusCard[0]]} handleClick={()=>{}} /> : <></>}
           </div>
           <div className="deck_and_graveyard">
             <p>graveyards</p>
