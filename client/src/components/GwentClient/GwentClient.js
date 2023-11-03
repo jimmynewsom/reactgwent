@@ -21,9 +21,8 @@ function PlayerStatsPanel({player}){
 const bitingFrostCard = new CardData("Biting Frost", "biting_frost.png", "special", "neutral", "0", "special", "weather", "3", "");
 const impenetrableFogCard = new CardData("Impenetrable Fog", "impenetrable_fog.png", "special", "neutral", "0", "special", "weather", "3", "");
 const torrentialRainCard = new CardData("Torrential Rain", "torrential_rain.png", "special", "neutral", "0", "special", "weather", "3", "");
-
 // const BitingFrostView = new SmallCardView({bitingFrostCard});
-const impenetrableFogView = <SmallCardView cardData={impenetrableFogCard} />;
+// const impenetrableFogView = <SmallCardView cardData={impenetrableFogCard} />;
 // const torrentialRainView = new SmallCardView({torrentialRainCard});
 
 function WeatherPanel({weather}){
