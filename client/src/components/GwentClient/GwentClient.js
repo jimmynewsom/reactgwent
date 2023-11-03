@@ -116,7 +116,7 @@ function Field({board, playerIndex}){
       cardViews.push(<SmallCardView
                         cardData={card}
                         key={(range + i) + j}
-                        currentStrength={board.getCardStrength(i, range, j)}
+                        currentStrength={1}
                     />)
     }
 
