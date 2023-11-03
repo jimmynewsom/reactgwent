@@ -38,58 +38,6 @@ function WeatherPanel({weather}){
   );
 }
 
-const rallyHornCard = new CardData("Commanders Horn", "commanders_horn.png", "special", "neutral", "0", "special", "horn", "3", "");
-
-//Field is basically a view for my Board class
-function Field({board, playerIndex}){
-
-  //technically this is also basically a React component, but that was an accident...
-  function createCardRows(range, i){
-    let cardViews = [];
-    let cards = board.field[(playerIndex + i) % 2][range];
-    let rowWeather = board.weather[range];
-    
-    for(let j=0; j < cards.length; j++){
-      //let cardName = cardNames[j];
-      //let card = cardMap.get(cardName);
-      let card = cards[j];
-
-      cardViews.push(<SmallCardView
-                        cardData={card}
-                        key={(range + i) + j}
-                        currentStrength={1}
-                    />)
-    }
-
-    let rallyHorn = board.rallyHorns[(playerIndex + i) % 2][range];
-
-    let cardViewClasses = "cardrow";
-    if(rowWeather)
-      cardViewClasses += " weather_active";
-    //todo - if this row is targetable
-
-
-    return (<>
-              <div className="range">{range}<p>totalStrength: {board.getRowStrength(playerIndex, range)}</p></div>
-              <div className="rallyhorn">{rallyHorn ? <SmallCardView cardData={rallyHornCard}/> : <></>}</div>
-              <div className={cardViewClasses}>{cardViews}</div>
-            </>);
-  }
-
-  return(
-    <div className="field_grid">
-      {createCardRows("siege", 1)}
-      {createCardRows("ranged", 1)}
-      {createCardRows("close", 1)}
-      
-      {createCardRows("close", 0)}
-      {createCardRows("ranged", 0)}
-      {createCardRows("siege", 0)}
-    </div>
-  );
-}
-
-
 class Board{
   field = [{close: [], ranged: [], siege: [], graveyard: []},
            {close: [], ranged: [], siege: [], graveyard: []}];
@@ -147,6 +95,57 @@ class Board{
     let total = this.getRowStrength(playerIndex, "close") + this.getRowStrength(playerIndex, "ranged") + this.getRowStrength(playerIndex, "siege");
     return total;
   }
+}
+
+const rallyHornCard = new CardData("Commanders Horn", "commanders_horn.png", "special", "neutral", "0", "special", "horn", "3", "");
+
+//Field is basically a view for my Board class
+function Field({board, playerIndex}){
+
+  //technically this is also basically a React component, but that was an accident...
+  function createCardRows(range, i){
+    let cardViews = [];
+    let cards = board.field[(playerIndex + i) % 2][range];
+    let rowWeather = board.weather[range];
+    
+    for(let j=0; j < cards.length; j++){
+      //let cardName = cardNames[j];
+      //let card = cardMap.get(cardName);
+      let card = cards[j];
+
+      cardViews.push(<SmallCardView
+                        cardData={card}
+                        key={(range + i) + j}
+                        currentStrength={1}
+                    />)
+    }
+
+    let rallyHorn = board.rallyHorns[(playerIndex + i) % 2][range];
+
+    let cardViewClasses = "cardrow";
+    if(rowWeather)
+      cardViewClasses += " weather_active";
+    //todo - if this row is targetable
+
+
+    return (<>
+              <div className="range">{range}<p>totalStrength: {board.getRowStrength(playerIndex, range)}</p></div>
+              <div className="rallyhorn">{rallyHorn ? <SmallCardView cardData={rallyHornCard}/> : <></>}</div>
+              <div className={cardViewClasses}>{cardViews}</div>
+            </>);
+  }
+
+  return(
+    <div className="field_grid">
+      {createCardRows("siege", 1)}
+      {createCardRows("ranged", 1)}
+      {createCardRows("close", 1)}
+      
+      {createCardRows("close", 0)}
+      {createCardRows("ranged", 0)}
+      {createCardRows("siege", 0)}
+    </div>
+  );
 }
 
 
