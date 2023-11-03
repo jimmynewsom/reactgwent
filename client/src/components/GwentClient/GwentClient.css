@@ -19,9 +19,13 @@
 .weather_grid {
   display: grid;
   grid-template-columns: 33% 33% 33%;
-  border: 2px solid black;
+  border: 1px solid black;
   margin-top: 10px;
   margin-bottom: 10px;
+}
+
+.weather_grid div {
+  border: 1px solid black;
 }
 
 .board_panel {
@@ -70,4 +74,8 @@
   align-items: center;
   align-self: center;
   display: inline-block;
+}
+
+footer {
+  visibility: hidden;
 }

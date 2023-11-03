@@ -169,7 +169,7 @@ export class Player{
     this.faction = faction;
   }
 
-  setLeader(leader){
+  setLeader(leaderName){
     this.leaderName = leaderName;
   }
 }
@@ -323,6 +323,12 @@ export class Gwent{
   play cards, following all gwent rules
   */
   playCard(playerIndex, cardIndex, target){
+    //first check if it is the player's turn
+    if(playerIndex != this.playersTurn){
+      console.log("player tried to move, but it is not their turn");
+      return;
+    }
+
     let card = this.players[playerIndex].hand[cardIndex];
     this.players[playerIndex].hand.splice(cardIndex, 1);
     
@@ -411,8 +417,9 @@ export class Gwent{
       //finally, every special card except decoys gets put in the graveyard
       //except maybe weather cards and commanders horns shouldnt, but since you cant recover them from the graveyard its basically the same thing
       if(card.name != "Decoy")
-        this.board[playerIndex].field.graveyard.push(card);
+        this.board.field[playerIndex].graveyard.push(card);
     }
+    this.playersTurn = (this.playersTurn + 1) % 2;
   }
 
   playCardSpecial(playerIndex, card){

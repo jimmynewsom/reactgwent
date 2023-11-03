@@ -130,16 +130,12 @@ export function getCardData(setcardmap, authheader) {
 }
 
 
-
-
-
-
 export default function GwentClient({socket}) {
   const authHeader = useAuthHeader();
   const [cardMap, setCardMap] = useState(new Map());
   
   //focusCard is going to look like cardIndex to start
-  const [focusCard, setFocusCard] = useState([0]);
+  const [focusCard, setFocusCard] = useState();
 
   let card1 = new CardData("Geralt of Rivia", "geralt_of_rivia.png", "hero", "neutral", "15", "close", "none", "1", "");
   let card2 = new CardData("Yennefer of Vengerberg", "yennefer_of_vengerberg.png", "hero", "neutral", "7", "ranged", "medic", "1", "");
@@ -148,6 +144,7 @@ export default function GwentClient({socket}) {
   let initialGameState = {
     playerIndex: 0,
     playersTurn: 0,
+    round: 1,
     board: {
       field: [{close: [card1], ranged: [card2], siege: [card3], graveyard: [card4]},
               {close: [card2], ranged: [card4], siege: [card2], graveyard: []}],
@@ -201,12 +198,19 @@ export default function GwentClient({socket}) {
     socket.emit("pass");
   }
 
-   function handleHandClick(cardIndex){
+  function handleHandClick(cardIndex){
     return () => {
-      if(focusCard[0] != cardIndex)
+      //first click makes the card the focus card
+      if(!focusCard || focusCard[0] != cardIndex)
         setFocusCard([cardIndex]);
       else {
         //if the card is already the focus and they click it again, play the card, unless it has targeting rules
+        //but first check if it's the players turn
+        if(gameState.playersTurn != gameState.playerIndex){
+          console.log("it's not your turn (please work)");
+          return;
+        }
+
         let card = gameState.player.hand[cardIndex];
 
         if(card.type == "unit" || card.type == "hero"){
@@ -240,6 +244,7 @@ export default function GwentClient({socket}) {
             console.log("decoy played");
           }
         }
+        setFocusCard();
         socket.emit("request_game_update");
       }
     }
@@ -277,9 +282,11 @@ export default function GwentClient({socket}) {
           <WeatherPanel
             weather={gameState.board.weather}
           />
+          <p>round: {gameState.round}</p>
           <PlayerStatsPanel
             player={gameState.player}
           />
+          <p>{gameState.playersTurn == gameState.playerIndex ? <b>YOUR TURN</b> : <b>NOT YOUR TURN</b>}</p>
           <button onClick={submitPass}>Pass</button>
         </div>
         <div className="board_panel">
