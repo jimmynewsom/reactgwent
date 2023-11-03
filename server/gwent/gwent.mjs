@@ -164,6 +164,14 @@ export class Player{
   constructor(playerName){
     this.playerName = playerName;
   }
+
+  setFaction(faction){
+    this.faction = faction;
+  }
+
+  setLeader(leader){
+    this.leader = leader;
+  }
 }
 
 class Board{
@@ -317,6 +325,8 @@ export class Gwent{
     let card = this.players[playerIndex].hand[cardIndex];
     this.players[playerIndex].hand.splice(cardIndex, 1);
     
+    //unit cards and hero cards that aren't spies get added to their respective row
+    //if the unit range is agile, target should specify the row
     if((card.type == "unit" || card.type == "hero") && card.special != "spy"){
       if(card.range == "close")
         this.board.field[playerIndex].close.push(card);
@@ -397,7 +407,7 @@ export class Gwent{
         this.players[playerIndex].hand.push(card2);
       }
 
-      //finally, every card except decoys get put in the graveyard
+      //finally, every special card except decoys gets put in the graveyard
       //except maybe weather cards and commanders horns shouldnt, but since you cant recover them from the graveyard its basically the same thing
       if(card.name != "Decoy")
         this.board[playerIndex].graveyard.push(card);
@@ -410,5 +420,15 @@ export class Gwent{
 
   playLeaderAbility(playerIndex){
     console.log("nothing for now");
+  }
+
+  pass(playerIndex){
+    if(this.playersTurn == playerIndex){
+      this.players[playerIndex].passed = true;
+      if(this.game.players[(playerIndex + 1) % 2].passed)
+        this.board.endRoundAndCalculateWinner(this.player1.faction, this.player2.faction);
+      else
+        this.playersTurn = (this.playersTurn + 1) % 2;
+    }
   }
 }

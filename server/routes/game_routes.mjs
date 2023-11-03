@@ -42,20 +42,16 @@ class MultiplayerGwent{
   getGameState(playerIndex){
     let gameState = {
       playerIndex: playerIndex,
+      playersTurn: this.game.playersTurn,
       board: this.game.board,
       player: this.game.players[playerIndex].player,
       opponent: this.game.players[(playerIndex + 1) % 2].player,
-      playersTurn: this.game.playersTurn
     }
-    gameState.player.hand = this.game.players[(playerIndex) % 2].hand;
+    gameState.player.hand = this.game.players[(playerIndex)].hand;
     //little hack, because my PlayerPanel components expect a player.hand.length, but I don't want to reveal the opponent's cards
     gameState.opponent.hand = {length: this.game.players[(playerIndex + 1) % 2].hand.length}
 
     return gameState;
-  }
-
-  playMove(playerIndex, cardIndex, target){
-    console.log("nothing for now");
   }
 }
 
@@ -196,10 +192,16 @@ export default function create_game_router(io){
         }
       }
 
-      if(playerIndex == 0)
+      if(playerIndex == 0){
         game.setDeck1(deck);
-      else
+        game.player1.setFaction(deckObject.faction);
+        game.player1.setLeader(deckObject.leaderName);
+      }
+      else {
         game.setDeck2(deck);
+        game.player2.setFaction(deckObject.faction);
+        game.player2.setLeader(deckObject.leaderName);
+      }
 
       if(game.deck1 != undefined && game.deck2 != undefined){
         console.log("both players ready, redirecting to game view");

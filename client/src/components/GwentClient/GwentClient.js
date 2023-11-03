@@ -6,12 +6,15 @@ import {LargeCardView, CardData, SmallCardView} from '../Card/Card';
 
 
 function PlayerStatsPanel({player}){
+
+
   return(
     <div className="player_stats_panel">
       <p>{player.playerName}</p>
-      <p>(player.faction)</p>
+      <p>{player.faction}</p>
       <p>{player.hand.length}</p>
       <p>lives: {player.lives}</p>
+      <p>leader: {player.leaderName}</p>
       {player.passed ? <p><b>passed</b></p> : <p></p>}
     </div>
   );
@@ -147,6 +150,18 @@ export default function GwentClient({socket, gameState}) {
     return cardViews;
   }
 
+  function submitPass(){
+    socket.emit("pass");
+  }
+
+
+
+
+
+
+  
+
+
   if(gameState == undefined)
     return;
 
@@ -163,7 +178,7 @@ export default function GwentClient({socket, gameState}) {
           <PlayerStatsPanel
             player={gameState.player}
           />
-          <button>Pass</button>
+          <button onClick={submitPass}>Pass</button>
         </div>
         <div className="board_panel">
           <Field 
