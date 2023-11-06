@@ -1,4 +1,4 @@
-import './Dashboard.css';
+import './Dashboard.scss';
 import React, { useState, useEffect } from 'react';
 import { useAuthHeader, useAuthUser } from 'react-auth-kit';
 

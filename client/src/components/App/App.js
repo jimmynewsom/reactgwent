@@ -46,16 +46,20 @@ export default function App() {
 
   return(
     <div className="app-wrapper">
-      <div className="sidebar">
+      <div className={`sidebar ${!isAuthenticated() ? 'logged-out' : 'logged-in'}`}>
         <h1>React Gwent</h1>
 
-        <nav>
-          <ul>
-            <li><a href="/">Dashboard</a></li>
-            <li><a href="/deckbuilder">DeckBuilder</a></li>
-            {isAuthenticated() ? <button onClick={signOutAndRedirectToLogin}>Sign Out</button> : <></>}
-          </ul>
-        </nav>
+        {isAuthenticated() &&
+          <nav>
+            <ul>
+              <div className='tabs'>
+                <li><a href="/">Dashboard</a></li>
+                <li><a href="/deckbuilder">DeckBuilder</a></li>
+              </div>
+              <button onClick={signOutAndRedirectToLogin}>Sign Out</button>
+            </ul>
+          </nav>
+        }
       </div>
 
       <Routes>
