@@ -1,7 +1,7 @@
 @font-face {
   font-family: 'Asap';
   src: url('./fonts/Asap.ttf') format('ttf'),
-       url('./fonts/Asap-Italic.ttf') format('ttf');
+    url('./fonts/Asap-Italic.ttf') format('ttf');
   font-weight: normal;
   font-style: normal;
 }
@@ -24,7 +24,8 @@ code {
 }
 
 #root {
-  padding-bottom: 2.5rem;    /* Footer height */
+  padding-bottom: 2.5rem;
+  /* Footer height */
   background: linear-gradient(to right, #1a1a1a, #333333);
 }
 
@@ -45,13 +46,14 @@ h2 {
 h3 {
   font-size: 1.215rem;
   font-weight: normal;
-  text-transform: uppercase;
+  text-transform: normal;
+  color: #fff;
 }
 
 h4 {
   font-size: 1.138rem;
   font-weight: normal;
-  text-transform: uppercase;
+  text-transform: normal;
 }
 
 h5 {
@@ -71,9 +73,11 @@ a {
 input {
   border: 4px solid #14110e;
   color: #fff;
-  padding: 4px 40px;
+  padding: 0.5rem 1rem;
   text-align: left;
-  width: 50%;
+  width: 60%;
+  margin-left: 40px;
+  vertical-align: middle;
 }
 
 button {
@@ -91,7 +95,11 @@ button {
   }
 }
 
-p, a, span, label, button {
+p,
+a,
+span,
+label,
+button {
   font-size: 1rem;
   line-height: 1.5;
   color: #fff;
@@ -104,4 +112,5 @@ strong {
 footer {
   position: absolute;
   bottom: 0;
+  color: #fff;
 }

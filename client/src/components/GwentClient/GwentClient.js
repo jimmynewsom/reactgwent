@@ -1,4 +1,4 @@
-import './GwentClient.css';
+import './GwentClient.scss';
 import React, { useState, useEffect } from 'react';
 import { useAuthHeader } from 'react-auth-kit';
 
