@@ -1,0 +1,69 @@
+.app-wrapper {
+  height: 100vh;
+  width: 98%;
+  border-style: solid;
+  margin: 10px;
+  padding: 10px;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: left;
+  
+  @media screen and (min-width: 768px) {
+    margin-left: 10rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  .login_wrapper {
+    margin-left: 10rem;
+  }
+}
+
+h1 {
+  text-align: center;
+}
+
+nav {
+  display: flex;
+  flex-direction: column;
+
+  ul {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 0;
+  }
+  li {
+    display: inline;
+    padding-right: 10px;
+    margin-top: 2rem;
+
+    a {
+      color: #818284;
+      text-decoration: none;
+      border: 2px solid transparent;
+      border-radius: 3px;
+      padding: 4px 40px;
+      transition: .3s;
+
+      &:hover {
+        border: 2px solid #282a2b;
+      }
+    }
+  }
+}
+
+nav button {
+  display: inline;
+  float: right;
+}
+
+* {
+  box-sizing: border-box;
+  background-color: #050505;
+}
