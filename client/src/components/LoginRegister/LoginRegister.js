@@ -49,7 +49,7 @@ export default function LoginRegister({ setToken }) {
         result = await result.json();
         //console.log(result);
 
-        setToastMessage("Sign in successful! Redirecting to dashboard");
+        setToastMessage("Signing in...");
         setShowToastMessage(true);
         setTimeout(()=> {
           signIn({
@@ -138,8 +138,7 @@ export default function LoginRegister({ setToken }) {
           <input type="password" onChange={e => setPassword(e.target.value)} />
         </div>
         <div className={'login-button'}>
-          <button id="login" onClick={login}>Login</button>
-          {showToastMessage ? <div id="login_toast">{toastMessage}</div> : <></>}
+          <button id="login" onClick={login}>{showToastMessage ? toastMessage : "Login" }</button>
         </div>        
       </form>
       <hr />

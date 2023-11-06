@@ -47,7 +47,7 @@ export default function App() {
   return(
     <div className="app-wrapper">
       <div className={`sidebar ${!isAuthenticated() ? 'logged-out' : 'logged-in'}`}>
-        <h1>React Gwent</h1>
+        <img src="/logo.webp" width="300" height="300" />
 
         {isAuthenticated() &&
           <nav>
