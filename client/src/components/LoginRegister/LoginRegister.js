@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSignIn } from 'react-auth-kit';
-import './LoginRegister.css';
+import './LoginRegister.scss';
 
 
 //TODO - add flash messages for login and registration successes and failures
@@ -128,20 +128,22 @@ export default function LoginRegister({ setToken }) {
     <div className="login_wrapper">
       <h2>Login</h2>
       <form>
-        <label>
-          <p>Username: </p>
-          <input type="text" onChange={e => setUsername(e.target.value)} />
-        </label>
-        <label>
-          <p>Password: </p>
-          <input type="password" onChange={e => setPassword(e.target.value)} />
-        </label>
         <div>
-          <button id="login" onClick={login}>Login</button>
-          <button id="register" onClick={register}>Register</button>
-          {showToastMessage ? <div id="login_toast">{toastMessage}</div> : <></>}
+          <label>Username: </label>
+          <input type="text" onChange={e => setUsername(e.target.value)} />
         </div>
+        <br />
+        <div>
+          <label>Password: </label>
+          <input type="password" onChange={e => setPassword(e.target.value)} />
+        </div>
+        <div className={'login-button'}>
+          <button id="login" onClick={login}>Login</button>
+          {showToastMessage ? <div id="login_toast">{toastMessage}</div> : <></>}
+        </div>        
       </form>
+      <hr />
+      <button id="register" onClick={register}>Register as a new user</button>
     </div>
   );
 }

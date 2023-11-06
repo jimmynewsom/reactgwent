@@ -1,4 +1,4 @@
-import './App.css';
+import './App.scss';
 import React, {useState} from 'react';
 import {io} from 'socket.io-client';
 import {RequireAuth, useIsAuthenticated, useAuthUser, useSignOut} from 'react-auth-kit';
@@ -46,15 +46,17 @@ export default function App() {
 
   return(
     <div className="app-wrapper">
-      <h1>React Gwent</h1>
+      <div className="sidebar">
+        <h1>React Gwent</h1>
 
-      <nav>
-        <ul>
-          <li><a href="/">Dashboard</a></li>
-          <li><a href="/deckbuilder">DeckBuilder</a></li>
-          {isAuthenticated() ? <button onClick={signOutAndRedirectToLogin}>Sign Out</button> : <></>}
-        </ul>
-      </nav>
+        <nav>
+          <ul>
+            <li><a href="/">Dashboard</a></li>
+            <li><a href="/deckbuilder">DeckBuilder</a></li>
+            {isAuthenticated() ? <button onClick={signOutAndRedirectToLogin}>Sign Out</button> : <></>}
+          </ul>
+        </nav>
+      </div>
 
       <Routes>
         <Route path="/" element={
