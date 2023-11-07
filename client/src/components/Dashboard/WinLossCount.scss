@@ -1,0 +1,19 @@
+.win-loss-count {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+	align-items: center;
+
+	span {
+		background-color: #2C2405;
+		border: 2px solid #7E6B04;
+		border-radius: 5px;
+		padding: 5px 10px;
+		font-size: 1.296rem;
+		margin-bottom: .5rem;
+	}
+
+	label {
+		text-transform: uppercase;
+	}
+}

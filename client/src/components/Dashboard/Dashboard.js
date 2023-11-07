@@ -1,6 +1,7 @@
-import './Dashboard.css';
+import './Dashboard.scss';
 import React, { useState, useEffect } from 'react';
 import { useAuthHeader, useAuthUser } from 'react-auth-kit';
+import WinLossCount from './WinLossCount';
 
 const instructions = "Game is a pretty simple game."
 
@@ -136,9 +137,11 @@ export default function Dashboard({socket}) {
   return(
     <div className="dashboard">
       <h2> Dashboard / Lobby </h2>
-      <p> Hello {auth().username} </p>
-      <p> wins: {userStats.wins} </p>
-      <p> losses: {userStats.losses} </p>
+      <h3> Hello, {auth().username}!</h3>
+      <div className='wins-and-losses'>
+        <WinLossCount label="Wins" count={userStats.wins} />
+        <WinLossCount label="Losses" count={userStats.losses} />
+      </div>
 
       {waitingForOpponent ? <p><b>WAITING FOR OPPONENT TO JOIN GAME</b></p> : <p> </p>}
 

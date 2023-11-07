@@ -1,0 +1,27 @@
+.dashboard {
+  height: 80%;
+  width: 100%;
+  padding: 10px;
+  border-style: solid;
+  padding: 0 2rem;
+
+  h2 {
+    text-align: center;
+  }
+
+  h3 {
+    padding: 0 3rem;
+  }
+
+  .wins-and-losses {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: nowrap;
+    flex-direction: row;
+
+    .win-loss-count {
+      margin: 0 1rem;
+    }
+  }
+}
