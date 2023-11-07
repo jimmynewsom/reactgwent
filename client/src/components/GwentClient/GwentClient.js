@@ -50,7 +50,7 @@ class Board{
   morale = [{close: 0, ranged: 0, siege: 0},
             {close: 0, ranged: 0, siege: 0}];
 
-  tightBondsMap = new Map();
+  tightBondsMaps = [new Map(), new Map()];
 
   constructor(board){
     if(board){
@@ -70,10 +70,10 @@ class Board{
             this.morale[i][range]++;
 
           else if(card.special == "tight bond"){
-            if(this.tightBondsMap.has(card.name))
-              this.tightBondsMap.set(card.name, this.tightBondsMap.get(card.name) + 1);
+            if(this.tightBondsMaps[i].has(card.name))
+              this.tightBondsMaps[i].set(card.name, this.tightBondsMaps.get(card.name) + 1);
             else
-              this.tightBondsMap.set(card.name, 1);
+              this.tightBondsMaps[i].set(card.name, 1);
           }
         }
       }
@@ -88,7 +88,7 @@ class Board{
       return card.strength;
 
     let morale = this.morale[playerIndex][range];
-    let tightBond = this.tightBondsMap.has(card.name) ? this.tightBondsMap.get(card.name) : 0;
+    let tightBond = this.tightBondsMaps[playerIndex].has(card.name) ? this.tightBondsMaps[playerIndex].get(card.name) : 0;
 
     //morale effects every creature in the row except itself
     if(card.special == "morale")
@@ -149,7 +149,7 @@ function createCardRows(board, playerIndex, range, i){
                       cardData={card}
                       key={(range + i) + j}
                       currentStrength={currentStrength}
-                  />)
+                  />);
   }
 
   let rallyHorn = board.rallyHorns[(playerIndex + i) % 2][range];
