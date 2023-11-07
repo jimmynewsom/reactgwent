@@ -373,16 +373,6 @@ export class Gwent{
         //     break;
         // }
       }
-      else if(card.special == "spy"){
-        this.draw(playerIndex, 2);
-
-        if(card.range == "close")
-          this.board.field[(playerIndex + 1) % 2].close.push(card);
-        else if(card.range == "ranged")
-          this.board.field[(playerIndex + 1) % 2].ranged.push(card);
-        else if(card.range == "siege")
-          this.board.field[(playerIndex + 1) % 2].siege.push(card);
-      }
       else if(card.special == "muster"){
         console.log("muster played");
         // let musterList = musterMap.get(card.name);
@@ -400,6 +390,16 @@ export class Gwent{
         // }
       }
 
+    }
+    else if(card.special == "spy"){
+      this.draw(playerIndex, 2);
+
+      if(card.range == "close")
+        this.board.field[(playerIndex + 1) % 2].close.push(card);
+      else if(card.range == "ranged")
+        this.board.field[(playerIndex + 1) % 2].ranged.push(card);
+      else if(card.range == "siege")
+        this.board.field[(playerIndex + 1) % 2].siege.push(card);
     }
     //7 special cards - 4 weather cards, scorch, commander's horn, & decoy
     else if(card.type == "special"){
