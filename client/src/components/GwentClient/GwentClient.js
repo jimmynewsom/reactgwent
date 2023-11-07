@@ -47,29 +47,50 @@ class Board{
   rallyHorns = [{close: false, ranged: false, siege: false},
                {close: false, ranged: false, siege: false}];
 
+  morale = [{close: 0, ranged: 0, siege: 0},
+            {close: 0, ranged: 0, siege: 0}];
+
+  tightBondsMap = new Map();
+
   constructor(board){
     if(board){
       this.field = board.field;
       this.weather = board.weather;
       this.rallyHorns = board.rallyHorns;
+      this.calculateMoraleAndTightBonds();
     }
   }
 
+  calculateMoraleAndTightBonds(){
+    const ranges = ["close", "ranged", "siege"];
+    for(let i = 0; i < 2; i++){
+      for(let range of ranges){
+        for(let card of this.field[i][range]){
+          if(card.special == "morale")
+            this.morale[i][range]++;
+
+          else if(card.special == "tight bond"){
+            if(this.tightBondsMap.has(card.name))
+              this.tightBondsMap.set(card.name, this.tightBondsMap.get(card.name) + 1);
+            else
+              this.tightBondsMap.set(card.name, 1);
+          }
+        }
+        
+      }
+    }
+  }
+
+
+  //this needs to be called after I calculate morale and tight bonds for the rows now
+  //that way I only need to iterate over each row twice, instead once per card
   getCardStrength(playerIndex, range, cardIndex){
     let card = this.field[playerIndex][range][cardIndex];
     if(card.type == "hero")
       return card.strength;
 
-    let tightBond = 1, morale = 0;
-
-    for(let [card2, i] of this.field[playerIndex][range].entries()){
-      if(i == cardIndex)
-        continue;
-      else if(card2.special == "morale")
-        morale++;
-      else if(card2.special == "tight bond" && card2.name == card.name)
-        tightBond++;
-    }
+    let morale = this.morale[range];
+    let tightBond = this.tightBondsMap.has(card.name) ? this.tightBondsMap.get(card.name) : 0;
 
     let currentStrength = card.strength;
     if(this.weather[range] == true)
@@ -83,6 +104,7 @@ class Board{
     return currentStrength;
   }
 
+  //same conditions as above (must be called after morale and tight bond calculations)
   getRowStrength(playerIndex, range){
     let totalStrength = 0;
     for(let i = 0; i < this.field[playerIndex][range].length; i++){
@@ -91,6 +113,7 @@ class Board{
     return totalStrength;
   }
 
+  //same conditions as above
   getTotalStrength(playerIndex){
     let total = this.getRowStrength(playerIndex, "close") + this.getRowStrength(playerIndex, "ranged") + this.getRowStrength(playerIndex, "siege");
     return total;
