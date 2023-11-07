@@ -317,21 +317,17 @@ class Board{
 
   //this could be optimized.......
   scorch(playerIndex, range){
-    console.log("scorch played");
-    return;
-
-
-
     //for targeted scorch, if the opponent has a total strength of 10 or higher in the target row, kill that rows strongest card(s)
     //(iterating backwards through the row, so splices don't screw up later indexes in the loop)
     if(range){
-      if(this.getRowStrength((playerIndex + 1) % 2, range) >= 10){
-        let maxStrength = 0;
-        for(let i = this.field[(playerIndex + 1) % 2][range].length - 1; i--; i > -1){
-          let card = this.field[(playerIndex + 1) % 2][range][i];
-          if(card.strength > maxStrength)
-            maxStrength = card.strength;
-        }
+      let totalStrength = 0, maxStrength = 0;
+      for(let i = this.field[(playerIndex + 1) % 2][range].length - 1; i--; i > -1){
+        let card = this.field[(playerIndex + 1) % 2][range][i];
+        totalStrength += card.strength;
+        if(card.strength > maxStrength)
+          maxStrength = card.strength;
+      }
+      if(totalStrength >= 10){
         for(let i = this.field[(playerIndex + 1) % 2][range].length - 1; i--; i > -1){
           let card = this.field[(playerIndex + 1) % 2][range][i];
           if(card.strength == maxStrength)
@@ -347,6 +343,17 @@ class Board{
         for(let range of ranges){
           for(let j = this.field[i][range].length - 1; j--; j > -1){
             let card = this.field[i][range][j];
+            if(card.strength > maxStrength)
+              maxStrength = card.strength;
+          }
+        }
+      }
+      for(let i = 0; i < 2; i++){
+        for(let range of ranges){
+          for(let j = this.field[i][range].length - 1; j--; j > -1){
+            let card = this.field[i][range][j];
+            if(card.strength == maxStrength)
+              this.field[i][range].splice(j, 1);
           }
         }
       }
