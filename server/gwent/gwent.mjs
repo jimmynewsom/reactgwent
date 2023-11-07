@@ -198,6 +198,10 @@ class Board{
   }
 
   calculateMoraleAndTightBonds(){
+    this.morale = [{close: 0, ranged: 0, siege: 0},
+                  {close: 0, ranged: 0, siege: 0}];
+    this.tightBondsMaps = [new Map(), new Map()];
+
     const ranges = ["close", "ranged", "siege"];
     for(let i = 0; i < 2; i++){
       for(let range of ranges){
@@ -259,6 +263,7 @@ class Board{
 
   //returns 1 for player1 wins, 2 for player2 wins, and 3 for ties
   endRoundAndCalculateWinner(faction1, faction2){
+    this.calculateMoraleAndTightBonds();
     let p1Total = this.getTotalStrength(0);
     let p2Total = this.getTotalStrength(1);
     let card;
@@ -317,6 +322,7 @@ class Board{
 
   //this could be optimized.......
   scorch(playerIndex, range){
+    this.calculateMoraleAndTightBonds();
     //for targeted scorch, if the opponent has a total strength of 10 or higher in the target row, kill that rows strongest card(s)
     //(iterating backwards through the row, so splices don't screw up later indexes in the loop)
     if(range){
