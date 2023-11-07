@@ -322,15 +322,15 @@ class Board{
     if(range){
       let totalStrength = 0, maxStrength = 0;
       for(let i = this.field[(playerIndex + 1) % 2][range].length - 1; i--; i > -1){
-        let card = this.field[(playerIndex + 1) % 2][range][i];
-        totalStrength += card.strength;
-        if(card.strength > maxStrength)
-          maxStrength = card.strength;
+        let strength = this.getCardStrength((playerIndex + 1) % 2, range, i);
+        totalStrength += strength;
+        if(strength > maxStrength)
+          maxStrength = strength;
       }
       if(totalStrength >= 10){
         for(let i = this.field[(playerIndex + 1) % 2][range].length - 1; i--; i > -1){
-          let card = this.field[(playerIndex + 1) % 2][range][i];
-          if(card.strength == maxStrength)
+          let strength = this.getCardStrength((playerIndex + 1) % 2, range, i);
+          if(strength == maxStrength)
             this.field[(playerIndex + 1) % 2][range].splice(i, 1);
         }
       }
@@ -342,17 +342,17 @@ class Board{
       for(let i = 0; i < 2; i++){
         for(let range of ranges){
           for(let j = this.field[i][range].length - 1; j--; j > -1){
-            let card = this.field[i][range][j];
-            if(card.strength > maxStrength)
-              maxStrength = card.strength;
+            let strength = this.getCardStrength(i, range, j);
+            if(strength > maxStrength)
+              maxStrength = strength;
           }
         }
       }
       for(let i = 0; i < 2; i++){
         for(let range of ranges){
           for(let j = this.field[i][range].length - 1; j--; j > -1){
-            let card = this.field[i][range][j];
-            if(card.strength == maxStrength)
+            let strength = this.getCardStrength(i, range, j);
+            if(strength == maxStrength)
               this.field[i][range].splice(j, 1);
           }
         }
