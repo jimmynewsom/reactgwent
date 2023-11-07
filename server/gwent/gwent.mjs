@@ -224,7 +224,7 @@ class Board{
       return card.strength;
 
     let morale = this.morale[playerIndex][range];
-    let tightBond = this.tightBondsMaps[playerIndex].has(card.name) ? this.tightBondsMaps[playerIndex].get(card.name) : 0;
+    let tightBond = this.tightBondsMaps[playerIndex].has(card.name) ? this.tightBondsMaps[playerIndex].get(card.name) : 1;
 
     //morale effects every creature in the row except itself
     if(card.special == "morale")
@@ -408,7 +408,7 @@ export class Gwent{
 
     }
     else if(card.special == "spy"){
-      this.draw(playerIndex, 2);
+      this.players[playerIndex].hand.push(...this.draw(playerIndex, 2));
 
       if(card.range == "close")
         this.board.field[(playerIndex + 1) % 2].close.push(card);

@@ -88,7 +88,7 @@ class Board{
       return card.strength;
 
     let morale = this.morale[playerIndex][range];
-    let tightBond = this.tightBondsMaps[playerIndex].has(card.name) ? this.tightBondsMaps[playerIndex].get(card.name) : 0;
+    let tightBond = this.tightBondsMaps[playerIndex].has(card.name) ? this.tightBondsMaps[playerIndex].get(card.name) : 1;
 
     //morale effects every creature in the row except itself
     if(card.special == "morale")
