@@ -12,7 +12,9 @@ export default function LoginRegister({ setToken }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [toastMessage, setToastMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   const [showToastMessage, setShowToastMessage] = useState(false);
+  const [showErrorMessage, setShowErrorMessage] = useState(false);
   const signIn = useSignIn();
   const navigate = useNavigate();
 
@@ -38,10 +40,10 @@ export default function LoginRegister({ setToken }) {
       });
 
       if(result.status != 200){
-        console.error("error logging in! username/password invalid");
-        setToastMessage("error logging in! username/password invalid");
-        setShowToastMessage(true);
-        setTimeout(()=>{setShowToastMessage(false)}, 3000);
+        console.error("Username or password invalid");
+        setErrorMessage("Username or password invalid");
+        setShowErrorMessage(true);
+        setTimeout(()=>{setShowErrorMessage(false)}, 3000);
         login.disabled = false;
         register.disabled = false;
       }
@@ -93,9 +95,9 @@ export default function LoginRegister({ setToken }) {
 
       if(result.status != 201){
         console.error("username already exists, please enter a different username");
-        setToastMessage("username already exists, please enter a different username");
-        setShowToastMessage(true);
-        setTimeout(()=>{setShowToastMessage(false)}, 3000);
+        setErrorMessage("username already exists, please enter a different username");
+        setShowErrorMessage(true);
+        setTimeout(()=>{setShowErrorMessage(false)}, 3000);
         login.disabled = false;
         register.disabled = false;
       }
@@ -127,6 +129,7 @@ export default function LoginRegister({ setToken }) {
   return(
     <div className="login_wrapper">
       <h2>Login</h2>
+      <span>{errorMessage}</span>
       <form>
         <div>
           <label>Username: </label>
