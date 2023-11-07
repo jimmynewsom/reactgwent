@@ -261,14 +261,40 @@ class Board{
   endRoundAndCalculateWinner(faction1, faction2){
     let p1Total = this.getTotalStrength(0);
     let p2Total = this.getTotalStrength(1);
+    let card;
 
     for(let i = 0; i < 2; i++){
+      //Monster faction keeps 1 unit card on their side of the field at the end of every round
+      if((i == 0 && faction1 == "Monsters") || (i == 1 && faction2 == "Monsters")){
+        let totalCardCount = this.field[i]["close"].length + this.field[i]["ranged"].length + this.field[i]["siege"].length;
+        let randomIndex = Math.floor(Math.random() * totalCardCount);
+
+        if(totalCardCount > 0){
+          if(randomIndex < this.field[i]["close"].length)
+            card = this.field[i]["close"].splice(randomIndex, 1)[0];
+          else if(randomIndex < this.field[i]["close"].length + this.field[i]["ranged"].length){
+            randomIndex -= this.field[i]["close"].length;
+            card = this.field[i]["ranged"].splice(randomIndex, 1)[0];
+          }
+          else {
+            randomIndex -= this.field[i]["close"].length + this.field[i]["ranged"].length;
+            card = this.field[i]["siege"].splice(randomIndex, 1)[0];
+          }
+        }
+      }
+
       this.field[i].graveyard.push(...this.field[i].close);
       this.field[i].graveyard.push(...this.field[i].ranged);
       this.field[i].graveyard.push(...this.field[i].siege);
       this.field[i].close = [];
       this.field[i].ranged = [];
       this.field[i].siege = [];
+
+      if(((i == 0 && faction1 == "Monsters") || (i == 1 && faction2 == "Monsters")) && card){
+        this.field[i][card.range].push(card);
+        card = null;
+      }
+
     }
 
     this.clearWeather();
@@ -289,12 +315,41 @@ class Board{
     }
   }
 
+  //this could be optimized.......
   scorch(playerIndex, range){
+    console.log("scorch played");
+    return;
+
+
+
+    //for targeted scorch, if the opponent has a total strength of 10 or higher in the target row, kill that rows strongest card(s)
+    //(iterating backwards through the row, so splices don't screw up later indexes in the loop)
     if(range){
-      console.log("scorch - range");
+      if(this.getRowStrength((playerIndex + 1) % 2, range) >= 10){
+        let maxStrength = 0;
+        for(let i = this.field[(playerIndex + 1) % 2][range].length - 1; i--; i > -1){
+          let card = this.field[(playerIndex + 1) % 2][range][i];
+          if(card.strength > maxStrength)
+            maxStrength = card.strength;
+        }
+        for(let i = this.field[(playerIndex + 1) % 2][range].length - 1; i--; i > -1){
+          let card = this.field[(playerIndex + 1) % 2][range][i];
+          if(card.strength == maxStrength)
+            this.field[(playerIndex + 1) % 2][range].splice(i, 1);
+        }
+      }
     }
+    //otherwise, kill the strongest card(s) in every row
     else {
-      console.log("scorch everywhere");
+      let maxStrength = 0;
+      let ranges = ["close", "ranged", "siege"];
+      for(let i = 0; i < 2; i++){
+        for(let range of ranges){
+          for(let j = this.field[i][range].length - 1; j--; j > -1){
+            let card = this.field[i][range][j];
+          }
+        }
+      }
     }
   }
 }
