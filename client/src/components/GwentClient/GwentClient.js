@@ -71,7 +71,7 @@ class Board{
 
           else if(card.special == "tight bond"){
             if(this.tightBondsMaps[i].has(card.name))
-              this.tightBondsMaps[i].set(card.name, this.tightBondsMaps.get(card.name) + 1);
+              this.tightBondsMaps[i].set(card.name, this.tightBondsMaps[i].get(card.name) + 1);
             else
               this.tightBondsMaps[i].set(card.name, 1);
           }
