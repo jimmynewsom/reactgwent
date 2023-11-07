@@ -475,11 +475,15 @@ export class Gwent{
         this.players[1].player.lives--;
         if(this.players[1].player.lives == 0)
           return 1;
+        else if(this.players[0].player.faction == "Northern Realms")
+          this.players[0].hand.push(...this.draw(0, 1));
       }
       else if(result == 2){
         this.players[0].player.lives--;
         if(this.players[0].player.lives == 0)
           return 2;
+        else if(this.players[1].player.faction == "Northern Realms")
+          this.players[1].hand.push(...this.draw(1, 1));
       }
 
       //if we finish round 3, there are 3 possibilities
