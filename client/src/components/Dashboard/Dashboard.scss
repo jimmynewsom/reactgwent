@@ -10,18 +10,93 @@
   }
 
   h3 {
-    padding: 0 3rem;
+    text-transform: uppercase;
+    font-weight: 200;
   }
 
-  .wins-and-losses {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: nowrap;
-    flex-direction: row;
+  h2.screen-heading {
+    border: 3px solid #a77d56;
+    padding: 16px 0;
+    width: 30%;
+    text-align: center;
+    margin: 0 auto;
+    margin-bottom: 2rem;
+  }
 
-    .win-loss-count {
-      margin: 0 1rem;
+  .container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      border: 5px groove #0e0c0b;
+      padding: 1rem 2rem;
+      box-shadow: 0px 0px 13px #62554d;
+      margin-right: 1rem;
+
+      .wins-and-losses {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: nowrap;
+        flex-direction: column;
+
+        h5 { 
+          text-align: center;
+        }
+    
+        .win-loss-count {
+          margin: 0 1rem;
+        }
+      }
+    }
+
+    .main-window {
+      border: 5px groove #0e0c0b;
+      padding: 1rem 5rem 1rem 2rem;
+      box-shadow: 0px 0px 13px #62554d;
+      width: 100%;
+
+      table {
+        width: 100%;
+        border-top: 2px solid #2d2826;
+        border-bottom: 2px solid #2d2826;
+    
+        tr {
+          margin-bottom: 1rem;
+        }
+    
+        th, td {
+          width: 100px;
+          text-align: center;
+          border-right: 3px solid #2d2826;
+        }
+
+        td {
+          font-weight: 200;
+        }
+      }
+
+      .games-in-progress {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    
+        div {
+          display: flex;
+          flex-direction: row;
+          flex-wrap: nowrap;
+          justify-content: flex-start;
+          align-items: center;
+        }
+      }
     }
   }
 }

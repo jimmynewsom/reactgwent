@@ -129,7 +129,7 @@ export default function LoginRegister({ setToken }) {
   return(
     <div className="login_wrapper">
       <h2>Login</h2>
-      <span>{errorMessage}</span>
+      <span className={`error`}>{errorMessage}</span>
       <form>
         <div>
           <label>Username: </label>
@@ -141,11 +141,11 @@ export default function LoginRegister({ setToken }) {
           <input type="password" onChange={e => setPassword(e.target.value)} />
         </div>
         <div className={'login-button'}>
-          <button id="login" onClick={login}>{showToastMessage ? toastMessage : "Login" }</button>
+          <button className={`primary-button`} id="login" onClick={login}>{showToastMessage ? toastMessage : "Login" }</button>
         </div>        
       </form>
       <hr />
-      <button id="register" onClick={register}>Register as a new user</button>
+      <button className={`secondary-button`} id="register" onClick={register}>Register as a new user</button>
     </div>
   );
 }

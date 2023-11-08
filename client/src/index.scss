@@ -1,3 +1,5 @@
+@import 'library';
+
 @font-face {
   font-family: 'Asap';
   src: url('./fonts/Asap.ttf') format('ttf'),
@@ -29,41 +31,37 @@ code {
   background: linear-gradient(to right, #1a1a1a, #333333);
 }
 
+h1, h2, h3, h4, h5, h5 {
+  color: #fff;
+  font-weight: normal;
+}
+
 h1 {
   font-size: 1.383rem;
-  font-weight: normal;
   text-transform: uppercase;
-  color: #fff;
 }
 
 h2 {
   font-size: 1.296rem;
-  font-weight: normal;
   text-transform: uppercase;
-  color: #fff;
 }
 
 h3 {
   font-size: 1.215rem;
-  font-weight: normal;
   text-transform: normal;
-  color: #fff;
 }
 
 h4 {
   font-size: 1.138rem;
-  font-weight: normal;
   text-transform: normal;
 }
 
 h5 {
   font-size: 1.067rem;
-  font-weight: normal;
 }
 
 h6 {
   font-size: 1rem;
-  font-weight: normal;
 }
 
 a {
@@ -71,27 +69,43 @@ a {
 }
 
 input {
-  border: 4px solid #14110e;
-  color: #fff;
-  padding: 0.5rem 1rem;
-  text-align: left;
-  width: 60%;
-  margin-left: 40px;
-  vertical-align: middle;
+  @include input-base;
+  border: 4px solid $secondary-button-border;
 }
 
 button {
-  font-family: 'Asap', sans-serif;
-  background-color: #0e0c0b;
-  color: #7b6a54;
-  text-transform: uppercase;
-  border: 1px solid #14110e;
-  padding: 4px 40px;
-  transition: .3s;
+  @include button-base;
+  background-color: $secondary-button-background;
+  color: $secondary-button-color;
+  border: 1px solid $secondary-button-border;
 
   &:hover {
-    background-color: #050403;
-    cursor: pointer;
+    background-color: $secondary-button-background-hover;
+  }
+}
+
+.primary-button {
+  border: 4px solid $primary-button-border;
+  color: $primary-button-color;
+
+  svg {
+    vertical-align: middle;
+    margin-right: 7px;
+    fill: $primary-button-color;
+    color: $primary-button-color;
+  }
+}
+
+.icon-button {
+  padding: 4px 10px;
+  font-size: 1rem;
+  border-radius: 5px;
+  vertical-align: middle;
+
+  svg {
+    color: #fff;
+    fill: #fff;
+    margin-right: 7px;
   }
 }
 
@@ -99,14 +113,27 @@ p,
 a,
 span,
 label,
-button {
+button,
+th,
+td {
   font-size: 1rem;
   line-height: 1.5;
+  font-weight: normal;
   color: #fff;
+}
+
+span.error {
+  color: $error-color;
+  font-size: 1rem;
 }
 
 strong {
   font-weight: bold;
+}
+
+th, td {
+  color: #fff;
+  font-weight: 700;
 }
 
 footer {
