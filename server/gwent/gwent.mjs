@@ -345,7 +345,28 @@ class Board{
 
 function shuffle(array){ 
   return array.sort(() => Math.random() - 0.5); 
-}; 
+};
+
+const arachasGroup = ["Arachas", "Arachas Behemoth"];
+const croneGroup = ["Crone: Brewess", "Crone: Weavess", "Crone: Whispess"];
+const vampireGroup = ["Vampire: Ekkimara", "Vampire: Fleder", "Vampire: Garkain", "Vampire: Bruxa"];
+
+const musterMap = new Map(
+  ["Havekar Smuggler", ["Havekar Smuggler"]],
+  ["Dwarven Skirmisher", ["Dwarven Skirmisher"]],
+  ["Elven Skirmisher", ["Elven Skirmisher"]],
+  ["Arachas Behemoth", arachasGroup],
+  ["Arachas", arachasGroup],
+  ["Crone: Brewess", croneGroup],
+  ["Crone: Weavess", croneGroup],
+  ["Crone: Whispess", croneGroup],
+  ["Vampire: Ekkimara", vampireGroup],
+  ["Vampire: Fleder", vampireGroup],
+  ["Vampire: Garkain", vampireGroup],
+  ["Vampire: Bruxa", vampireGroup],
+  ["Nekker", ["Nekker"]],
+  ["Ghoul", ["Ghoul"]]
+);
 
 /*
 Here is where the game logic will go.
@@ -501,8 +522,29 @@ export class Gwent{
       this.playersTurn = (this.playersTurn + 1) % 2;
   }
 
+  //iterate through players hand and deck backwards, and splice out and play every card in the muster group
+  muster(playerIndex, cardName){
+    let deck = this.players[playerIndex].deck;
+    let hand = this.players[playerIndex].hand;
+    let musterGroup = musterMap.get(cardName);
+    for(let i = hand.length - 1; i > -1; i--){
+      let card = hand[i];
+      if(musterGroup.includes(card.name)){
+        hand.splice(i, 1);
+        this.playCardSpecial(playerIndex, card);
+      }
+    }
+    for(let i = deck.length - 1; i > -1; i--){
+      let card = deck[i];
+      if(musterGroup.includes(card.name)){
+        deck.splice(i, 1);
+        this.playCardSpecial(playerIndex, card);
+      }
+    }
+  }
+
   playCardSpecial(playerIndex, card){
-    console.log("nothing for now");
+    this.board.field[playerIndex][card.range].push(card);
   }
 
   playLeaderAbility(playerIndex){
