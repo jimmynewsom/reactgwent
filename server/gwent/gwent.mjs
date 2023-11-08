@@ -203,7 +203,7 @@ class Board{
       return card.strength;
 
     let morale = this.morale[playerIndex][range];
-    let tightBond = this.tightBondsMaps[playerIndex].has(card.name) ? this.tightBondsMaps[playerIndex].get(card.name) : 1;
+    let tightBond = this.tightBondsMaps[playerIndex].has(card.name) ? this.tightBondsMaps[playerIndex].get(card.name) : 0;
 
     //morale effects every creature in the row except itself
     if(card.special == "morale")
@@ -213,7 +213,7 @@ class Board{
     if(this.weather[range] == true)
       currentStrength = 1;
 
-    currentStrength = (currentStrength + morale)**tightBond;
+    currentStrength = (currentStrength + morale)*(2**tightBond);
     
     if(this.rallyHorns[playerIndex][range])
       currentStrength = currentStrength * 2;
@@ -299,7 +299,7 @@ class Board{
     //also, I am writing another loop instead of calling getRowStrength because then I can also find maxStrength for the row in the same loop
     if(range){
       let totalStrength = 0, maxStrength = 0;
-      for(let i = this.field[(playerIndex + 1) % 2][range].length - 1; i--; i > -1){
+      for(let i = this.field[(playerIndex + 1) % 2][range].length - 1; i > -1; i--){
         let strength = this.getCardStrength((playerIndex + 1) % 2, range, i);
         let type = this.field[(playerIndex + 1) % 2][range][i].type;
         totalStrength += strength;
@@ -307,7 +307,7 @@ class Board{
           maxStrength = strength;
       }
       if(totalStrength >= 10){
-        for(let i = this.field[(playerIndex + 1) % 2][range].length - 1; i--; i > -1){
+        for(let i = this.field[(playerIndex + 1) % 2][range].length - 1; i > -1; i--){
           let strength = this.getCardStrength((playerIndex + 1) % 2, range, i);
           let type = this.field[(playerIndex + 1) % 2][range][i].type;
           if(strength == maxStrength && type != "hero")
@@ -321,7 +321,7 @@ class Board{
       let ranges = ["close", "ranged", "siege"];
       for(let i = 0; i < 2; i++){
         for(let range of ranges){
-          for(let j = this.field[i][range].length - 1; j--; j > -1){
+          for(let j = this.field[i][range].length - 1; j > -1; j--){
             let strength = this.getCardStrength(i, range, j);
             let type = this.field[i][range][j].type;
             if(strength > maxStrength && type != "hero")
@@ -331,7 +331,7 @@ class Board{
       }
       for(let i = 0; i < 2; i++){
         for(let range of ranges){
-          for(let j = this.field[i][range].length - 1; j--; j > -1){
+          for(let j = this.field[i][range].length - 1; j > -1; j--){
             let strength = this.getCardStrength(i, range, j);
             let type = this.field[i][range][j].type;
             if(strength == maxStrength && type != "hero")
@@ -351,7 +351,7 @@ const arachasGroup = ["Arachas", "Arachas Behemoth"];
 const croneGroup = ["Crone: Brewess", "Crone: Weavess", "Crone: Whispess"];
 const vampireGroup = ["Vampire: Ekkimara", "Vampire: Fleder", "Vampire: Garkain", "Vampire: Bruxa"];
 
-const musterMap = new Map(
+const musterMap = new Map([
   ["Havekar Smuggler", ["Havekar Smuggler"]],
   ["Dwarven Skirmisher", ["Dwarven Skirmisher"]],
   ["Elven Skirmisher", ["Elven Skirmisher"]],
@@ -366,7 +366,7 @@ const musterMap = new Map(
   ["Vampire: Bruxa", vampireGroup],
   ["Nekker", ["Nekker"]],
   ["Ghoul", ["Ghoul"]]
-);
+]);
 
 /*
 Here is where the game logic will go.
@@ -446,7 +446,7 @@ export class Gwent{
         if(this.board.tightBondsMaps[playerIndex].has(card.name))
           this.board.tightBondsMaps[playerIndex].set(card.name, this.board.tightBondsMaps[playerIndex].get(card.name) + 1);
         else
-          this.board.tightBondsMaps[playerIndex].set(card.name, 1);
+          this.board.tightBondsMaps[playerIndex].set(card.name, 0);
       }
       else if(card.special == "scorchClose")
         this.board.scorch(playerIndex, "close");
@@ -463,20 +463,7 @@ export class Gwent{
         // }
       }
       else if(card.special == "muster"){
-        console.log("muster played");
-        // let musterList = musterMap.get(card.name);
-        // let i = 0;
-        // while(i < this.players[playerIndex].hand.length){
-        //   let card2;
-        //   if(musterMap.includes(this.players[playerIndex].hand[i].name)){
-        //     card2 = this.players[playerIndex].hand[i];
-        //     this.players[playerIndex].hand.splice(i, 1);
-        //     this.playCardSpecial(playerIndex, card2);
-        //   }
-        //   else {
-        //     i++;
-        //   }
-        // }
+        this.muster(playerIndex, card.name);
       }
     }
     else if(card.special == "spy"){
