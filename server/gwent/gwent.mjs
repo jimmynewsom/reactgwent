@@ -197,6 +197,15 @@ class Board{
                       {close: false, ranged: false, siege: false}];
   }
 
+  clearMorale(){
+    this.morale = [{close: 0, ranged: 0, siege: 0},
+                  {close: 0, ranged: 0, siege: 0}];
+  }
+
+  clearTightBonds(){
+    this.tightBondsMaps = [new Map(), new Map()];
+  }
+
   getCardStrength(playerIndex, range, cardIndex){
     let card = this.field[playerIndex][range][cardIndex];
     if(card.type == "hero")
@@ -276,6 +285,8 @@ class Board{
 
     this.clearWeather();
     this.clearRallyHorns();
+    this.clearMorale();
+    this.clearTightBonds();
       
     if(p1Total > p2Total)
       return 1;
