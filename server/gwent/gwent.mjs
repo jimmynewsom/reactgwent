@@ -197,31 +197,6 @@ class Board{
                       {close: false, ranged: false, siege: false}];
   }
 
-  calculateMoraleAndTightBonds(){
-    this.morale = [{close: 0, ranged: 0, siege: 0},
-                  {close: 0, ranged: 0, siege: 0}];
-    this.tightBondsMaps = [new Map(), new Map()];
-
-    const ranges = ["close", "ranged", "siege"];
-    for(let i = 0; i < 2; i++){
-      for(let range of ranges){
-        for(let card of this.field[i][range]){
-          if(card.special == "morale")
-            this.morale[i][range]++;
-
-          else if(card.special == "tight bond"){
-            if(this.tightBondsMaps[i].has(card.name))
-              this.tightBondsMaps[i].set(card.name, this.tightBondsMaps[i].get(card.name) + 1);
-            else
-              this.tightBondsMaps[i].set(card.name, 1);
-          }
-        }
-      }
-    }
-  }
-
-  //this needs to be called after I calculate morale and tight bonds for the rows now
-  //that way I only need to iterate over each row twice, instead once per card
   getCardStrength(playerIndex, range, cardIndex){
     let card = this.field[playerIndex][range][cardIndex];
     if(card.type == "hero")
@@ -246,7 +221,6 @@ class Board{
     return currentStrength;
   }
 
-  //same conditions as above (must be called after calculateMoraleAndTightBonds())
   getRowStrength(playerIndex, range){
     let totalStrength = 0;
     for(let i = 0; i < this.field[playerIndex][range].length; i++){
@@ -255,7 +229,6 @@ class Board{
     return totalStrength;
   }
 
-  //same conditions as above
   getTotalStrength(playerIndex){
     let total = this.getRowStrength(playerIndex, "close") + this.getRowStrength(playerIndex, "ranged") + this.getRowStrength(playerIndex, "siege");
     return total;
@@ -441,9 +414,17 @@ export class Gwent{
           this.board.field[playerIndex].ranged.push(card);
       }
 
-      //unit cards can have 4 abilities that trigger when placed - medic, spy, scorchClose, & muster
-      //(morale & tight bond don't trigger until I calculate the card strength)
-      if(card.special == "scorchClose")
+      //unit cards can have 6 abilities that trigger when placed - morale, tight bond, medic, spy, scorchClose, & muster
+      if(card.special == 'morale'){
+        this.board.morale[playerIndex][card.range]++;
+      }
+      else if(card.special == "tight bond"){
+        if(this.board.tightBondsMaps[playerIndex].has(card.name))
+          this.board.tightBondsMaps[playerIndex].set(card.name, this.board.tightBondsMaps[playerIndex].get(card.name) + 1);
+        else
+          this.board.tightBondsMaps[playerIndex].set(card.name, 1);
+      }
+      else if(card.special == "scorchClose")
         this.board.scorch(playerIndex, "close");
       //if the player plays a medic card, target should specify indexes in graveyard
       //since medics can revive medics, target is an array here
@@ -473,7 +454,6 @@ export class Gwent{
         //   }
         // }
       }
-
     }
     else if(card.special == "spy"){
       this.players[playerIndex].hand.push(...this.draw(playerIndex, 2));
