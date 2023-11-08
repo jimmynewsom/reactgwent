@@ -236,7 +236,6 @@ class Board{
 
   //returns 1 for player1 wins, 2 for player2 wins, and 3 for ties
   endRoundAndCalculateWinner(faction1, faction2){
-    this.calculateMoraleAndTightBonds();
     let p1Total = this.getTotalStrength(0);
     let p2Total = this.getTotalStrength(1);
     let card;
@@ -293,23 +292,25 @@ class Board{
     }
   }
 
-  //this could be optimized.......
+  //this could be optimized, but it's decent
   scorch(playerIndex, range){
-    this.calculateMoraleAndTightBonds();
     //for targeted scorch, if the opponent has a total strength of 10 or higher in the target row, kill that rows strongest card(s)
     //(iterating backwards through the row, so splices don't screw up later indexes in the loop)
+    //also, I am writing another loop instead of calling getRowStrength because then I can also find maxStrength for the row in the same loop
     if(range){
       let totalStrength = 0, maxStrength = 0;
       for(let i = this.field[(playerIndex + 1) % 2][range].length - 1; i--; i > -1){
         let strength = this.getCardStrength((playerIndex + 1) % 2, range, i);
+        let type = this.field[(playerIndex + 1) % 2][range][i].type;
         totalStrength += strength;
-        if(strength > maxStrength)
+        if(strength > maxStrength && type != "hero")
           maxStrength = strength;
       }
       if(totalStrength >= 10){
         for(let i = this.field[(playerIndex + 1) % 2][range].length - 1; i--; i > -1){
           let strength = this.getCardStrength((playerIndex + 1) % 2, range, i);
-          if(strength == maxStrength)
+          let type = this.field[(playerIndex + 1) % 2][range][i].type;
+          if(strength == maxStrength && type != "hero")
             this.field[(playerIndex + 1) % 2][range].splice(i, 1);
         }
       }
@@ -322,7 +323,8 @@ class Board{
         for(let range of ranges){
           for(let j = this.field[i][range].length - 1; j--; j > -1){
             let strength = this.getCardStrength(i, range, j);
-            if(strength > maxStrength)
+            let type = this.field[i][range][j].type;
+            if(strength > maxStrength && type != "hero")
               maxStrength = strength;
           }
         }
@@ -331,7 +333,8 @@ class Board{
         for(let range of ranges){
           for(let j = this.field[i][range].length - 1; j--; j > -1){
             let strength = this.getCardStrength(i, range, j);
-            if(strength == maxStrength)
+            let type = this.field[i][range][j].type;
+            if(strength == maxStrength && type != "hero")
               this.field[i][range].splice(j, 1);
           }
         }
