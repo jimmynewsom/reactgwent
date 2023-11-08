@@ -377,7 +377,7 @@ export default function DeckBuilder({socket}) {
           <p>Hero Cards</p>
           <p>{currentDeck.heroCount}</p>
 
-          {!roomName ? <button onClick={saveCurrentDeck}> Save current deck </button> : <button id="ready" onClick={submitReady}> Ready (use current deck) </button>}
+          {!roomName ? <button id="save_button" onClick={saveCurrentDeck}> Save current deck </button> : <button id="ready" onClick={submitReady}> Ready (use current deck) </button>}
 
 
         </div>
