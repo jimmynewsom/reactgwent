@@ -73,7 +73,7 @@ class Board{
             if(this.tightBondsMaps[i].has(card.name))
               this.tightBondsMaps[i].set(card.name, this.tightBondsMaps[i].get(card.name) + 1);
             else
-              this.tightBondsMaps[i].set(card.name, 1);
+              this.tightBondsMaps[i].set(card.name, 0);
           }
         }
       }
@@ -88,7 +88,7 @@ class Board{
       return card.strength;
 
     let morale = this.morale[playerIndex][range];
-    let tightBond = this.tightBondsMaps[playerIndex].has(card.name) ? this.tightBondsMaps[playerIndex].get(card.name) : 1;
+    let tightBond = this.tightBondsMaps[playerIndex].has(card.name) ? this.tightBondsMaps[playerIndex].get(card.name) : 0;
 
     //morale effects every creature in the row except itself
     if(card.special == "morale")
@@ -98,7 +98,7 @@ class Board{
     if(this.weather[range] == true)
       currentStrength = 1;
 
-    currentStrength = (currentStrength + morale)**tightBond;
+    currentStrength = (currentStrength + morale)*(2**tightBond);
     
     if(this.rallyHorns[playerIndex][range])
       currentStrength = currentStrength * 2;
@@ -302,8 +302,10 @@ export default function GwentClient({socket}) {
 
   function handleHandClick(cardIndex){
     return () => {
-      if(!socket.connected)
-      console.log("websocket is disconnected. please refresh the page");
+      if(!socket.connected){
+        alert("websocket is disconnected. please refresh the page!");
+        return;
+      }
 
       //first click makes the card the focus card
       if(!focusCard || focusCard[0] != cardIndex)
@@ -312,7 +314,7 @@ export default function GwentClient({socket}) {
         //if the card is already the focus and they click it again, play the card, unless it has targeting rules
         //but first check if it's the players turn
         if(gameState.playersTurn != gameState.playerIndex){
-          console.log("it's not your turn");
+          alert("it's not your turn");
           return;
         }
 
