@@ -213,7 +213,8 @@ export default function create_game_router(io){
     });
 
     socket.on("request_game_update", () => {
-      io.to(socket.id).emit("game_update", game.getGameState(playerIndex));
+      if(userGameMap.has(username) && userGameMap.get(username).status == "gameInProgress")
+        io.to(socket.id).emit("game_update", game.getGameState(playerIndex));
     });
 
     socket.on("play_card", (cardIndex, target) => {
