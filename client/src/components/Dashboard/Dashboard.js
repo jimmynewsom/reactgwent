@@ -14,7 +14,7 @@ export default function Dashboard({ socket }) {
   const authHeader = useAuthHeader();
   const [userStats, setUserStats] = useState({ wins: "loading", losses: "loading" });
   const [gameList, setGameList] = useState([]);
-  const [waitingForOpponent, setWaitingForOpponent] = useState([false, false, false, false, false]);
+  const [waitingForOpponent, setWaitingForOpponent] = useState(false);
 
 
   //mostly finished stuff
@@ -72,13 +72,12 @@ export default function Dashboard({ socket }) {
 
   function createGamesTable() {
     let gameRows = [];
-    for (let i = 0; i < gameList.length; i++) {
-      let game = gameList[i];
+    for (let game of gameList) {
       gameRows.push(
         <tr key={game[0]}>
           <td>{game[0]}</td>
-          <td>{game[1] ? game[1] : <button className={`primary-button`} onClick={joinGame(game[0])}> Join Game </button>}</td>
-          <td>{waitingForOpponent[i] ? "Waiting for players..." : "Game in Progress"}</td>
+          <td>{game[1] ? game[1] : <button className={`primary-button`} onClick={joinGame(game[0])}>Join Game</button>}</td>
+          <td>{game[1] ? "Waiting for players..." : "Game in Progress"}</td>
         </tr>
       );
     }
