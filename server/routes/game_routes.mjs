@@ -1,6 +1,6 @@
 import express from "express";
 import validator from "validator";
-import authenticateToken from "../middleware/authenticateToken.mjs";
+import authenticateToken, {verifyWebsocketToken} from "../middleware/authenticateToken.mjs";
 import { Player, Gwent, cardMap, validateDeck, defaultDeck } from "../gwent/gwent.mjs";
 
 
@@ -158,7 +158,12 @@ export default function create_game_router(io){
   //when a client connects, I pull their username from auth, and use that to add them to the right room
   //I might need to use jwt for this later, but this works right now
   io.on('connection', (socket) => {
-    const username = socket.handshake.auth.username;
+    const token = socket.handshake.auth.Authorization;
+    let result = verifyWebsocketToken(token);
+    if(!result.isValid)
+      return
+
+    const username = result.username;
     console.log(username + " connected");
 
     if(!userGameMap.has(username))

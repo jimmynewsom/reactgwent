@@ -2,7 +2,6 @@ import jwt from 'jsonwebtoken';
 
 export default function verifyToken(req, res, next) {
   let token = req.headers['authorization'];
-  console.log(token);
 
   if (!token)
     res.sendStatus(403);
@@ -13,6 +12,19 @@ export default function verifyToken(req, res, next) {
     else{
       req.username = decoded;
       next();
+    }
+  });
+}
+
+export function verifyWebsocketToken(token) {
+  if (!token)
+    return {isValid: false};
+
+  jwt.verify(token, process.env.JWT_SECRET, (error, decoded) => {
+    if(error)
+      return {isValid: false};
+    else{
+      return {isValid: true, username: decoded};
     }
   });
 }
