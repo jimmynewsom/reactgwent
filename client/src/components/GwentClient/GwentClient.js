@@ -47,109 +47,125 @@ class Board{
   rallyHorns = [{close: false, ranged: false, siege: false},
                {close: false, ranged: false, siege: false}];
 
+  morale = [{close: 0, ranged: 0, siege: 0},
+            {close: 0, ranged: 0, siege: 0}];
+
+  tightBondsMaps = [new Map(), new Map()];
+
   constructor(board){
     if(board){
       this.field = board.field;
       this.weather = board.weather;
       this.rallyHorns = board.rallyHorns;
+      this.calculateMoraleAndTightBonds();
     }
   }
 
+  calculateMoraleAndTightBonds(){
+    const ranges = ["close", "ranged", "siege"];
+    for(let i = 0; i < 2; i++){
+      for(let range of ranges){
+        for(let card of this.field[i][range]){
+          if(card.special == "morale")
+            this.morale[i][range]++;
+
+          else if(card.special == "tight bond"){
+            if(this.tightBondsMaps[i].has(card.name))
+              this.tightBondsMaps[i].set(card.name, this.tightBondsMaps[i].get(card.name) + 1);
+            else
+              this.tightBondsMaps[i].set(card.name, 0);
+          }
+        }
+      }
+    }
+  }
+
+  //this needs to be called after I calculate morale and tight bonds for the rows now
+  //that way I only need to iterate over each row twice, instead once per card
   getCardStrength(playerIndex, range, cardIndex){
     let card = this.field[playerIndex][range][cardIndex];
     if(card.type == "hero")
       return card.strength;
 
-    let tightBond = 1, morale = 0;
+    let morale = this.morale[playerIndex][range];
+    let tightBond = this.tightBondsMaps[playerIndex].has(card.name) ? this.tightBondsMaps[playerIndex].get(card.name) : 0;
 
-    for(let [card2, i] of this.field[playerIndex][range].entries()){
-      if(i == cardIndex)
-        continue;
-      else if(card2.special == "morale")
-        morale++;
-      else if(card2.special == "tight bond" && card2.name == card.name)
-        tightBond++;
-    }
+    //morale effects every creature in the row except itself
+    if(card.special == "morale")
+      morale--;
 
     let currentStrength = card.strength;
     if(this.weather[range] == true)
       currentStrength = 1;
 
-    currentStrength = (currentStrength + morale)**tightBond;
+    currentStrength = (currentStrength + morale)*(2**tightBond);
     
     if(this.rallyHorns[playerIndex][range])
       currentStrength = currentStrength * 2;
 
     return currentStrength;
   }
-
-  getRowStrength(playerIndex, range){
-    let totalStrength = 0;
-    for(let i = 0; i < this.field[playerIndex][range].length; i++){
-      totalStrength = totalStrength + this.getCardStrength(playerIndex, range, i);
-    }
-    return totalStrength;
-  }
-
-  getTotalStrength(playerIndex){
-    let total = this.getRowStrength(playerIndex, "close") + this.getRowStrength(playerIndex, "ranged") + this.getRowStrength(playerIndex, "siege");
-    return total;
-  }
 }
 
 const rallyHornCard = new CardData("Commanders Horn", "commanders_horn.png", "special", "neutral", "0", "special", "horn", "3", "");
 
 //Field is basically a view for my Board class
-function Field({board, playerIndex}){
+function Field({board, playerIndex, setPlayerTotal, setOpponentTotal}){
 
-  //technically this is also basically a React component, but that was an accident...
-  function createCardRows(range, i){
-    let cardViews = [];
-    let cards = board.field[(playerIndex + i) % 2][range];
-    let rowWeather = board.weather[range];
-    
-    for(let j=0; j < cards.length; j++){
-      //let cardName = cardNames[j];
-      //let card = cardMap.get(cardName);
-      let card = cards[j];
-
-      cardViews.push(<SmallCardView
-                        cardData={card}
-                        key={(range + i) + j}
-                        currentStrength={board.getCardStrength((playerIndex + i) % 2, range, j)}
-                    />)
-    }
-
-    let rallyHorn = board.rallyHorns[(playerIndex + i) % 2][range];
-
-    let cardViewClasses = "cardrow";
-    if(rowWeather)
-      cardViewClasses += " weather_active";
-    //todo - if this row is targetable
-
-
-    return (<>
-              <div className="range">{range}<p>totalStrength: {board.getRowStrength((playerIndex + i) % 2, range)}</p></div>
-              <div className="rallyhorn">{rallyHorn ? <SmallCardView cardData={rallyHornCard}/> : <></>}</div>
-              <div className={cardViewClasses}>{cardViews}</div>
-            </>);
-  }
+  let r1 = createCardRows(board, playerIndex, "siege", 1);
+  let r2 = createCardRows(board, playerIndex, "ranged", 1);
+  let r3 = createCardRows(board, playerIndex, "close", 1);
+  setOpponentTotal(r1[1] + r2[1] + r3[1]);
+  let r4 = createCardRows(board, playerIndex, "close", 0);
+  let r5 = createCardRows(board, playerIndex, "ranged", 0);
+  let r6 = createCardRows(board, playerIndex, "siege", 0);
+  setPlayerTotal(r4[1] + r5[1] + r6[1]);
 
   return(
     <div className="field_grid">
-      {createCardRows("siege", 1)}
-      {createCardRows("ranged", 1)}
-      {createCardRows("close", 1)}
+      {r1[0]}
+      {r2[0]}
+      {r3[0]}
       
-      {createCardRows("close", 0)}
-      {createCardRows("ranged", 0)}
-      {createCardRows("siege", 0)}
+      {r4[0]}
+      {r5[0]}
+      {r6[0]}
     </div>
   );
 }
 
+function createCardRows(board, playerIndex, range, i){
+  let cardViews = [];
+  let cards = board.field[(playerIndex + i) % 2][range];
+  let rowWeather = board.weather[range];
+  let rowStrength = 0;
+  
+  for(let j=0; j < cards.length; j++){
+    let card = cards[j];
+    let currentStrength = board.getCardStrength((playerIndex + i) % 2, range, j);
+    rowStrength += currentStrength;
+
+    cardViews.push(<SmallCardView
+                      cardData={card}
+                      key={(range + i) + j}
+                      currentStrength={currentStrength}
+                  />);
+  }
+
+  let rallyHorn = board.rallyHorns[(playerIndex + i) % 2][range];
+
+  let cardViewClasses = "cardrow";
+  if(rowWeather)
+    cardViewClasses += " weather_active";
+  //todo - if this row is targetable
 
 
+  return[(<>
+    <div className="range">{range}<p>totalStrength: {rowStrength}</p></div>
+    <div className="rallyhorn">{rallyHorn ? <SmallCardView cardData={rallyHornCard}/> : <></>}</div>
+    <div className={cardViewClasses}>{cardViews}</div>
+  </>), rowStrength];
+}
 
 
 //first, checks for cardRows in localStorage
@@ -202,6 +218,8 @@ export default function GwentClient({socket}) {
   //focusCard is going to look like cardIndex to start
   const [focusCard, setFocusCard] = useState();
   const [gameOverMessage, setGameOverMessage] = useState();
+  const [playerTotal, setPlayerTotal] = useState(0);
+  const [opponentTotal, setOpponentTotal] = useState(0);
 
   let card1 = new CardData("Geralt of Rivia", "geralt_of_rivia.png", "hero", "neutral", "15", "close", "none", "1", "");
   let card2 = new CardData("Yennefer of Vengerberg", "yennefer_of_vengerberg.png", "hero", "neutral", "7", "ranged", "medic", "1", "");
@@ -284,6 +302,11 @@ export default function GwentClient({socket}) {
 
   function handleHandClick(cardIndex){
     return () => {
+      if(!socket.connected){
+        alert("websocket is disconnected. please refresh the page!");
+        return;
+      }
+
       //first click makes the card the focus card
       if(!focusCard || focusCard[0] != cardIndex)
         setFocusCard([cardIndex]);
@@ -291,7 +314,7 @@ export default function GwentClient({socket}) {
         //if the card is already the focus and they click it again, play the card, unless it has targeting rules
         //but first check if it's the players turn
         if(gameState.playersTurn != gameState.playerIndex){
-          console.log("it's not your turn");
+          alert("it's not your turn");
           return;
         }
 
@@ -365,7 +388,7 @@ export default function GwentClient({socket}) {
         <div className="stats_panel">
           <PlayerStatsPanel
             player={gameState.opponent}
-            totalStrength={gameState.board.getTotalStrength((gameState.playerIndex + 1) % 2)}
+            totalStrength={opponentTotal}
           />
           <WeatherPanel
             weather={gameState.board.weather}
@@ -373,7 +396,7 @@ export default function GwentClient({socket}) {
           <p>round: {gameState.round}</p>
           <PlayerStatsPanel
             player={gameState.player}
-            totalStrength={gameState.board.getTotalStrength(gameState.playerIndex)}
+            totalStrength={playerTotal}
           />
           <p>{gameState.playersTurn == gameState.playerIndex ? <b>YOUR TURN</b> : <b>NOT YOUR TURN</b>}</p>
           <button onClick={submitPass}>Pass</button>
@@ -382,6 +405,8 @@ export default function GwentClient({socket}) {
           <Field 
             board={gameState.board}
             playerIndex={gameState.playerIndex}
+            setPlayerTotal={setPlayerTotal}
+            setOpponentTotal={setOpponentTotal}
           />
           <br />
           <div className="player_hand">
