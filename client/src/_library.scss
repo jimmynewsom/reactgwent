@@ -1,0 +1,31 @@
+// _library.scss
+$primary-button-background: #0e0c0b;
+$primary-button-background-hover: #050403;
+$primary-button-color: #a77d56;
+$primary-button-border: #2d2826;
+$secondary-button-background: #0e0c0b;
+$secondary-button-background-hover: #050403;
+$secondary-button-color: #7b6a54;
+$secondary-button-border: #14110e;
+
+$error-color: #a70901;
+
+@mixin button-base {
+	padding: 4px 40px;
+	transition: .3s;
+	text-transform: uppercase;
+	font-family: 'Asap', sans-serif;
+
+	&:hover {
+		cursor: pointer;
+	}
+}
+
+@mixin input-base {
+	color: #fff;
+  padding: 0.5rem 1rem;
+  text-align: left;
+  width: 60%;
+  margin-left: 40px;
+  vertical-align: middle;
+}
