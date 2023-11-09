@@ -7,7 +7,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import db from "./db/conn.mjs";
 import authenticateToken from './middleware/authenticateToken.mjs';
-import {cardMap, cardRows, leaderRows, validateDeck} from './gwent/gwent.mjs';
+import {cardMap, cardRows, leaderRows, validateDeck, defaultDeck} from './gwent/gwent.mjs';
 import create_game_router from "./routes/game_routes.mjs";
 
 
@@ -160,7 +160,7 @@ app.get("/getUserDecks", authenticateToken, async (req, res) => {
     }
 
     if(!userHasNRDeck)
-      decks.push(await collection.findOne({"owner": "default", "faction": "Northern Realms"}));
+      decks.push(defaultDeck);
 
     //console.log(decks);
 
