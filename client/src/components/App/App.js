@@ -1,7 +1,7 @@
 import './App.scss';
 import React from 'react';
 import {io} from 'socket.io-client';
-import {RequireAuth, useIsAuthenticated, useAuthUser, useSignOut} from 'react-auth-kit';
+import {RequireAuth, useIsAuthenticated, useAuthHeader, useSignOut} from 'react-auth-kit';
 import {Route, Routes, useNavigate} from "react-router-dom";
 
 import Dashboard from '../Dashboard/Dashboard';
@@ -13,7 +13,7 @@ import {CardData, SmallCardView, LargeCardView} from '../Card/Card';
 
 export default function App() {
   const isAuthenticated = useIsAuthenticated();
-  const auth = useAuthUser();
+  const authHeader = useAuthHeader();
   const signOut = useSignOut();
   const navigate = useNavigate();
 
@@ -25,7 +25,7 @@ export default function App() {
     const SOCKET_URL = process.env.REACT_APP_BACKEND_URL;
     socket = io(SOCKET_URL, {
       autoConnect: false,
-      auth: { username: auth().username }
+      auth: { "Authorization": authHeader().split(" ")[1] }
     });
 
     console.log("new websocket connection");
