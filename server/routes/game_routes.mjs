@@ -218,13 +218,13 @@ export default function create_game_router(io){
     });
 
     socket.on("play_card", (cardIndex, target) => {
-      console.log(playerIndex + " " + cardIndex + " " + target);
+      //console.log(playerIndex + " " + cardIndex + " " + target);
       game.game.playCard(playerIndex, cardIndex, target);
       io.to(game.player1.playerName).emit("game_update_ready");
     });
 
     socket.on("pass", () => {
-      console.log("player " + playerIndex + " passes");
+      //console.log("player " + playerIndex + " passes");
       let result = game.game.pass(playerIndex);
       if(result == 0)
         io.to(game.player1.playerName).emit("game_update_ready");
