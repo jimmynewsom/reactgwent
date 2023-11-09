@@ -76,8 +76,8 @@ export default function Dashboard({ socket }) {
       gameRows.push(
         <tr key={game[0]}>
           <td>{game[0]}</td>
-          <td>{game[1] ? game[1] : <button className={`primary-button`} onClick={joinGame(game[0])}>Join Game</button>}</td>
-          <td>{game[1] ? "Waiting for players..." : "Game in Progress"}</td>
+          <td>{game[1] ? game[1] : !waitingForOpponent ? <button className={`primary-button`} onClick={joinGame(game[0])}>Join Game</button> : "Waiting for Opponent"}</td>
+          <td>{game[1] ? "Game in Progress" : "Waiting for players..."}</td>
         </tr>
       );
     }
@@ -126,8 +126,10 @@ export default function Dashboard({ socket }) {
       });
       result = await result.json();
       console.log("inprogress result: " + result.inProgress);
-      if (result.inProgress)
+      if (result.inProgress){
         socket.connect();
+        setWaitingForOpponent(true);
+      }
     } catch (error) {
       console.log(error);
     }
