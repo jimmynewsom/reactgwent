@@ -1,6 +1,6 @@
 .large_card {
-    height: 320px;
-    width: 180px;
+    height: auto;
+    width: 100%;
     border-style: solid;
     margin: 5px;
     border-radius: 10px;
@@ -9,8 +9,8 @@
 
 .available {
   position: absolute;
-  top: 200px;
-  right: 0;
+  top: 160px;
+  right: 105px;
   background-color: rgb(255, 255, 255, 0);
 }
 

@@ -1,0 +1,73 @@
+.deckbuilder {
+  height: 80%;
+  width: 100%;
+  padding: 10px;
+  border-style: solid;
+  text-align: center;
+
+  h2.screen-heading {
+    border: 3px solid #a77d56;
+    padding: 16px 0;
+    width: 30%;
+    text-align: center;
+    margin: 0 auto;
+    margin-bottom: 2rem;
+  }
+}
+
+.deckbuilder_grid {
+  display: grid;
+  grid-template-columns: 35% 30% 35%;
+}
+
+.one {
+  border: 2px solid black;
+}
+
+.two {
+  border: 2px solid black;
+}
+
+.three {
+  border: 2px solid black;
+}
+
+
+.faction_select {
+  display: grid;
+  grid-template-columns: 30% 40% 30%;
+  
+  p {
+    display: inline;
+  }
+}
+
+.card_panel {
+  width: 97%;
+  height: 400px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding: 0 2px;
+  margin: 0 16px 16px 16px;
+  overflow-y: scroll;
+
+  .available {
+    p {
+      background-color: #2C2405;
+      border: 2px solid #7E6B04;
+      border-radius: 5px;
+      padding: 5px 10px;
+      font-size: 1.296rem;
+      margin-bottom: .5rem;
+    }
+
+    label {
+      text-transform: uppercase;
+    }
+  }
+}
+
+li {
+  list-style-type: none;
+}

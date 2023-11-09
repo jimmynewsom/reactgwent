@@ -25,7 +25,7 @@ export function LargeCardView ({cardData, handleClick, available = 0}) {
         width="180"
         height="320"
       />
-      {available ? <div className="available"><p>available: {available}</p></div> : <></>}
+      {available ? <div className="available"><p>Available: {available}</p></div> : <></>}
     </div>
   );
 }

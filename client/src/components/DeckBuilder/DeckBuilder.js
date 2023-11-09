@@ -1,4 +1,4 @@
-import './DeckBuilder.css';
+import './DeckBuilder.scss';
 import React, {useState, useEffect} from 'react';
 import {useParams} from 'react-router-dom';
 import {useAuthHeader} from 'react-auth-kit';
@@ -345,45 +345,45 @@ export default function DeckBuilder({socket}) {
 
   return(
     <div className="deckbuilder">
-      <h3>DeckBuilder</h3>
+      <h2 className={'screen-heading'}>DeckBuilder</h2>
       <div className="faction_select">
-        <button onClick={previousFaction}> previous faction </button>
-        <p> {currentFaction} </p>
-        <button onClick={nextFaction}> next faction </button>
+        <button className={'primary-button'} onClick={previousFaction}> previous faction </button>
+        <h3> {currentFaction} </h3>
+        <button className={'primary-button'} onClick={nextFaction}> next faction </button>
       </div>
       <div className="deckbuilder_grid">
         <div className="one">
           <p>(filters - todo)</p>
-          <p>Available Cards</p>
+          <h5>Available Cards</h5>
           <div className="card_panel">
             {createAvailableCards()}
           </div>
         </div>
         <div className="two">
           <p>Leader - todo</p>
-          <h3>{currentDeck.leaderName}</h3>
-          <p>Total cards in deck</p>
+          <h4>{currentDeck.leaderName}</h4>
+          <strong>Total cards in deck</strong>
           <p>{currentDeck.totalCardCount}</p>
-          <p>Number of Unit Cards</p>
+          <strong>Number of Unit Cards</strong>
 
           {currentDeck.unitCount >= 22 ? <p style={{color:"green"}}>{currentDeck.unitCount}</p> : <p style={{color:"red"}}>{currentDeck.unitCount}/22</p>}
 
-          <p>Special Cards</p>
+          <strong>Special Cards</strong>
 
           {currentDeck.specialCount <= 10 ? <p style={{color:"green"}}>{currentDeck.specialCount}/10</p> : <p style={{color:"red"}}>{currentDeck.specialCount}/10</p>}
           
-          <p>Total Unit Card Strength</p>
+          <strong>Total Unit Card Strength</strong>
           <p>{currentDeck.totalUnitStrength}</p>
-          <p>Hero Cards</p>
+          <strong>Hero Cards</strong>
           <p>{currentDeck.heroCount}</p>
 
-          {!roomName ? <button id="save_button" onClick={saveCurrentDeck}> Save current deck </button> : <button id="ready" onClick={submitReady}> Ready (use current deck) </button>}
+          {!roomName ? <button className="primary-button" id="save_button" onClick={saveCurrentDeck}> Save current deck </button> : <button id="ready" onClick={submitReady}> Ready (use current deck) </button>}
 
 
         </div>
         <div className="three">
           <p>filters - todo</p>
-          <p>Cards in Deck</p>
+          <h5>Cards in Deck</h5>
           <div className="card_panel">
             {createUsedCards()}
           </div>
