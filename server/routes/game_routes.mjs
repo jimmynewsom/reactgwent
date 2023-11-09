@@ -155,15 +155,11 @@ export default function create_game_router(io){
   //and I don't think I can fix that. I think that's just how it works.
   //So, every connection / re-connection, I am using some logic to send them (back) where they need to go
   //Also, I am using game.player1.playerName as the name of the room for every game
-  //when a client connects, I pull their username from auth, and use that to add them to the right room
-  //I might need to use jwt for this later, but this works right now
+  //and when a client connects, I pull their username from their jwt token, and use that to add them to the right room
+  io.use(verifyWebsocketToken);
+  
   io.on('connection', (socket) => {
-    const token = socket.handshake.auth.Authorization;
-    let result = verifyWebsocketToken(token);
-    if(!result.isValid)
-      return
-
-    const username = result.username;
+    const username = socket.username;
     console.log(username + " connected");
 
     if(!userGameMap.has(username))

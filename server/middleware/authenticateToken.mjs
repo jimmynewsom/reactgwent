@@ -16,15 +16,17 @@ export default function verifyToken(req, res, next) {
   });
 }
 
-export function verifyWebsocketToken(token) {
+export function verifyWebsocketToken(socket, next) {
+  const token = socket.handshake.auth.Authorization;
   if (!token)
-    return {isValid: false};
+    next(new Error("invalid token"));
 
   jwt.verify(token, process.env.JWT_SECRET, (error, decoded) => {
     if(error)
-      return {isValid: false};
+      next(new Error("invalid token"));
     else{
-      return {isValid: true, username: decoded};
+      socket.username = decoded;
+      next();
     }
   });
 }
