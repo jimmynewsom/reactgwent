@@ -120,11 +120,11 @@ function Field({board, playerIndex, setPlayerTotal, setOpponentTotal}){
   let r1 = createCardRows(board, playerIndex, "siege", 1);
   let r2 = createCardRows(board, playerIndex, "ranged", 1);
   let r3 = createCardRows(board, playerIndex, "close", 1);
-  setOpponentTotal(r1[1] + r2[1] + r3[1]);
+  //setOpponentTotal(r1[1] + r2[1] + r3[1]);
   let r4 = createCardRows(board, playerIndex, "close", 0);
   let r5 = createCardRows(board, playerIndex, "ranged", 0);
   let r6 = createCardRows(board, playerIndex, "siege", 0);
-  setPlayerTotal(r4[1] + r5[1] + r6[1]);
+  //setPlayerTotal(r4[1] + r5[1] + r6[1]);
 
   return(
     <div className="field_grid">
@@ -217,6 +217,41 @@ export function getCardData(setcardmap, authheader) {
   }
 }
 
+let card1 = new CardData("Geralt of Rivia", "geralt_of_rivia.png", "hero", "neutral", "15", "close", "none", "1", "");
+let card2 = new CardData("Yennefer of Vengerberg", "yennefer_of_vengerberg.png", "hero", "neutral", "7", "ranged", "medic", "1", "");
+let card3 = new CardData("Triss Merigold", "triss_merigold.png", "hero", "neutral", "7", "close", "scorch", "1", "");
+let card4 = new CardData("Cirilla Fiona Elen Riannon", "ciri.png", "hero", "neutral", "15", "close", "none", "1", "");
+
+let initialGameState = {
+  playerIndex: 0,
+  playersTurn: 0,
+  round: 1,
+  board: new Board({
+    field: [{close: [card1], ranged: [card2], siege: [card3], graveyard: [card4]},
+            {close: [card2], ranged: [card4], siege: [card2], graveyard: []}],
+    weather: {close: true, ranged: false, siege: true},
+    rallyHorns: [{close: true, ranged: true, siege: true},
+                {close: false, ranged: false, siege: false}]
+  }),
+  player: {
+    lives: 2,
+    passed: false,
+    playerName: "jimmynewsom",
+    faction: "Northern Realms",
+    leaderName: "leaderwoman",
+    hand: [card1, card2, card3, card4]
+  },
+  opponent: {
+    lives: 2,
+    passed: false,
+    playerName: "opponent",
+    faction: "Northern Realms",
+    leaderName: "leaderman",
+    hand: {length: 10}//this is a hack, so I can reuse my Player panel for both players, but not send 1 player what's in the other players hand
+  }
+}
+
+
 
 export default function GwentClient({socket}) {
   console.log("rendering gwent client parent component");
@@ -229,52 +264,20 @@ export default function GwentClient({socket}) {
   const [gameOverMessage, setGameOverMessage] = useState();
   const [playerTotal, setPlayerTotal] = useState(0);
   const [opponentTotal, setOpponentTotal] = useState(0);
-
-  let card1 = new CardData("Geralt of Rivia", "geralt_of_rivia.png", "hero", "neutral", "15", "close", "none", "1", "");
-  let card2 = new CardData("Yennefer of Vengerberg", "yennefer_of_vengerberg.png", "hero", "neutral", "7", "ranged", "medic", "1", "");
-  let card3 = new CardData("Triss Merigold", "triss_merigold.png", "hero", "neutral", "7", "close", "scorch", "1", "");
-  let card4 = new CardData("Cirilla Fiona Elen Riannon", "ciri.png", "hero", "neutral", "15", "close", "none", "1", "");
-  let initialGameState = {
-    playerIndex: 0,
-    playersTurn: 0,
-    round: 1,
-    board: new Board({
-      field: [{close: [card1], ranged: [card2], siege: [card3], graveyard: [card4]},
-              {close: [card2], ranged: [card4], siege: [card2], graveyard: []}],
-      weather: {close: true, ranged: false, siege: true},
-      rallyHorns: [{close: true, ranged: true, siege: true},
-                  {close: false, ranged: false, siege: false}]
-    }),
-    player: {
-      lives: 2,
-      passed: false,
-      playerName: "jimmynewsom",
-      faction: "Northern Realms",
-      leaderName: "leaderwoman",
-      hand: [card1, card2, card3, card4]
-    },
-    opponent: {
-      lives: 2,
-      passed: false,
-      playerName: "opponent",
-      faction: "Northern Realms",
-      leaderName: "leaderman",
-      hand: {length: 10}//this is a hack, so I can reuse my Player panel for both players, but not send 1 player what's in the other players hand
-    }
-  }
+  
 
   const [gameState, setGameState] = useState(initialGameState);
 
-  socket.on("game_update", (gameState) => {
+  function socketGameUpdateReceived(gameState){
     console.log("game update received");
 
     gameState.board = new Board(gameState.board);
     console.log(gameState.board);
     setGameState(gameState);
     console.log(gameState)
-  });
+  };
 
-  socket.on("game_over", (result) => {
+  function socketGameOverReceived(result){
     console.log("game over");
 
     if(result.winner == gameState.playerIndex)
@@ -283,13 +286,17 @@ export default function GwentClient({socket}) {
       setGameOverMessage("You Lose!");
     else
       setGameOverMessage("Tie Game.");
-  });
+  }
 
   useEffect(() => {
     getCardData(setCardMap, authHeader);
 
     console.log("connecting to websocket");
     socket.connect();
+    socket.removeAllListeners("game_update");
+    socket.removeAllListeners("game_over");
+    socket.on("game_update", socketGameUpdateReceived);
+    socket.on("game_over", socketGameOverReceived);
     socket.emit("request_game_update");
 
     return (() => {
