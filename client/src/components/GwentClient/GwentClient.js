@@ -272,9 +272,9 @@ export default function GwentClient({socket}) {
     console.log("game update received");
 
     gameState.board = new Board(gameState.board);
-    console.log(gameState.board);
+    //console.log(gameState.board);
     setGameState(gameState);
-    console.log(gameState)
+    //console.log(gameState)
   };
 
   function socketGameOverReceived(result){
@@ -366,7 +366,6 @@ export default function GwentClient({socket}) {
           }
         }
         setFocusCard();
-        socket.emit("request_game_update");
       }
     }
    }
