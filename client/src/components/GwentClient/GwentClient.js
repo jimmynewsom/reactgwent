@@ -6,6 +6,8 @@ import {LargeCardView, CardData, SmallCardView} from '../Card/Card';
 
 
 function PlayerStatsPanel({player, totalStrength}){
+  console.log("rendering player stats panel");
+
   return(
     <div className="player_stats_panel">
       <p>{player.playerName}</p>
@@ -27,6 +29,8 @@ const torrentialRainCard = new CardData("Torrential Rain", "torrential_rain.png"
 // const torrentialRainView = new SmallCardView({torrentialRainCard});
 
 function WeatherPanel({weather}){
+  console.log("rendering weather panel");
+
   return(
     <div className="weather_panel">
       <div className="weather_grid">
@@ -111,6 +115,7 @@ const rallyHornCard = new CardData("Commanders Horn", "commanders_horn.png", "sp
 
 //Field is basically a view for my Board class
 function Field({board, playerIndex, setPlayerTotal, setOpponentTotal}){
+  console.log("rendering field component");
 
   let r1 = createCardRows(board, playerIndex, "siege", 1);
   let r2 = createCardRows(board, playerIndex, "ranged", 1);
@@ -135,6 +140,8 @@ function Field({board, playerIndex, setPlayerTotal, setOpponentTotal}){
 }
 
 function createCardRows(board, playerIndex, range, i){
+  console.log("calling createCardRows function");
+
   let cardViews = [];
   let cards = board.field[(playerIndex + i) % 2][range];
   let rowWeather = board.weather[range];
@@ -212,6 +219,8 @@ export function getCardData(setcardmap, authheader) {
 
 
 export default function GwentClient({socket}) {
+  console.log("rendering gwent client parent component");
+
   const authHeader = useAuthHeader();
   const [cardMap, setCardMap] = useState(new Map());
   
@@ -257,6 +266,8 @@ export default function GwentClient({socket}) {
   const [gameState, setGameState] = useState(initialGameState);
 
   socket.on("game_update", (gameState) => {
+    console.log("game update received");
+
     gameState.board = new Board(gameState.board);
     console.log(gameState.board);
     setGameState(gameState);
