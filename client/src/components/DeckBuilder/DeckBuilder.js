@@ -345,23 +345,23 @@ export default function DeckBuilder({socket}) {
 
   return(
     <div className="deckbuilder">
-      <h2 className={'screen-heading'}>DeckBuilder</h2>
+      <h1 className={'screen-heading'}>DeckBuilder</h1>
       <div className="faction_select">
         <button className={'primary-button'} onClick={previousFaction}> previous faction </button>
-        <h3> {currentFaction} </h3>
+        <h2> {currentFaction} </h2>
         <button className={'primary-button'} onClick={nextFaction}> next faction </button>
       </div>
       <div className="deckbuilder_grid">
         <div className="one">
           <p>(filters - todo)</p>
-          <h5>Available Cards</h5>
+          <h4>Available Cards</h4>
           <div className="card_panel">
             {createAvailableCards()}
           </div>
         </div>
         <div className="two">
           <p>Leader - todo</p>
-          <h4>{currentDeck.leaderName}</h4>
+          <h3>{currentDeck.leaderName}</h3>
           <strong>Total cards in deck</strong>
           <p>{currentDeck.totalCardCount}</p>
           <strong>Number of Unit Cards</strong>
@@ -378,8 +378,6 @@ export default function DeckBuilder({socket}) {
           <p>{currentDeck.heroCount}</p>
 
           {!roomName ? <button className="primary-button" id="save_button" onClick={saveCurrentDeck}> Save current deck </button> : <button id="ready" onClick={submitReady}> Ready (use current deck) </button>}
-
-
         </div>
         <div className="three">
           <p>filters - todo</p>
