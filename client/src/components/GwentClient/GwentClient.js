@@ -274,10 +274,6 @@ export default function GwentClient({socket}) {
     console.log(gameState)
   });
 
-  socket.on("game_update_ready", () => {
-    socket.emit("request_game_update");
-  });
-
   socket.on("game_over", (result) => {
     console.log("game over");
 
