@@ -54,6 +54,8 @@ class MultiplayerGwent{
     //little hack, because my PlayerPanel components expect a player.hand.length, but I don't want to reveal the opponent's cards
     gameState.opponent.hand = {length: this.game.players[(playerIndex + 1) % 2].hand.length}
 
+    gameState.tightBonds = Object.fromEntries(gameState.board.tightBondsMaps[playerIndex].entries());
+
     return gameState;
   }
 }
@@ -170,6 +172,12 @@ export default function create_game_router(io){
     socket.join(game.player1.playerName);
     console.log(username + " joined room " + game.player1.playerName);
 
+    //store socket ids inside MultiplayerGwent object to send game updates later
+    if(username == game.player1.playerName)
+      game.player1socketid = socket.id;
+    else
+      game.player2socketid = socket.id;
+
     //this sends the first player to deckbuilder once the second player joins
     if(game.status == "redirect to deckbuilder"){
       io.to(game.player1.playerName).emit("redirect", "/deckbuilder/" + game.player1.playerName);
@@ -220,14 +228,17 @@ export default function create_game_router(io){
     socket.on("play_card", (cardIndex, target) => {
       //console.log(playerIndex + " " + cardIndex + " " + target);
       game.game.playCard(playerIndex, cardIndex, target);
-      io.to(game.player1.playerName).emit("game_update_ready");
+      io.to(game.player1socketid).emit("game_update", game.getGameState(0));
+      io.to(game.player2socketid).emit("game_update", game.getGameState(1));
     });
 
     socket.on("pass", () => {
       //console.log("player " + playerIndex + " passes");
       let result = game.game.pass(playerIndex);
-      if(result == 0)
-        io.to(game.player1.playerName).emit("game_update_ready");
+      if(result == 0){
+        io.to(game.player1socketid).emit("game_update", game.getGameState(0));
+        io.to(game.player2socketid).emit("game_update", game.getGameState(1));
+      }
       else{
         console.log("game over");
 
