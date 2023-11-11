@@ -54,8 +54,9 @@ class MultiplayerGwent{
     //little hack, because my PlayerPanel components expect a player.hand.length, but I don't want to reveal the opponent's cards
     gameState.opponent.hand = {length: this.game.players[(playerIndex + 1) % 2].hand.length}
     //maps are not serializable, which means they don't get sent via socket.io events,
-    //so this adds a serializable version of the appropriate tightBondsMap to the gamestate
-    gameState.tightBonds = Object.fromEntries(gameState.board.tightBondsMaps[playerIndex].entries());
+    //so this adds a serializable version of the tightBondsMaps to the gamestate
+    gameState.tightBondMaps = [Object.fromEntries(gameState.board.tightBondsMaps[0].entries()),
+                                Object.fromEntries(gameState.board.tightBondsMaps[1].entries())];
 
     return gameState;
   }
