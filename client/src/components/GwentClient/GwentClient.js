@@ -345,8 +345,7 @@ export default function GwentClient({socket}) {
             socket.emit("play_card", cardIndex);
           }
           else if(card.range == "agile"){
-            //todo - implement agile targeting logic
-            socket.emit("play_card", cardIndex, "close");
+            console.log("agile unit selected, please select row");
           }
           else {
             //todo - implement medic targeting logic
@@ -364,7 +363,7 @@ export default function GwentClient({socket}) {
             socket.emit("play_card", cardIndex, "close");
           }
           else {
-            console.log("decoy selected");
+            console.log("decoy selected, please choose target");
           }
         }
         setFocusCard();
@@ -379,19 +378,25 @@ export default function GwentClient({socket}) {
         return;
       }
 
-      console.log("got here");
-
       //if the focus card is a decoy in the player's hand, clicking a card on your side of the field will make it the target for the decoy
-      if(focusCard && focusCard[0] == "hand" && gameState.player.hand[focusCard[1]].special == "decoy"){
+      if(focusCard && focusCard[0] == "hand"){
         if(gameState.playersTurn != gameState.playerIndex){
           alert("it's not your turn");
           return;
         }
 
-        console.log("got here");
+        if(gameState.player.hand[focusCard[1]].special == "decoy"){
+          if(gameState.board.field[gameState.playerIndex][range][cardIndex].type == "unit")
+            socket.emit("play_card", focusCard[1], {range: range, index: cardIndex});
+        }
 
-        if(gameState.board.field[gameState.playerIndex][range][cardIndex].type == "unit")
-          socket.emit("play_card", focusCard[1], {range: range, index: cardIndex});
+        if(gameState.player.hand[focusCard[1]].range == "agile" && range != "siege"){
+          socket.emit("play_card", focusCard[1], range);
+        }
+
+        if(gameState.player.hand[focusCard[1]].special == "horn"){
+          socket.emit("play_card", focusCard[1], range);
+        }        
       }
 
       //otherwise, set the focus card to the card that was clicked
