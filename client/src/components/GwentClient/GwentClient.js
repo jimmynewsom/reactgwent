@@ -145,17 +145,19 @@ function createCardRows(board, playerIndex, range, i, rowStrength, handleFieldCl
 
   let rallyHorn = board.rallyHorns[(playerIndex + i) % 2][range];
 
-  let cardViewClasses = "cardrow";
+  let rowClasses = "row_grid";
   if(rowWeather)
-    cardViewClasses += " weather_active";
+    rowClasses += " weather_active";
+  if(rallyHorn)
+    rowClasses += " rallyhorn_active";
   //todo - if this row is targetable
 
 
-  return(<>
+  return(<div className={rowClasses}>
     <div className="range">{range}<p>totalStrength: {rowStrength}</p></div>
     <div className="rallyhorn">{rallyHorn ? <SmallCardView cardData={rallyHornCard}/> : <></>}</div>
-    <div className={cardViewClasses}>{cardViews}</div>
-  </>);
+    <div className="cardrow">{cardViews}</div>
+  </div>);
 }
 
 
@@ -396,7 +398,7 @@ export default function GwentClient({socket}) {
 
         if(gameState.player.hand[focusCard[1]].special == "horn"){
           socket.emit("play_card", focusCard[1], range);
-        }        
+        }
       }
 
       //otherwise, set the focus card to the card that was clicked
@@ -414,6 +416,18 @@ export default function GwentClient({socket}) {
 
       if(!focusCard || focusCard[0] != range || focusCard[1] != cardIndex || focusCard[2] != "opponent");
         setFocusCard(range, cardIndex, "opponent");
+    }
+  }
+
+  function handleRangeSelectClick(range){
+    if(focusCard && focusCard[0] == "hand"){
+      if(gameState.player.hand[focusCard[1]].range == "agile" && range != "siege"){
+        socket.emit("play_card", focusCard[1], range);
+      }
+
+      if(gameState.player.hand[focusCard[1]].special == "horn"){
+        socket.emit("play_card", focusCard[1], range);
+      }
     }
   }
 
