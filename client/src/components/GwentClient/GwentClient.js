@@ -15,7 +15,7 @@ function PlayerStatsPanel({player, totalStrength}){
       <p>cards in hand: {player.hand.length}</p>
       <p>lives: {player.lives}</p>
       <p>leader: {player.leaderName}</p>
-      <p>totalStrength: {totalStrength}</p>
+      <p>totalStrength: {totalStrength.close + totalStrength.ranged + totalStrength.siege}</p>
       {player.passed ? <p><b>passed</b></p> : <p></p>}
     </div>
   );
@@ -24,9 +24,6 @@ function PlayerStatsPanel({player, totalStrength}){
 const bitingFrostCard = new CardData("Biting Frost", "biting_frost.png", "special", "neutral", "0", "special", "weather", "3", "");
 const impenetrableFogCard = new CardData("Impenetrable Fog", "impenetrable_fog.png", "special", "neutral", "0", "special", "weather", "3", "");
 const torrentialRainCard = new CardData("Torrential Rain", "torrential_rain.png", "special", "neutral", "0", "special", "weather", "3", "");
-// const BitingFrostView = new SmallCardView({bitingFrostCard});
-// const impenetrableFogView = <SmallCardView cardData={impenetrableFogCard} />;
-// const torrentialRainView = new SmallCardView({torrentialRainCard});
 
 function WeatherPanel({weather}){
   console.log("rendering weather panel");
@@ -61,31 +58,11 @@ class Board{
       this.field = board.field;
       this.weather = board.weather;
       this.rallyHorns = board.rallyHorns;
-      this.calculateMoraleAndTightBonds();
+      this.morale = board.morale;
+      this.tightBondsMaps = board.tightBondsMaps;
     }
   }
 
-  calculateMoraleAndTightBonds(){
-    const ranges = ["close", "ranged", "siege"];
-    for(let i = 0; i < 2; i++){
-      for(let range of ranges){
-        for(let card of this.field[i][range]){
-          if(card.special == "morale")
-            this.morale[i][range]++;
-
-          else if(card.special == "tight bond"){
-            if(this.tightBondsMaps[i].has(card.name))
-              this.tightBondsMaps[i].set(card.name, this.tightBondsMaps[i].get(card.name) + 1);
-            else
-              this.tightBondsMaps[i].set(card.name, 0);
-          }
-        }
-      }
-    }
-  }
-
-  //this needs to be called after I calculate morale and tight bonds for the rows now
-  //that way I only need to iterate over each row twice, instead once per card
   getCardStrength(playerIndex, range, cardIndex){
     let card = this.field[playerIndex][range][cardIndex];
     if(card.type == "hero")
@@ -109,53 +86,60 @@ class Board{
 
     return currentStrength;
   }
+
+  getTotalStrength(playerIndex){
+    let totalStrength = {close: 0, ranged: 0, siege: 0};
+    let ranges = ["close", "ranged", "siege"];
+    for(let range of ranges){
+      for(let i = 0; i < this.field[playerIndex][range].length; i++){
+        totalStrength[range] += this.getCardStrength(playerIndex, range, i);
+      }
+    }
+    return totalStrength;
+  }
 }
 
 const rallyHornCard = new CardData("Commanders Horn", "commanders_horn.png", "special", "neutral", "0", "special", "horn", "3", "");
 
 //Field is basically a view for my Board class
-function Field({board, playerIndex, setPlayerTotal, setOpponentTotal}){
+//except maybe I should just use BoardRow components instead...
+function Field({board, playerIndex, playerTotal, opponentTotal, handlePlayersFieldClick, handleOpponentsFieldClick}){
   console.log("rendering field component");
 
-  let r1 = createCardRows(board, playerIndex, "siege", 1);
-  let r2 = createCardRows(board, playerIndex, "ranged", 1);
-  let r3 = createCardRows(board, playerIndex, "close", 1);
-  //setOpponentTotal(r1[1] + r2[1] + r3[1]);
-  let r4 = createCardRows(board, playerIndex, "close", 0);
-  let r5 = createCardRows(board, playerIndex, "ranged", 0);
-  let r6 = createCardRows(board, playerIndex, "siege", 0);
-  //setPlayerTotal(r4[1] + r5[1] + r6[1]);
+  let r1 = createCardRows(board, playerIndex, "siege", 1, opponentTotal.siege, handleOpponentsFieldClick);
+  let r2 = createCardRows(board, playerIndex, "ranged", 1, opponentTotal.ranged, handleOpponentsFieldClick);
+  let r3 = createCardRows(board, playerIndex, "close", 1, opponentTotal.close, handleOpponentsFieldClick);
+  let r4 = createCardRows(board, playerIndex, "close", 0, playerTotal.close, handlePlayersFieldClick);
+  let r5 = createCardRows(board, playerIndex, "ranged", 0, playerTotal.ranged, handlePlayersFieldClick);
+  let r6 = createCardRows(board, playerIndex, "siege", 0, playerTotal.siege, handlePlayersFieldClick);
 
   return(
     <div className="field_grid">
-      {r1[0]}
-      {r2[0]}
-      {r3[0]}
+      {r1}
+      {r2}
+      {r3}
       
-      {r4[0]}
-      {r5[0]}
-      {r6[0]}
+      {r4}
+      {r5}
+      {r6}
     </div>
   );
 }
 
-function createCardRows(board, playerIndex, range, i){
+function createCardRows(board, playerIndex, range, i, rowStrength, handleFieldClick){
   console.log("calling createCardRows function");
 
   let cardViews = [];
   let cards = board.field[(playerIndex + i) % 2][range];
   let rowWeather = board.weather[range];
-  let rowStrength = 0;
   
   for(let j=0; j < cards.length; j++){
     let card = cards[j];
-    let currentStrength = board.getCardStrength((playerIndex + i) % 2, range, j);
-    rowStrength += currentStrength;
-
     cardViews.push(<SmallCardView
                       cardData={card}
                       key={(range + i) + j}
-                      currentStrength={currentStrength}
+                      currentStrength={board.getCardStrength((playerIndex + i) % 2, range, j)}
+                      handleClick={handleFieldClick(range, j)}
                   />);
   }
 
@@ -167,11 +151,11 @@ function createCardRows(board, playerIndex, range, i){
   //todo - if this row is targetable
 
 
-  return[(<>
+  return(<>
     <div className="range">{range}<p>totalStrength: {rowStrength}</p></div>
     <div className="rallyhorn">{rallyHorn ? <SmallCardView cardData={rallyHornCard}/> : <></>}</div>
     <div className={cardViewClasses}>{cardViews}</div>
-  </>), rowStrength];
+  </>);
 }
 
 
@@ -231,7 +215,9 @@ let initialGameState = {
             {close: [card2], ranged: [card4], siege: [card2], graveyard: []}],
     weather: {close: true, ranged: false, siege: true},
     rallyHorns: [{close: true, ranged: true, siege: true},
-                {close: false, ranged: false, siege: false}]
+                {close: false, ranged: false, siege: false}],
+    morale: [{close: 0, ranged: 0, siege: 0}, {close: 0, ranged: 0, siege: 0}],
+    tightBondsMaps: [new Map(), new Map()]
   }),
   player: {
     lives: 2,
@@ -251,6 +237,21 @@ let initialGameState = {
   }
 }
 
+ //this function is kind of a repeat of my createCardRows function inside my Field component..... might refactor later
+ function PlayerHand({cards, handleHandClick}){
+  let cardViews = [];
+  for(let i = 0; i < cards.length; i++){
+    let card = cards[i];
+    cardViews.push(<SmallCardView
+                      cardData={card}
+                      handleClick={handleHandClick(i)}
+                      key={"hand" + i}
+                  />)
+  }
+  return cardViews;
+}
+
+
 
 
 export default function GwentClient({socket}) {
@@ -259,22 +260,24 @@ export default function GwentClient({socket}) {
   const authHeader = useAuthHeader();
   const [cardMap, setCardMap] = useState(new Map());
   
-  //focusCard is going to look like cardIndex to start
+  //focusCard is looks like [range, index]
   const [focusCard, setFocusCard] = useState();
   const [gameOverMessage, setGameOverMessage] = useState();
-  const [playerTotal, setPlayerTotal] = useState(0);
-  const [opponentTotal, setOpponentTotal] = useState(0);
-  
-
   const [gameState, setGameState] = useState(initialGameState);
+  const [playerTotal, setPlayerTotal] = useState(initialGameState.board.getTotalStrength(initialGameState.playerIndex));
+  const [opponentTotal, setOpponentTotal] = useState(initialGameState.board.getTotalStrength((initialGameState.playerIndex + 1) % 2));
+
 
   function socketGameUpdateReceived(gameState){
     console.log("game update received");
+    gameState.board.tightBondsMaps = [new Map(Object.entries(gameState.tightBondsMaps[0])),
+                                      new Map(Object.entries(gameState.tightBondsMaps[1]))];
 
     gameState.board = new Board(gameState.board);
-    //console.log(gameState.board);
     setGameState(gameState);
-    //console.log(gameState)
+    setPlayerTotal(gameState.board.getTotalStrength(gameState.playerIndex));
+    setPlayerTotal(gameState.board.getTotalStrength((gameState.playerIndex + 1) % 2));
+    console.log(gameState)
   };
 
   function socketGameOverReceived(result){
@@ -322,8 +325,8 @@ export default function GwentClient({socket}) {
       }
 
       //first click makes the card the focus card
-      if(!focusCard || focusCard[0] != cardIndex)
-        setFocusCard([cardIndex]);
+      if(!focusCard || focusCard[0] != "hand" || focusCard[1] != cardIndex)
+        setFocusCard(["hand", cardIndex]);
       else {
         //if the card is already the focus and they click it again, play the card, unless it has targeting rules
         //but first check if it's the players turn
@@ -332,12 +335,13 @@ export default function GwentClient({socket}) {
           return;
         }
 
+        console.log("socket connected: " + socket.connected);
+
         let card = gameState.player.hand[cardIndex];
+        console.log(card.name + " played");
 
         if(card.type == "unit" || card.type == "hero"){
-          console.log("unit or hero card played");
           if(card.special != "medic" && card.range != "agile"){
-            console.log("socket connected: " + socket.connected);
             socket.emit("play_card", cardIndex);
           }
           else if(card.range == "agile"){
@@ -352,7 +356,6 @@ export default function GwentClient({socket}) {
         else {
           //if the card is not type hero or unit it is type special
           //decoys and rally horns have targets, but the other special cards do not
-          console.log("special card played");
           if(card.name != "Decoy" && card.name !="Commanders Horn"){
             socket.emit("play_card", cardIndex);
           }
@@ -361,31 +364,54 @@ export default function GwentClient({socket}) {
             socket.emit("play_card", cardIndex, "close");
           }
           else {
-            //todo - add decoy targeting logic
-            console.log("decoy played");
+            console.log("decoy selected");
           }
         }
         setFocusCard();
       }
     }
-   }
-
-   //this function is kind of a repeat of my createCardRows function inside my Field component..... might refactor later
-  function createHandViews(){
-    let cardViews = [];
-    let cards = gameState.player.hand;
-    
-    for(let i=0; i < cards.length; i++){
-      let card = cards[i];
-
-      cardViews.push(<SmallCardView
-                        cardData={card}
-                        handleClick={handleHandClick(i)}
-                        key={"hand" + i}
-                    />)
-    }
-    return cardViews;
   }
+
+  function handlePlayersFieldClick(range, cardIndex){
+    return () => {
+      if(!socket.connected){
+        alert("websocket is disconnected. please refresh the page!");
+        return;
+      }
+
+      console.log("got here");
+
+      //if the focus card is a decoy in the player's hand, clicking a card on your side of the field will make it the target for the decoy
+      if(focusCard && focusCard[0] == "hand" && gameState.player.hand[focusCard[1]].special == "decoy"){
+        if(gameState.playersTurn != gameState.playerIndex){
+          alert("it's not your turn");
+          return;
+        }
+
+        console.log("got here");
+
+        if(gameState.board.field[gameState.playerIndex][range][cardIndex].type == "unit")
+          socket.emit("play_card", focusCard[1], {range: range, index: cardIndex});
+      }
+
+      //otherwise, set the focus card to the card that was clicked
+      else if(!focusCard || focusCard[0] != range || focusCard[1] != cardIndex || focusCard[2] == "player");
+        setFocusCard([range, cardIndex, "player"]);
+    }
+  }
+
+  function handleOpponentsFieldClick(range, cardIndex){
+    return () => {
+      if(!socket.connected){
+        alert("websocket is disconnected. please refresh the page!");
+        return;
+      }
+
+      if(!focusCard || focusCard[0] != range || focusCard[1] != cardIndex || focusCard[2] != "opponent");
+        setFocusCard(range, cardIndex, "opponent");
+    }
+  }
+
 
 
   
@@ -394,6 +420,16 @@ export default function GwentClient({socket}) {
 
   if(gameOverMessage)
     return <h3>{gameOverMessage}</h3>
+
+  //focusCard has shape [range (or hand), index, player or opponent]
+  let fcard;
+  if(focusCard && focusCard[0] == "hand"){
+    fcard = gameState.player.hand[focusCard[1]];
+  }
+  else if(focusCard && focusCard[2] == "player")
+    fcard = gameState.board.field[gameState.playerIndex][focusCard[0]][focusCard[1]];
+  else if(focusCard && focusCard[2] == "opponent")
+    fcard = gameState.board.field[(gameState.playerIndex + 1) % 2][focusCard[0]][focusCard[1]];
 
   return(
     <div className="gwent_client">
@@ -418,12 +454,14 @@ export default function GwentClient({socket}) {
           <Field 
             board={gameState.board}
             playerIndex={gameState.playerIndex}
-            setPlayerTotal={setPlayerTotal}
-            setOpponentTotal={setOpponentTotal}
+            playerTotal={playerTotal}
+            opponentTotal={opponentTotal}
+            handlePlayersFieldClick={handlePlayersFieldClick}
+            handleOpponentsFieldClick={handleOpponentsFieldClick}
           />
           <br />
           <div className="player_hand">
-            {createHandViews()}
+            <PlayerHand cards={gameState.player.hand} handleHandClick={handleHandClick} />
           </div>
         </div>
         <div className="right_panel">
@@ -432,7 +470,7 @@ export default function GwentClient({socket}) {
             <p>decks & card focus</p>
           </div>
           <div className="card_focus">
-            {focusCard ? <LargeCardView cardData={gameState.player.hand[focusCard[0]]} handleClick={()=>{}} /> : <></>}
+            {focusCard ? <LargeCardView cardData={fcard} handleClick={()=>{}} /> : <></>}
           </div>
           <div className="deck_and_graveyard">
             <p>graveyards</p>
