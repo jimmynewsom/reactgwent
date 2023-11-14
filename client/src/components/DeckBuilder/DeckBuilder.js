@@ -1,10 +1,19 @@
+// Import dependencies
 import './DeckBuilder.scss';
 import React, {useState, useEffect} from 'react';
 import {useParams} from 'react-router-dom';
 import {useAuthHeader} from 'react-auth-kit';
 
+// Import components
 import {getCardData} from '../GwentClient/GwentClient';
 import {LargeCardView, CardData} from '../Card/Card';
+
+// Import icons
+import { TbCards } from "react-icons/tb";
+import { CgCardSpades } from "react-icons/cg";
+import { CgCardClubs } from "react-icons/cg";
+import { PiHandFist } from "react-icons/pi";
+import { GiElfHelmet } from "react-icons/gi";
 
 //this class is a little weird, but I need to make new objects everytime for React to notice my state changes, and this seemed like a good way to do it
 //also, I should maybe include a field for the faction, but right now it's easier to track that separately and add it when I save decks to the database
@@ -363,19 +372,19 @@ export default function DeckBuilder({socket}) {
           <p>Leader - todo</p>
           <h3>{currentDeck.leaderName}</h3>
           <strong>Total cards in deck</strong>
-          <p>{currentDeck.totalCardCount}</p>
+          <p className="card-stat"><TbCards />{currentDeck.totalCardCount}</p>
           <strong>Number of Unit Cards</strong>
 
-          {currentDeck.unitCount >= 22 ? <p style={{color:"green"}}>{currentDeck.unitCount}</p> : <p style={{color:"red"}}>{currentDeck.unitCount}/22</p>}
+          {currentDeck.unitCount >= 22 ? <p style={{color:"green"}}><CgCardSpades />{currentDeck.unitCount}</p> : <p style={{color:"red"}}>{currentDeck.unitCount}/22</p>}
 
           <strong>Special Cards</strong>
 
-          {currentDeck.specialCount <= 10 ? <p style={{color:"green"}}>{currentDeck.specialCount}/10</p> : <p style={{color:"red"}}>{currentDeck.specialCount}/10</p>}
+          {currentDeck.specialCount <= 10 ? <p style={{color:"green"}}><CgCardClubs />{currentDeck.specialCount}/10</p> : <p style={{color:"red"}}>{currentDeck.specialCount}/10</p>}
           
           <strong>Total Unit Card Strength</strong>
-          <p>{currentDeck.totalUnitStrength}</p>
+          <p className="card-stat"><PiHandFist />{currentDeck.totalUnitStrength}</p>
           <strong>Hero Cards</strong>
-          <p>{currentDeck.heroCount}</p>
+          <p className="card-stat"><GiElfHelmet />{currentDeck.heroCount}</p>
 
           {!roomName ? <button className="primary-button" id="save_button" onClick={saveCurrentDeck}> Save current deck </button> : <button id="ready" onClick={submitReady}> Ready (use current deck) </button>}
         </div>

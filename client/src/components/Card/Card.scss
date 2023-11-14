@@ -9,6 +9,11 @@
     // thank you Bri Camp Gomez! https://codepen.io/brianacamp/pen/ExxrYra
     .large_card__image {
       width: 100%;
+
+      img {
+        width: 150px;
+        height: 290px;
+      }
     }
 
     .large_card__availability {
