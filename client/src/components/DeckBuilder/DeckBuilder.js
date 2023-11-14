@@ -10,10 +10,10 @@ import {LargeCardView, CardData} from '../Card/Card';
 
 // Import icons
 import { TbCards } from "react-icons/tb";
-import { CgCardSpades } from "react-icons/cg";
-import { CgCardClubs } from "react-icons/cg";
+import { CgCardSpades, CgCardClubs } from "react-icons/cg";
 import { PiHandFist } from "react-icons/pi";
-import { GiElfHelmet } from "react-icons/gi";
+import { GiElfHelmet, GiBroadsword, GiCrossbow, GiSpikedShield } from "react-icons/gi";
+import { GoSun } from "react-icons/go";
 
 //this class is a little weird, but I need to make new objects everytime for React to notice my state changes, and this seemed like a good way to do it
 //also, I should maybe include a field for the faction, but right now it's easier to track that separately and add it when I save decks to the database
@@ -362,14 +362,14 @@ export default function DeckBuilder({socket}) {
       </div>
       <div className="deckbuilder_grid">
         <div className="one">
-          <p>(filters - todo)</p>
+          <p className="filters"><TbCards /><GiBroadsword /><GiCrossbow /><GiElfHelmet /><GoSun /><GiSpikedShield />(filters - todo)</p>
           <h4>Available Cards</h4>
           <div className="card_panel">
             {createAvailableCards()}
           </div>
         </div>
         <div className="two">
-          <p>Leader - todo</p>
+          <p className="leader-title">Leader - todo</p>
           <h3>{currentDeck.leaderName}</h3>
           <strong>Total cards in deck</strong>
           <p className="card-stat"><TbCards />{currentDeck.totalCardCount}</p>
@@ -389,7 +389,7 @@ export default function DeckBuilder({socket}) {
           {!roomName ? <button className="primary-button" id="save_button" onClick={saveCurrentDeck}> Save current deck </button> : <button id="ready" onClick={submitReady}> Ready (use current deck) </button>}
         </div>
         <div className="three">
-          <p>filters - todo</p>
+        <p className="filters"><TbCards /><GiBroadsword /><GiCrossbow /><GiElfHelmet /><GoSun /><GiSpikedShield />(filters - todo)</p>
           <h5>Cards in Deck</h5>
           <div className="card_panel">
             {createUsedCards()}
