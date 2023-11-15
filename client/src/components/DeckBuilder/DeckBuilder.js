@@ -1,10 +1,19 @@
-import './DeckBuilder.css';
+// Import dependencies
+import './DeckBuilder.scss';
 import React, {useState, useEffect} from 'react';
 import {useParams} from 'react-router-dom';
 import {useAuthHeader} from 'react-auth-kit';
 
+// Import components
 import {getCardData} from '../GwentClient/GwentClient';
 import {LargeCardView, CardData} from '../Card/Card';
+
+// Import icons
+import { TbCards } from "react-icons/tb";
+import { CgCardSpades, CgCardClubs } from "react-icons/cg";
+import { PiHandFist } from "react-icons/pi";
+import { GiElfHelmet, GiBroadsword, GiCrossbow, GiSpikedShield } from "react-icons/gi";
+import { GoSun } from "react-icons/go";
 
 //this class is a little weird, but I need to make new objects everytime for React to notice my state changes, and this seemed like a good way to do it
 //also, I should maybe include a field for the faction, but right now it's easier to track that separately and add it when I save decks to the database
@@ -345,45 +354,43 @@ export default function DeckBuilder({socket}) {
 
   return(
     <div className="deckbuilder">
-      <h3>DeckBuilder</h3>
+      <h1 className={'screen-heading'}>DeckBuilder</h1>
       <div className="faction_select">
-        <button onClick={previousFaction}> previous faction </button>
-        <p> {currentFaction} </p>
-        <button onClick={nextFaction}> next faction </button>
+        <button className={'primary-button'} onClick={previousFaction}> previous faction </button>
+        <h2> {currentFaction} </h2>
+        <button className={'primary-button'} onClick={nextFaction}> next faction </button>
       </div>
       <div className="deckbuilder_grid">
         <div className="one">
-          <p>(filters - todo)</p>
-          <p>Available Cards</p>
+          <p className="filters"><TbCards /><GiBroadsword /><GiCrossbow /><GiElfHelmet /><GoSun /><GiSpikedShield />(filters - todo)</p>
+          <h4>Available Cards</h4>
           <div className="card_panel">
             {createAvailableCards()}
           </div>
         </div>
         <div className="two">
-          <p>Leader - todo</p>
+          <p className="leader-title">Leader - todo</p>
           <h3>{currentDeck.leaderName}</h3>
-          <p>Total cards in deck</p>
-          <p>{currentDeck.totalCardCount}</p>
-          <p>Number of Unit Cards</p>
+          <strong>Total cards in deck</strong>
+          <p className="card-stat"><TbCards />{currentDeck.totalCardCount}</p>
+          <strong>Number of Unit Cards</strong>
 
-          {currentDeck.unitCount >= 22 ? <p style={{color:"green"}}>{currentDeck.unitCount}</p> : <p style={{color:"red"}}>{currentDeck.unitCount}/22</p>}
+          {currentDeck.unitCount >= 22 ? <p style={{color:"green"}}><CgCardSpades />{currentDeck.unitCount}</p> : <p style={{color:"red"}}>{currentDeck.unitCount}/22</p>}
 
-          <p>Special Cards</p>
+          <strong>Special Cards</strong>
 
-          {currentDeck.specialCount <= 10 ? <p style={{color:"green"}}>{currentDeck.specialCount}/10</p> : <p style={{color:"red"}}>{currentDeck.specialCount}/10</p>}
+          {currentDeck.specialCount <= 10 ? <p style={{color:"green"}}><CgCardClubs />{currentDeck.specialCount}/10</p> : <p style={{color:"red"}}>{currentDeck.specialCount}/10</p>}
           
-          <p>Total Unit Card Strength</p>
-          <p>{currentDeck.totalUnitStrength}</p>
-          <p>Hero Cards</p>
-          <p>{currentDeck.heroCount}</p>
+          <strong>Total Unit Card Strength</strong>
+          <p className="card-stat"><PiHandFist />{currentDeck.totalUnitStrength}</p>
+          <strong>Hero Cards</strong>
+          <p className="card-stat"><GiElfHelmet />{currentDeck.heroCount}</p>
 
-          {!roomName ? <button id="save_button" onClick={saveCurrentDeck}> Save current deck </button> : <button id="ready" onClick={submitReady}> Ready (use current deck) </button>}
-
-
+          {!roomName ? <button className="primary-button" id="save_button" onClick={saveCurrentDeck}> Save current deck </button> : <button id="ready" onClick={submitReady}> Ready (use current deck) </button>}
         </div>
         <div className="three">
-          <p>filters - todo</p>
-          <p>Cards in Deck</p>
+        <p className="filters"><TbCards /><GiBroadsword /><GiCrossbow /><GiElfHelmet /><GoSun /><GiSpikedShield />(filters - todo)</p>
+          <h5>Cards in Deck</h5>
           <div className="card_panel">
             {createUsedCards()}
           </div>

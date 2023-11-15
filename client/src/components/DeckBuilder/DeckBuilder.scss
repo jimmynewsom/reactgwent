@@ -1,0 +1,94 @@
+.deckbuilder {
+  height: 80%;
+  width: 100%;
+  padding: 10px;
+  border-style: solid;
+  text-align: center;
+
+  h1.screen-heading {
+    border: 3px solid #a77d56;
+    padding: 16px 0;
+    width: 30%;
+    text-align: center;
+    margin: 0 auto;
+    margin-bottom: 2rem;
+  }
+
+  strong {
+    color: #776d5d;
+  }
+
+  .faction_select {
+    display: grid;
+    grid-template-columns: 40% 20% 40%;
+    
+    p {
+      display: inline;
+    }
+  }
+}
+
+.deckbuilder_grid {
+  display: grid;
+  grid-template-columns: 35% 30% 35%;
+
+  p.card-stat {
+    color: #7b6340;
+  }
+
+  .one, .three {
+    border: 10px solid #2d2826;
+    border-radius: 5px;
+    box-shadow: 0px 0px 17px 0px #a77d56;
+    margin-top: 3rem;
+    
+    .filters {
+      color: #44342c;
+
+      svg {
+        font-size: 3rem;
+        margin: 0 15px;
+
+        &:hover {
+          color: #fff;
+        }
+      }
+    }
+
+    .card_panel {
+      width: 100%;
+      height: 400px;
+      overflow-y: scroll;
+      scrollbar-color: #4a3c31;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    
+      .available {
+        p {
+          background-color: #2C2405;
+          border: 2px solid #7E6B04;
+          border-radius: 5px;
+          padding: 5px 10px;
+          font-size: 1.296rem;
+          margin-bottom: .5rem;
+        }
+    
+        label {
+          text-transform: uppercase;
+        }
+      }
+    }
+  }
+
+  .two {
+    margin: 0 0.5rem;
+
+    p.leader-title {
+      color: #75603f;
+    }
+  }
+}
+
+li {
+  list-style-type: none;
+}

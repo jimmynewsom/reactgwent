@@ -143,10 +143,10 @@ export default function Dashboard({ socket }) {
 
   return (
     <div className="dashboard">
-      <h2 className={`screen-heading`}> Dashboard / Lobby </h2>
+      <h1 className={`screen-heading`}> Dashboard / Lobby </h1>
       <div className={`container`}>
         <div className={`sidebar`}>
-          <h3> Hello, {auth().username}!</h3>
+          <h2> Hello, {auth().username}!</h2>
           <div className='wins-and-losses'>
             <h5>Latest stats</h5>
             <WinLossCount label="Wins" count={userStats.wins} />
