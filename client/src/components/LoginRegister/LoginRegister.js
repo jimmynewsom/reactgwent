@@ -11,9 +11,11 @@ import './LoginRegister.scss';
 export default function LoginRegister({ setToken }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [toastMessage, setToastMessage] = useState("");
+  const [loginSuccessMessage, setLoginSuccessMessage] = useState("");
+  const [signupSuccessMessage, setSignupSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [showToastMessage, setShowToastMessage] = useState(false);
+  const [showLoginSuccessMessage, setShowLoginSuccessMessage] = useState(false);
+  const [showSignupSuccessMessage, setShowSignupSuccessMessage] = useState(false);
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const signIn = useSignIn();
   const navigate = useNavigate();
@@ -51,8 +53,8 @@ export default function LoginRegister({ setToken }) {
         result = await result.json();
         //console.log(result);
 
-        setToastMessage("Signing in...");
-        setShowToastMessage(true);
+        setLoginSuccessMessage("Signing in...");
+        setShowLoginSuccessMessage(true);
         setTimeout(()=> {
           signIn({
             token: result.token,
@@ -105,8 +107,8 @@ export default function LoginRegister({ setToken }) {
         result = await result.json();
         //console.log(result);
 
-        setToastMessage("Registration successful! Redirecting to dashboard");
-        setShowToastMessage(true);
+        setSignupSuccessMessage("Registration successful! Redirecting to dashboard");
+        setShowSignupSuccessMessage(true);
         setTimeout(() => {
           signIn({
             token: result.token,
@@ -141,11 +143,11 @@ export default function LoginRegister({ setToken }) {
           <input type="password" onChange={e => setPassword(e.target.value)} />
         </div>
         <div className={'login-button'}>
-          <button className={`primary-button`} id="login" onClick={login}>{showToastMessage ? toastMessage : "Login" }</button>
+          <button className={`primary-button`} id="login" onClick={login}>{showLoginSuccessMessage ? loginSuccessMessage : "Login" }</button>
         </div>        
       </form>
       <hr />
-      <button className={`secondary-button`} id="register" onClick={register}>Register as a new user</button>
+      <button className={`secondary-button`} id="register" onClick={register}>{showSignupSuccessMessage ? signupSuccessMessage : "Register as a new user"}</button>
     </div>
   );
 }

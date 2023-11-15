@@ -48,12 +48,12 @@ h2 {
 
 h3 {
   font-size: 1.215rem;
-  text-transform: normal;
+  text-transform: none;
 }
 
 h4 {
   font-size: 1.138rem;
-  text-transform: normal;
+  text-transform: none;
 }
 
 h5 {
@@ -66,6 +66,10 @@ h6 {
 
 a {
   text-transform: uppercase;
+}
+
+strong {
+  color: #fff;
 }
 
 input {
