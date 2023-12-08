@@ -262,7 +262,7 @@ export default function GwentClient({socket}) {
   const authHeader = useAuthHeader();
   const [cardMap, setCardMap] = useState(new Map());
   
-  //focusCard is looks like [range, index]
+  //focusCard looks like [range, index]
   const [focusCard, setFocusCard] = useState();
   const [gameOverMessage, setGameOverMessage] = useState();
   const [gameState, setGameState] = useState(initialGameState);
@@ -278,7 +278,7 @@ export default function GwentClient({socket}) {
     gameState.board = new Board(gameState.board);
     setGameState(gameState);
     setPlayerTotal(gameState.board.getTotalStrength(gameState.playerIndex));
-    setPlayerTotal(gameState.board.getTotalStrength((gameState.playerIndex + 1) % 2));
+    setOpponentTotal(gameState.board.getTotalStrength((gameState.playerIndex + 1) % 2));
     console.log(gameState)
   };
 
