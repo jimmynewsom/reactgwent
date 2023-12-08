@@ -276,7 +276,7 @@ export default function GwentClient({socket}) {
     gameState.board = new Board(gameState.board);
     setGameState(gameState);
     setPlayerTotal(gameState.board.getTotalStrength(gameState.playerIndex));
-    setPlayerTotal(gameState.board.getTotalStrength((gameState.playerIndex + 1) % 2));
+    setOpponentTotal(gameState.board.getTotalStrength((gameState.playerIndex + 1) % 2));
     console.log(gameState)
   };
 
