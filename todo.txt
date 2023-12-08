@@ -1,0 +1,6 @@
+- add brute force protection to login route (except maybe something can do this for me when I deploy it)
+- (optional) add a display name to users, different from the username, to make it harder to hack accounts
+- implement medic card special ability, and add a dialog element to display cards in the graveyard
+- implement scoiatael faction ability
+- implement all leader abilities and add leader selection to deckbuilder component
+- add instructions dialog element to dashboard component
