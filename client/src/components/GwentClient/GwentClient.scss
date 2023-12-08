@@ -12,24 +12,24 @@
 }
 
 .player_stats_panel {
-  border: 2px solid black;
+  border: 2px solid white;
   padding-bottom: 10px;
 }
 
 .weather_grid {
   display: grid;
   grid-template-columns: 33% 33% 33%;
-  border: 1px solid black;
+  border: 1px solid white;
   margin-top: 10px;
   margin-bottom: 10px;
 }
 
 .weather_grid div {
-  border: 1px solid black;
+  border: 1px solid white;
 }
 
 .board_panel {
-  border: 2px solid black;
+  border: 2px solid white;
   height: 100%;
 }
 
@@ -41,15 +41,15 @@
 }
 
 .rallyhorn {
-  border: 2px solid black;
+  border: 2px solid white;
 }
 
 .range {
-  border: 2px solid black;
+  border: 2px solid white;
 }
 
 .cardrow {
-  border: 2px solid black;
+  border: 2px solid white;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -62,7 +62,7 @@
 
 .player_hand {
   height: 14%;
-  border: 2px solid black;
+  border: 2px solid white;
   display: flex;
   flex-direction: row;
   justify-content: center;
