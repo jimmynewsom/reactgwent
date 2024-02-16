@@ -426,98 +426,102 @@ export class Gwent{
   play cards, following all gwent rules
   */
   playCard(playerIndex, cardIndex, target){
-    //first check if it is the player's turn
-    if(playerIndex != this.playersTurn)
-      return;
 
-    let card = this.players[playerIndex].hand[cardIndex];
-    this.players[playerIndex].hand.splice(cardIndex, 1);
-    
-    //unit cards and hero cards that aren't spies get added to their respective range
-    //if the unit range is agile, target should specify the range
-    if((card.type == "unit" || card.type == "hero") && card.special != "spy"){
-      if(card.range == "close")
-        this.board.field[playerIndex].close.push(card);
-      else if(card.range == "ranged")
-        this.board.field[playerIndex].ranged.push(card);
-      else if(card.range == "siege")
-        this.board.field[playerIndex].siege.push(card);
-      else if(card.range == "agile"){
-        if(target == "close")
+    try {
+      //first check if it is the player's turn
+      if(playerIndex != this.playersTurn)
+        return;
+
+      let card = this.players[playerIndex].hand[cardIndex];
+      this.players[playerIndex].hand.splice(cardIndex, 1);
+      
+      //unit cards and hero cards that aren't spies get added to their respective range
+      //if the unit range is agile, target should specify the range
+      if((card.type == "unit" || card.type == "hero") && card.special != "spy"){
+        if(card.range == "close")
           this.board.field[playerIndex].close.push(card);
-        else if(target == "ranged")
+        else if(card.range == "ranged")
           this.board.field[playerIndex].ranged.push(card);
+        else if(card.range == "siege")
+          this.board.field[playerIndex].siege.push(card);
+        else if(card.range == "agile"){
+          this.board.field[playerIndex][target].push(card);
+        }
+
+        //unit cards can have 6 abilities that trigger when placed - morale, tight bond, medic, spy, scorchClose, & muster
+        if(card.special == 'morale'){
+          this.board.morale[playerIndex][card.range]++;
+        }
+        else if(card.special == "tight bond"){
+          if(this.board.tightBondsMaps[playerIndex].has(card.name))
+            this.board.tightBondsMaps[playerIndex].set(card.name, this.board.tightBondsMaps[playerIndex].get(card.name) + 1);
+          else
+            this.board.tightBondsMaps[playerIndex].set(card.name, 0);
+        }
+        else if(card.special == "scorchClose")
+          this.board.scorch(playerIndex, "close");
+        //if the player plays a medic card, target should specify indexes in graveyard
+        //since medics can revive medics, target is an array here
+        else if(card.special == "medic"){
+          console.log("medic played");
+          // for(let i = 0; i < target.length; i++){
+          //   let card2 = this.board.field[playerIndex].graveyard[target[i]];
+          //   this.board.field[playerIndex].graveyard.splice(target[i], 1);
+          //   this.playCardFromGraveyard(playerIndex, card2);
+          //   if(card2.special != "medic")
+          //     break;
+          // }
+        }
+        else if(card.special == "muster"){
+          this.muster(playerIndex, card.name);
+        }
+      }
+      else if(card.special == "spy"){
+        this.players[playerIndex].hand.push(...this.draw(playerIndex, 2));
+
+        if(card.range == "close")
+          this.board.field[(playerIndex + 1) % 2].close.push(card);
+        else if(card.range == "ranged")
+          this.board.field[(playerIndex + 1) % 2].ranged.push(card);
+        else if(card.range == "siege")
+          this.board.field[(playerIndex + 1) % 2].siege.push(card);
+      }
+      //7 special cards - 4 weather cards, scorch, commander's horn, & decoy
+      else if(card.type == "special"){
+        if(card.name == "Biting Frost")
+          this.board.weather.close = true;
+        else if(card.name == "Impenetrable Fog")
+          this.board.weather.ranged = true;
+        else if(card.name == "Torrential Rain")
+          this.board.weather.siege = true;
+        else if(card.name == "Clear Weather")
+          this.board.clearWeather();
+        else if(card.name == "Scorch")
+          this.board.scorch();
+        //if the player plays a commanders horn, target should specify the range
+        else if(card.name == "Commanders Horn")
+          this.board.rallyHorns[playerIndex][target] = true;
+        //if the player plays a decoy, target should specify range & index, eg. {range: "close", index: 3}
+        else if(card.name == "Decoy"){
+          let card2 = this.board.field[playerIndex][target.range][target.index];
+          this.board.field[playerIndex][target.range][target.index] = card;
+          this.players[playerIndex].hand.push(card2);
+        }
+
+        //finally, every special card except decoys gets put in the graveyard
+        //except maybe weather cards and commanders horns shouldnt, but since you cant recover them from the graveyard its basically the same thing
+        if(card.name != "Decoy")
+          this.board.field[playerIndex].graveyard.push(card);
       }
 
-      //unit cards can have 6 abilities that trigger when placed - morale, tight bond, medic, spy, scorchClose, & muster
-      if(card.special == 'morale'){
-        this.board.morale[playerIndex][card.range]++;
-      }
-      else if(card.special == "tight bond"){
-        if(this.board.tightBondsMaps[playerIndex].has(card.name))
-          this.board.tightBondsMaps[playerIndex].set(card.name, this.board.tightBondsMaps[playerIndex].get(card.name) + 1);
-        else
-          this.board.tightBondsMaps[playerIndex].set(card.name, 0);
-      }
-      else if(card.special == "scorchClose")
-        this.board.scorch(playerIndex, "close");
-      //if the player plays a medic card, target should specify indexes in graveyard
-      //since medics can revive medics, target is an array here
-      else if(card.special == "medic"){
-        console.log("medic played");
-        // for(let i = 0; i < target.length; i++){
-        //   let card2 = this.board.field[playerIndex].graveyard[target[i]];
-        //   this.board.field[playerIndex].graveyard.splice(target[i], 1);
-        //   this.playCardFromGraveyard(playerIndex, card2);
-        //   if(card2.special != "medic")
-        //     break;
-        // }
-      }
-      else if(card.special == "muster"){
-        this.muster(playerIndex, card.name);
-      }
+      //if the other player has not passed it's their turn. Otherwise it stays the current player's turn
+      if(!this.players[(playerIndex + 1) % 2].player.passed)
+        this.playersTurn = (this.playersTurn + 1) % 2;
     }
-    else if(card.special == "spy"){
-      this.players[playerIndex].hand.push(...this.draw(playerIndex, 2));
-
-      if(card.range == "close")
-        this.board.field[(playerIndex + 1) % 2].close.push(card);
-      else if(card.range == "ranged")
-        this.board.field[(playerIndex + 1) % 2].ranged.push(card);
-      else if(card.range == "siege")
-        this.board.field[(playerIndex + 1) % 2].siege.push(card);
-    }
-    //7 special cards - 4 weather cards, scorch, commander's horn, & decoy
-    else if(card.type == "special"){
-      if(card.name == "Biting Frost")
-        this.board.weather.close = true;
-      else if(card.name == "Impenetrable Fog")
-        this.board.weather.ranged = true;
-      else if(card.name == "Torrential Rain")
-        this.board.weather.siege = true;
-      else if(card.name == "Clear Weather")
-        this.board.clearWeather();
-      else if(card.name == "Scorch")
-        this.board.scorch();
-      //if the player plays a commanders horn, target should specify the range
-      else if(card.name == "Commanders Horn")
-        this.board.rallyHorns[playerIndex][target] = true;
-      //if the player plays a decoy, target should specify range & index, eg. {range: "close", index: 3}
-      else if(card.name == "Decoy"){
-        let card2 = this.board.field[playerIndex][target.range][target.index];
-        this.board.field[playerIndex][target.range][target.index] = card;
-        this.players[playerIndex].hand.push(card2);
-      }
-
-      //finally, every special card except decoys gets put in the graveyard
-      //except maybe weather cards and commanders horns shouldnt, but since you cant recover them from the graveyard its basically the same thing
-      if(card.name != "Decoy")
-        this.board.field[playerIndex].graveyard.push(card);
+    catch (error){
+      console.log(error);
     }
 
-    //if the other player has not passed it's their turn. Otherwise it stays the current player's turn
-    if(!this.players[(playerIndex + 1) % 2].player.passed)
-      this.playersTurn = (this.playersTurn + 1) % 2;
   }
 
   //iterate through players hand and deck backwards, and splice out and play every card in the muster group
