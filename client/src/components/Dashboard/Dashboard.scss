@@ -14,6 +14,10 @@
     font-weight: 200;
   }
 
+  dialog {
+    overflow: scroll;
+  }
+
   h2.screen-heading {
     border: 3px solid #a77d56;
     padding: 16px 0;
