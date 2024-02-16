@@ -85,8 +85,8 @@ export default function App() {
         }/>
         <Route path="/loginregister" element={<LoginRegister />} />
 
-        <Route path="/smallcardview" element={<SmallCardView cardData={card1} currentStrength={10}/>} />
-        <Route path="/largecardview" element={<LargeCardView cardData={card1} handleClick={() => console.log("nothing")}/>} />
+        <Route path="/smallcardview" element={<SmallCardView cardData={card1} currentStrength={15}/>} />
+        <Route path="/largecardview" element={<LargeCardView cardData={card1} handleClick={() => console.log("nothing")} available={3}/>} />
       </Routes>
       <footer>This is an unofficial, fan made game for demonstration purposes only, and is in no way endorsed by CD PROJEKT RED. It can also only play a maximum of 5 games at a time.</footer>
     </div>
