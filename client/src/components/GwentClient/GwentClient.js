@@ -106,28 +106,22 @@ const rallyHornCard = new CardData("Commanders Horn", "commanders_horn.png", "sp
 function Field({board, playerIndex, playerTotal, opponentTotal, handlePlayersFieldClick, handleOpponentsFieldClick}){
   console.log("rendering field component");
 
-  let r1 = createCardRows(board, playerIndex, "siege", 1, opponentTotal.siege, handleOpponentsFieldClick);
-  let r2 = createCardRows(board, playerIndex, "ranged", 1, opponentTotal.ranged, handleOpponentsFieldClick);
-  let r3 = createCardRows(board, playerIndex, "close", 1, opponentTotal.close, handleOpponentsFieldClick);
-  let r4 = createCardRows(board, playerIndex, "close", 0, playerTotal.close, handlePlayersFieldClick);
-  let r5 = createCardRows(board, playerIndex, "ranged", 0, playerTotal.ranged, handlePlayersFieldClick);
-  let r6 = createCardRows(board, playerIndex, "siege", 0, playerTotal.siege, handlePlayersFieldClick);
+  let r1 = CardRow(board, playerIndex, "siege", 1, opponentTotal.siege, handleOpponentsFieldClick);
+  let r2 = CardRow(board, playerIndex, "ranged", 1, opponentTotal.ranged, handleOpponentsFieldClick);
+  let r3 = CardRow(board, playerIndex, "close", 1, opponentTotal.close, handleOpponentsFieldClick);
+  let r4 = CardRow(board, playerIndex, "close", 0, playerTotal.close, handlePlayersFieldClick);
+  let r5 = CardRow(board, playerIndex, "ranged", 0, playerTotal.ranged, handlePlayersFieldClick);
+  let r6 = CardRow(board, playerIndex, "siege", 0, playerTotal.siege, handlePlayersFieldClick);
 
   return(
     <div className="field_grid">
-      {r1}
-      {r2}
-      {r3}
-      
-      {r4}
-      {r5}
-      {r6}
+      {r1}{r2}{r3}{r4}{r5}{r6}
     </div>
   );
 }
 
-function createCardRows(board, playerIndex, range, i, rowStrength, handleFieldClick){
-  console.log("calling createCardRows function");
+function CardRow(board, playerIndex, range, i, rowStrength, handleFieldClick){
+  console.log("calling CardRow function");
 
   let cardViews = [];
   let cards = board.field[(playerIndex + i) % 2][range];
@@ -215,8 +209,8 @@ let initialGameState = {
   board: new Board({
     field: [{close: [card1], ranged: [card2], siege: [card3], graveyard: [card4]},
             {close: [card2], ranged: [card4], siege: [card2], graveyard: []}],
-    weather: {close: true, ranged: false, siege: true},
-    rallyHorns: [{close: true, ranged: true, siege: true},
+    weather: {close: true, ranged: false, siege: false},
+    rallyHorns: [{close: true, ranged: false, siege: false},
                 {close: false, ranged: false, siege: false}],
     morale: [{close: 0, ranged: 0, siege: 0}, {close: 0, ranged: 0, siege: 0}],
     tightBondsMaps: [new Map(), new Map()]
@@ -247,6 +241,7 @@ let initialGameState = {
     cardViews.push(<SmallCardView
                       cardData={card}
                       handleClick={handleHandClick(i)}
+                      currentStrength={card.strength}
                       key={"hand" + i}
                   />)
   }
