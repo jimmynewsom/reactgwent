@@ -47,7 +47,7 @@ export function SmallCardView({ cardData, handleClick, currentStrength }) {
 
   return (
     <div className="small_card" onClick={handleClick ? handleClick : () => { }}>
-      {currentStrength || currentStrength == 0 ? <>{strength}</> : <></>}
+      {currentStrength || currentStrength == 0 ? <>{strength}</> : <p></p>}
       <img
         src={process.env.REACT_APP_UNIT_IMAGE_BASE_URL + cardData.image_url}
         alt={"image url is wrong for " + cardData.name + " with image url " + cardData.image_url}

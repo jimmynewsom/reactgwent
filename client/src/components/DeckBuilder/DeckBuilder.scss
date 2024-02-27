@@ -1,9 +1,13 @@
 .deckbuilder {
   height: 80%;
   width: 100%;
-  padding: 10px;
-  border-style: solid;
   text-align: center;
+
+  .deckbuilder_border {
+    border-style: solid;
+    height: auto;
+    padding: 20px;
+  }
 
   h1.screen-heading {
     border: 3px solid #a77d56;

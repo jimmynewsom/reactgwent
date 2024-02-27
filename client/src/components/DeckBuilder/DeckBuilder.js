@@ -65,6 +65,8 @@ So, my approach is as follows:
 
 
 export default function DeckBuilder({socket}) {
+  console.log("rendering Deckbuilder component");
+
   const authHeader = useAuthHeader();
   const [cardMap, setCardMap] = useState(new Map());
   const [currentFaction, setCurrentFaction] = useState("Northern Realms");
@@ -354,45 +356,47 @@ export default function DeckBuilder({socket}) {
 
   return(
     <div className="deckbuilder">
-      <h1 className={'screen-heading'}>DeckBuilder</h1>
-      <div className="faction_select">
-        <button className={'primary-button'} onClick={previousFaction}> previous faction </button>
-        <h2> {currentFaction} </h2>
-        <button className={'primary-button'} onClick={nextFaction}> next faction </button>
-      </div>
-      <div className="deckbuilder_grid">
-        <div className="one">
-          <p className="filters"><TbCards /><GiBroadsword /><GiCrossbow /><GiElfHelmet /><GoSun /><GiSpikedShield />(filters - todo)</p>
-          <h4>Available Cards</h4>
-          <div className="card_panel">
-            {createAvailableCards()}
+      <div className="deckbuilder_border">
+        <h1 className={'screen-heading'}>DeckBuilder</h1>
+        <div className="faction_select">
+          <button className={'primary-button'} onClick={previousFaction}> previous faction </button>
+          <h2> {currentFaction} </h2>
+          <button className={'primary-button'} onClick={nextFaction}> next faction </button>
+        </div>
+        <div className="deckbuilder_grid">
+          <div className="one">
+            <p className="filters"><TbCards /><GiBroadsword /><GiCrossbow /><GiElfHelmet /><GoSun /><GiSpikedShield />(filters - todo)</p>
+            <h4>Available Cards</h4>
+            <div className="card_panel">
+              {createAvailableCards()}
+            </div>
           </div>
-        </div>
-        <div className="two">
-          <p className="leader-title">Leader - todo</p>
-          <h3>{currentDeck.leaderName}</h3>
-          <strong>Total cards in deck</strong>
-          <p className="card-stat"><TbCards />{currentDeck.totalCardCount}</p>
-          <strong>Number of Unit Cards</strong>
+          <div className="two">
+            <p className="leader-title">Leader - todo</p>
+            <h3>{currentDeck.leaderName}</h3>
+            <strong>Total cards in deck</strong>
+            <p className="card-stat"><TbCards />{currentDeck.totalCardCount}</p>
+            <strong>Number of Unit Cards</strong>
 
-          {currentDeck.unitCount >= 22 ? <p style={{color:"green"}}><CgCardSpades />{currentDeck.unitCount}</p> : <p style={{color:"red"}}>{currentDeck.unitCount}/22</p>}
+            {currentDeck.unitCount >= 22 ? <p style={{color:"green"}}><CgCardSpades />{currentDeck.unitCount}</p> : <p style={{color:"red"}}>{currentDeck.unitCount}/22</p>}
 
-          <strong>Special Cards</strong>
+            <strong>Special Cards</strong>
 
-          {currentDeck.specialCount <= 10 ? <p style={{color:"green"}}><CgCardClubs />{currentDeck.specialCount}/10</p> : <p style={{color:"red"}}>{currentDeck.specialCount}/10</p>}
-          
-          <strong>Total Unit Card Strength</strong>
-          <p className="card-stat"><PiHandFist />{currentDeck.totalUnitStrength}</p>
-          <strong>Hero Cards</strong>
-          <p className="card-stat"><GiElfHelmet />{currentDeck.heroCount}</p>
+            {currentDeck.specialCount <= 10 ? <p style={{color:"green"}}><CgCardClubs />{currentDeck.specialCount}/10</p> : <p style={{color:"red"}}>{currentDeck.specialCount}/10</p>}
+            
+            <strong>Total Unit Card Strength</strong>
+            <p className="card-stat"><PiHandFist />{currentDeck.totalUnitStrength}</p>
+            <strong>Hero Cards</strong>
+            <p className="card-stat"><GiElfHelmet />{currentDeck.heroCount}</p>
 
-          {!roomName ? <button className="primary-button" id="save_button" onClick={saveCurrentDeck}> Save current deck </button> : <button id="ready" onClick={submitReady}> Ready (use current deck) </button>}
-        </div>
-        <div className="three">
-        <p className="filters"><TbCards /><GiBroadsword /><GiCrossbow /><GiElfHelmet /><GoSun /><GiSpikedShield />(filters - todo)</p>
-          <h5>Cards in Deck</h5>
-          <div className="card_panel">
-            {createUsedCards()}
+            {!roomName ? <button className="primary-button" id="save_button" onClick={saveCurrentDeck}> Save current deck </button> : <button id="ready" onClick={submitReady}> Ready (use current deck) </button>}
+          </div>
+          <div className="three">
+          <p className="filters"><TbCards /><GiBroadsword /><GiCrossbow /><GiElfHelmet /><GoSun /><GiSpikedShield />(filters - todo)</p>
+            <h5>Cards in Deck</h5>
+            <div className="card_panel">
+              {createUsedCards()}
+            </div>
           </div>
         </div>
       </div>
