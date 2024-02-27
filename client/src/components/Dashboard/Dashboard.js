@@ -8,6 +8,8 @@ import { FaPlus } from "react-icons/fa6";
 import { IoRefreshOutline } from "react-icons/io5";
 
 export default function Dashboard({ socket }) {
+  console.log("rendering dashboard component");
+
   const auth = useAuthUser();
   const authHeader = useAuthHeader();
   const [userStats, setUserStats] = useState({ wins: "loading", losses: "loading" });

@@ -12,6 +12,8 @@ import {CardData, SmallCardView, LargeCardView} from '../Card/Card';
 
 
 export default function App() {
+  console.log("rendering BrowserRouter component");
+
   const isAuthenticated = useIsAuthenticated();
   const authHeader = useAuthHeader();
   const signOut = useSignOut();
