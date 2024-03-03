@@ -154,17 +154,6 @@ function CardRow(board, playerIndex, range, i, rowStrength, handleFieldCardClick
   </div>);
 }
 
-//CardRowDialogs are for swapping cards at the start of the game, medics, and graveyards
-function CardRowDialog(cards, handleClick){
-  console.log("rendering card view dialog");
-
-  return(
-    <div className="card_dialog">
-      
-    </div>
-  );
-}
-
 //this is kind of a repeat of my CardRow component, but hands don't need weather, rally horns, and row totals
 function PlayerHand({cards, handleHandCardClick}){
   let cardViews = [];
@@ -178,6 +167,28 @@ function PlayerHand({cards, handleHandCardClick}){
                   />)
   }
   return cardViews;
+}
+
+//CardRowDialogs are for swapping cards at the start of the game, medics, and graveyards
+function CardRowDialog(cards, handleDialogClick){
+  console.log("rendering card view dialog");
+
+  let cardViews = [];
+  
+  for(let j=0; j < cards.length; j++){
+    let card = cards[j];
+    cardViews.push(<LargeCardView
+                      cardData={card}
+                      key={(range + i) + j}
+                      handleClick={handleDialogClick}
+                  />);
+  }
+
+  return(
+    <dialog className="card_dialog">
+      
+    </dialog>
+  );
 }
 
 
@@ -274,6 +285,10 @@ export default function GwentClient({socket}) {
   const [playerTotal, setPlayerTotal] = useState(initialGameState.board.getTotalStrength(initialGameState.playerIndex));
   const [opponentTotal, setOpponentTotal] = useState(initialGameState.board.getTotalStrength((initialGameState.playerIndex + 1) % 2));
 
+  //I'm using a state variable for this instead of just an html dialog so that it won't render at all unless I need it
+  //Otherwise I think a hidden html dialog would get recomputed every render phase
+  //can be [null, "cardSwap", "playerGY", "opponentGY", or "medic"]
+  const [dialogStatus, setDialogStatus] = useState();
 
   function socketGameUpdateReceived(gameState){
     console.log("game update received");
@@ -287,6 +302,19 @@ export default function GwentClient({socket}) {
     console.log(gameState)
   };
 
+  function socketSubmitCardSwap(cardIndex){
+    socket.emit("card_swap", cardIndex);
+  }
+
+  function socketSubmitPass(){
+    if(gameState.playersTurn != gameState.playerIndex){
+      console.log("it's not your turn");
+      return;
+    }
+
+    socket.emit("pass");
+  }
+
   function socketGameOverReceived(result){
     console.log("game over");
 
@@ -296,15 +324,6 @@ export default function GwentClient({socket}) {
       setGameOverMessage("You Lose!");
     else
       setGameOverMessage("Tie Game.");
-  }
-
-  function submitPass(){
-    if(gameState.playersTurn != gameState.playerIndex){
-      console.log("it's not your turn");
-      return;
-    }
-
-    socket.emit("pass");
   }
 
   useEffect(() => {
@@ -427,6 +446,16 @@ export default function GwentClient({socket}) {
     }
   }
 
+  function showGameDialog() {
+    let dialog = document.getElementById("game-dialog");
+    dialog.showModal();
+  }
+  
+  function hideGameDialog() {
+    let dialog = document.getElementById("game-dialog");
+    dialog.close();
+  }
+
   
 
   //////////////////////////////////////////////////////
@@ -439,7 +468,36 @@ export default function GwentClient({socket}) {
   if(gameOverMessage)
     return <h3>{gameOverMessage}</h3>
 
+  let dialogContent;
+  if(dialogStatus){
+    if(dialogStatus == "cardSwap"){
+      dialogContent = <div>Card Swap</div>;
+    }
+    else if(dialogStatus == "playerGY"){
+      dialogContent = (
+        <div>
+          <p>player GY</p>
+          <button onClick={()=>{setDialogStatus()}}>Close GY</button>  
+        </div>
+      );
+    }
+    else if(dialogStatus == "opponentGY"){
+      dialogContent = (
+        <div>
+          <p>opponent GY</p>
+          <button onClick={()=>{setDialogStatus()}}>Close GY</button>  
+        </div>
+      );
+    }
+  }
+  else {
+    dialogContent = <></>;
+  }
+
+
+
   //focusCard has shape [range (or hand), index, player or opponent]
+  //but I might refactor it to be [range (or hand), index, player or opponent, card]
   let fcard;
   if(focusCard && focusCard[0] == "hand"){
     fcard = gameState.player.hand[focusCard[1]];
@@ -451,6 +509,7 @@ export default function GwentClient({socket}) {
 
   return(
     <div className="gwent_client">
+      <dialog id="game-dialog">{dialogContent}</dialog>
       <div className="gwent_client_grid">
         <div className="stats_panel">
           <PlayerStatsPanel
@@ -466,7 +525,7 @@ export default function GwentClient({socket}) {
             totalStrength={playerTotal}
           />
           <p>{gameState.playersTurn == gameState.playerIndex ? <b>YOUR TURN</b> : <b>NOT YOUR TURN</b>}</p>
-          <button onClick={submitPass}>Pass</button>
+          <button onClick={socketSubmitPass}>Pass</button>
         </div>
         <div className="board_panel">
           <Field 
