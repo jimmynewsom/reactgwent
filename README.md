@@ -12,7 +12,7 @@ as well as a JWT_SECRET variable in the same file.
 You also need a .env (no config) file in the client folder with a REACT_APP_BACKEND_URL pointing to the express server (usually "http://localhost:5000/").
 If you want the images to work, you would also need REACT_APP_UNIT_IMAGE_BASE_URL and REACT_APP_LEADER_IMAGE_BASE_URL variables pointing to where you're hosting your images.
 
-Once you do all that, you need to run two processes. From the server folder run "node express.mjs" and from the client folder run "npm start".
+Once you do all that, you need to run two processes. From the server folder run "node server.mjs" and from the client folder run "npm start".
 This will start the express back end and the react front end respectively.
 Also, this is my first react project, and I suck at styling, so sorry about that.
 
