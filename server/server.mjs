@@ -116,12 +116,12 @@ app.post("/login", async (req, res) => {
 });
 
 
-app.get("/getCardData", authenticateToken, (req, res) => {
+app.get("/getCardData", (req, res) => {
   return res.json(cardRows);
 });
 
 
-app.get("/getLeaderData", authenticateToken, (req, res) => {
+app.get("/getLeaderData", (req, res) => {
   return res.json(leaderRows);
 });
 
