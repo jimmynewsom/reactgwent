@@ -7,8 +7,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import db from "./db/conn.mjs";
 import authenticateToken from './middleware/authenticateToken.mjs';
-import {cardMap, cardRows, leaderRows, validateDeck, defaultDeck} from './gwent/gwent.mjs';
-import create_game_router from "./routes/game_routes.mjs";
+import {cardRows, leaderRows, validateDeck, defaultDeck} from './gwent/gwent.mjs';
+import GameRouter from "./routes/game_routes.mjs";
 
 
 const app = express();
@@ -206,7 +206,7 @@ app.post("/saveUserDeck", authenticateToken, async (req, res) => {
 });
 
 
-app.use("/gwent", create_game_router(io));
+app.use("/gwent", GameRouter(io));
 
 
 server.listen(port, () => {
