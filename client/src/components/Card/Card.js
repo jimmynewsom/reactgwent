@@ -69,7 +69,7 @@ export function SmallCardView({ cardData, handleClick, currentStrength }) {
   );
 }
 
-export function LeaderCardView({ leaderCardData }) {
+export function LeaderCardView({ leaderCardData, width=180, height=320 }) {
 
   return (
     <div className="leader_card">
@@ -77,8 +77,8 @@ export function LeaderCardView({ leaderCardData }) {
         <img
           src={process.env.REACT_APP_UNIT_IMAGE_BASE_URL + leaderCardData.image_url}
           alt={"image url is wrong for " + leaderCardData.name + " " + leaderCardData.title + " with image url " + leaderCardData.image_url}
-          width="180"
-          height="320"
+          width={width}
+          height={height}
         />
       </div>
     </div>
