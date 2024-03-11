@@ -15,6 +15,17 @@ export class CardData {
   }
 }
 
+export class LeaderCardData {
+  constructor(name, title, image_url, faction, desc, ability_description){
+    this.name = name;
+    this.title = title;
+    this.image_url = image_url;
+    this.faction = faction;
+    this.desc = desc;
+    this.ability_description = ability_description;
+  }
+}
+
 export function LargeCardView({ cardData, handleClick, available = 0 }) {
 
   return (
@@ -54,6 +65,22 @@ export function SmallCardView({ cardData, handleClick, currentStrength }) {
         width="40"
         height="60"
       />
+    </div>
+  );
+}
+
+export function LeaderCardView({ leaderCardData }) {
+
+  return (
+    <div className="leader_card">
+      <div className="leader_card__image">
+        <img
+          src={process.env.REACT_APP_UNIT_IMAGE_BASE_URL + leaderCardData.image_url}
+          alt={"image url is wrong for " + leaderCardData.name + " " + leaderCardData.title + " with image url " + leaderCardData.image_url}
+          width="180"
+          height="320"
+        />
+      </div>
     </div>
   );
 }

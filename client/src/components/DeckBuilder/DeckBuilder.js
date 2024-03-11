@@ -26,7 +26,7 @@ export class GwentDeck {
       this.unitCount = 0;
       this.totalCardCount = 0;
       this.totalUnitStrength = 0;
-      this.leaderName = "Foltest, King of Temeria";
+      this.leaderTitle = "Foltest, King of Temeria";
     }
     else {
       this.cards = deck.cards;
