@@ -374,7 +374,7 @@ export default function GwentClient({socket}) {
     });
   }, []);
 
-  function handleHandCardClick(socket, focusCard, gameState, cardIndex, setFocusCard){
+  function handleHandCardClick(cardIndex){
     return () => {
       if(!socket.connected){
         alert("websocket is disconnected. please refresh the page!");
@@ -575,7 +575,6 @@ export default function GwentClient({socket}) {
         </div>
         <div className="right-panel">
           <div className="deck-and-graveyard">
-            <LargeCardView cardData={geralt} handleClick={()=>{}} />
             <p>opponent graveyard</p>
             <p>opponent deck size: 20</p>
           </div>
@@ -583,7 +582,6 @@ export default function GwentClient({socket}) {
             {focusCard ? <LargeCardView cardData={fcard} handleClick={()=>{}} /> : <></>}
           </div>
           <div className="deck-and-graveyard">
-            <LargeCardView cardData={geralt} handleClick={()=>{}} />
             <p>player graveyard</p>
             <p>decks & card focus</p>
           </div>
