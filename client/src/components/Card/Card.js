@@ -81,6 +81,7 @@ export function LeaderCardView({ leaderCardData, width=180, height=320 }) {
           height={height}
         />
       </div>
+      <p>{leaderCardData.ability_description}</p>
     </div>
   );
 }
