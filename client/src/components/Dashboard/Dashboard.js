@@ -254,6 +254,8 @@ export default function Dashboard({ socket }) {
           <button className={`secondary-button`} onClick={resetGames}>Reset</button>
         </div>
       </div>
+      <p>Right now everything works except the medic card ability, the Scoiatael faction ability, all the leader abilities, and swapping cards at the start of the game. Hopefully I can add these later when I have time, but I also have to work on finding another job.</p>
+      <p>If you would like to report any bugs, please email jimmy.newsom@icloud.com .</p>
     </div>
   );
 }
