@@ -16,13 +16,13 @@ export class CardData {
 }
 
 export class LeaderCardData {
-  constructor(name, title, image_url, faction, desc, abilityDescription){
+  constructor(name, title, image_url, faction, desc, ability_description){
     this.name = name;
     this.title = title;
     this.image_url = image_url;
     this.faction = faction;
     this.desc = desc;
-    this.abilityDescription = abilityDescription;
+    this.ability_description = ability_description;
   }
 }
 
