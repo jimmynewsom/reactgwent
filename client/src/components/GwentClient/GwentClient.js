@@ -2,14 +2,14 @@ import './GwentClient.scss';
 import React, { useState, useEffect } from 'react';
 import { useAuthHeader } from 'react-auth-kit';
 
-import {LargeCardView, CardData, SmallCardView} from '../Card/Card';
+import {CardData, SmallCardView, LargeCardView, LeaderCardData, LeaderCardView} from '../Card/Card';
 
 
 function PlayerStatsPanel({player, totalStrength}){
   console.log("rendering player stats panel");
 
   return(
-    <div className="player_stats_panel">
+    <div className="player-stats-panel">
       <p>{player.playerName}</p>
       <p>{player.faction}</p>
       <p>cards in hand: {player.hand.length}</p>
@@ -29,8 +29,8 @@ function WeatherPanel({weather}){
   console.log("rendering weather panel");
 
   return(
-    <div className="weather_panel">
-      <div className="weather_grid">
+    <div className="weather-panel">
+      <div className="weather-grid">
         <div>{weather.close ? <SmallCardView cardData={bitingFrostCard}/> : <></>}</div>
         <div>{weather.ranged ? <SmallCardView cardData={impenetrableFogCard}/> : <></>}</div>
         <div>{weather.siege ? <SmallCardView cardData={torrentialRainCard}/> : <></>}</div>
@@ -113,7 +113,7 @@ function Field({board, playerIndex, playerTotal, opponentTotal, handlePFieldCard
   let r6 = CardRow(board, playerIndex, "siege", 0, playerTotal.siege, handlePFieldCardClick, handleRangeClick);
 
   return(
-    <div className="field_grid">
+    <div className="field-grid">
       {r1}{r2}{r3}{r4}{r5}{r6}
     </div>
   );
@@ -139,11 +139,11 @@ function CardRow(board, playerIndex, range, i, rowStrength, handleFieldCardClick
 
   let rallyHorn = board.rallyHorns[(playerIndex + i) % 2][range];
 
-  let rowClasses = "row_grid";
+  let rowClasses = "row-grid";
   if(rowWeather)
-    rowClasses += " weather_active";
+    rowClasses += " weather-active";
   if(rallyHorn)
-    rowClasses += " rallyhorn_active";
+    rowClasses += " rallyhorn-active";
   //todo - if this row is targetable
 
 
@@ -152,17 +152,6 @@ function CardRow(board, playerIndex, range, i, rowStrength, handleFieldCardClick
     <div className="rallyhorn">{rallyHorn ? <SmallCardView cardData={rallyHornCard}/> : <></>}</div>
     <div className="cardrow">{cardViews}</div>
   </div>);
-}
-
-//CardRowDialogs are for swapping cards at the start of the game, medics, and graveyards
-function CardRowDialog(cards, handleClick){
-  console.log("rendering card view dialog");
-
-  return(
-    <div className="card_dialog">
-      
-    </div>
-  );
 }
 
 //this is kind of a repeat of my CardRow component, but hands don't need weather, rally horns, and row totals
@@ -180,13 +169,34 @@ function PlayerHand({cards, handleHandCardClick}){
   return cardViews;
 }
 
+//CardRowDialogs are for swapping cards at the start of the game, medics, and graveyards
+// function CardRowDialog(cards, handleDialogClick){
+//   console.log("rendering card view dialog");
+
+//   let cardViews = [];
+  
+//   for(let j=0; j < cards.length; j++){
+//     let card = cards[j];
+//     cardViews.push(<LargeCardView
+//                       cardData={card}
+//                       key={(range + i) + j}
+//                       handleClick={handleDialogClick}
+//                   />);
+//   }
+
+//   return(
+//     <dialog className="card-dialog">
+      
+//     </dialog>
+//   );
+// }
+
 
 //first, checks for cardRows in localStorage
 //if it's there already, use that data to build the cardMap
 //otherwise, pull it from the server, save it to localStorage for later, and then build the map
-//(Also, I need to build the map inside the async function, so there's a little duplicate code here
-//  which I could refactor out into another function, but it's only 3 lines, so who cares)
-export function getCardData(setcardmap, authheader) {
+//(Also, there's a little duplicate code here, might fix later)
+export function getCardData(setcardmap, setleadermap) {
   let cardRows;
   if(localStorage.hasOwnProperty("cardRows")){
     cardRows = JSON.parse(localStorage.getItem("cardRows"));
@@ -202,9 +212,7 @@ export function getCardData(setcardmap, authheader) {
   else {
     const fetchCardData = async () => {
       try {
-        let result = await fetch(process.env.REACT_APP_BACKEND_URL + "getCardData", {
-          headers: {"Authorization": authheader().split(" ")[1]}
-        });
+        let result = await fetch(process.env.REACT_APP_BACKEND_URL + "getCardData");
         cardRows = await result.json();
         localStorage.setItem("cardRows", JSON.stringify(cardRows));
         let map = new Map();
@@ -221,12 +229,45 @@ export function getCardData(setcardmap, authheader) {
     }
     fetchCardData();
   }
+
+  let leaderRows;
+  if(localStorage.hasOwnProperty("leaderRows")){
+    leaderRows = JSON.parse(localStorage.getItem("leaderRows"));
+    let map = new Map();
+    leaderRows.forEach((row, i) => {
+      if(i !== 0){
+        let card = new LeaderCardData(row[0], row[1], row[2], row[3], row[4]);
+        map.set(row[0], card);
+      }
+    });
+    setleadermap(map);
+  }
+  else {
+    const fetchLeaderCardData = async () => {
+      try {
+        let result = await fetch(process.env.REACT_APP_BACKEND_URL + "getLeaderData");
+        leaderRows = await result.json();
+        localStorage.setItem("leaderRows", JSON.stringify(leaderRows));
+        let map = new Map();
+        leaderRows.forEach((row, i) => {
+          if(i !== 0){
+            let card = new LeaderCardData(row[0], row[1], row[2], row[3], row[4]);
+            map.set(row[0], card);
+          }
+        });
+        setleadermap(map);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    fetchLeaderCardData();
+  }
 }
 
-let card1 = new CardData("Geralt of Rivia", "geralt_of_rivia.png", "hero", "neutral", "15", "close", "none", "1", "");
-let card2 = new CardData("Yennefer of Vengerberg", "yennefer_of_vengerberg.png", "hero", "neutral", "7", "ranged", "medic", "1", "");
-let card3 = new CardData("Triss Merigold", "triss_merigold.png", "hero", "neutral", "7", "close", "scorch", "1", "");
-let card4 = new CardData("Cirilla Fiona Elen Riannon", "ciri.png", "hero", "neutral", "15", "close", "none", "1", "");
+const geralt = new CardData("Geralt of Rivia", "geralt_of_rivia.png", "hero", "neutral", "15", "close", "none", "1", "");
+const yenn = new CardData("Yennefer of Vengerberg", "yennefer_of_vengerberg.png", "hero", "neutral", "7", "ranged", "medic", "1", "");
+const triss = new CardData("Triss Merigold", "triss_merigold.png", "hero", "neutral", "7", "close", "scorch", "1", "");
+const ciri = new CardData("Cirilla Fiona Elen Riannon", "ciri.png", "hero", "neutral", "15", "close", "none", "1", "");
 
 //initial game state to work on styling
 let initialGameState = {
@@ -234,8 +275,8 @@ let initialGameState = {
   playersTurn: 0,
   round: 1,
   board: new Board({
-    field: [{close: [card1], ranged: [card2], siege: [card3], graveyard: [card4]},
-            {close: [card2], ranged: [card4], siege: [card2], graveyard: []}],
+    field: [{close: [geralt], ranged: [yenn], siege: [triss], graveyard: [ciri]},
+            {close: [yenn], ranged: [ciri], siege: [yenn], graveyard: []}],
     weather: {close: true, ranged: false, siege: false},
     rallyHorns: [{close: true, ranged: false, siege: false},
                 {close: false, ranged: false, siege: false}],
@@ -248,7 +289,7 @@ let initialGameState = {
     playerName: "jimmynewsom",
     faction: "Northern Realms",
     leaderName: "leaderwoman",
-    hand: [card1, card2, card3, card4]
+    hand: [geralt, yenn, triss, ciri]
   },
   opponent: {
     lives: 2,
@@ -266,14 +307,19 @@ export default function GwentClient({socket}) {
 
   const authHeader = useAuthHeader();
   const [cardMap, setCardMap] = useState(new Map());
+  const [leaderMap, setLeaderMap] = useState(new Map());
   
-  //focusCard looks like [range or "hand", cardIndex, "player" or "opponent"]
+  //focusCard looks like [range or "hand", cardIndex, "player" or "opponent", card] or null
   const [focusCard, setFocusCard] = useState();
   const [gameOverMessage, setGameOverMessage] = useState();
   const [gameState, setGameState] = useState(initialGameState);
   const [playerTotal, setPlayerTotal] = useState(initialGameState.board.getTotalStrength(initialGameState.playerIndex));
   const [opponentTotal, setOpponentTotal] = useState(initialGameState.board.getTotalStrength((initialGameState.playerIndex + 1) % 2));
 
+  //I'm using a state variable for this instead of just an html dialog so that it won't render at all unless I need it
+  //Otherwise I think a hidden html dialog would get recomputed every render phase
+  //can be [null, "cardSwap", "playerGY", "opponentGY", or "medic"]
+  const [dialogStatus, setDialogStatus] = useState();
 
   function socketGameUpdateReceived(gameState){
     console.log("game update received");
@@ -287,6 +333,19 @@ export default function GwentClient({socket}) {
     console.log(gameState)
   };
 
+  function socketSubmitCardSwap(cardIndex){
+    socket.emit("card_swap", cardIndex);
+  }
+
+  function socketSubmitPass(){
+    if(gameState.playersTurn != gameState.playerIndex){
+      console.log("it's not your turn");
+      return;
+    }
+
+    socket.emit("pass");
+  }
+
   function socketGameOverReceived(result){
     console.log("game over");
 
@@ -298,17 +357,8 @@ export default function GwentClient({socket}) {
       setGameOverMessage("Tie Game.");
   }
 
-  function submitPass(){
-    if(gameState.playersTurn != gameState.playerIndex){
-      console.log("it's not your turn");
-      return;
-    }
-
-    socket.emit("pass");
-  }
-
   useEffect(() => {
-    getCardData(setCardMap, authHeader);
+    getCardData(setCardMap, setLeaderMap);
 
     console.log("connecting to websocket");
     socket.connect();
@@ -330,10 +380,12 @@ export default function GwentClient({socket}) {
         alert("websocket is disconnected. please refresh the page!");
         return;
       }
+
+      let card = gameState.player.hand[cardIndex];
   
       //first click makes the card the focus card
       if(!focusCard || focusCard[0] != "hand" || focusCard[1] != cardIndex)
-        setFocusCard(["hand", cardIndex]);
+        setFocusCard(["hand", cardIndex, "player", card]);
       else {
         //if the card is already the focus and they click it again, play the card, unless it has targeting rules
         //but first check if it's the players turn
@@ -341,8 +393,6 @@ export default function GwentClient({socket}) {
           alert("it's not your turn");
           return;
         }
-  
-        let card = gameState.player.hand[cardIndex];
         
         console.log("socket connected: " + socket.connected);
         console.log(card.name + " played");
@@ -427,19 +477,58 @@ export default function GwentClient({socket}) {
     }
   }
 
+  function showGameDialog() {
+    let dialog = document.getElementById("game-dialog");
+    dialog.showModal();
+  }
+  
+  function hideGameDialog() {
+    let dialog = document.getElementById("game-dialog");
+    dialog.close();
+  }
+
   
 
   //////////////////////////////////////////////////////
   ////////////////// Render Logic /////////////////////
   ////////////////////////////////////////////////////
   
-  if(gameState == undefined)
+  if(cardMap.size == 0 || leaderMap.size == 0 || gameState == undefined)
     return;
 
   if(gameOverMessage)
     return <h3>{gameOverMessage}</h3>
 
+  let dialogContent;
+  if(dialogStatus){
+    if(dialogStatus == "cardSwap"){
+      dialogContent = <div>Card Swap</div>;
+    }
+    else if(dialogStatus == "playerGY"){
+      dialogContent = (
+        <div>
+          <p>player GY</p>
+          <button onClick={()=>{setDialogStatus()}}>Close GY</button>  
+        </div>
+      );
+    }
+    else if(dialogStatus == "opponentGY"){
+      dialogContent = (
+        <div>
+          <p>opponent GY</p>
+          <button onClick={()=>{setDialogStatus()}}>Close GY</button>  
+        </div>
+      );
+    }
+  }
+  else {
+    dialogContent = <></>;
+  }
+
+
+
   //focusCard has shape [range (or hand), index, player or opponent]
+  //but I might refactor it to be [range (or hand), index, player or opponent, card]
   let fcard;
   if(focusCard && focusCard[0] == "hand"){
     fcard = gameState.player.hand[focusCard[1]];
@@ -450,9 +539,10 @@ export default function GwentClient({socket}) {
     fcard = gameState.board.field[(gameState.playerIndex + 1) % 2][focusCard[0]][focusCard[1]];
 
   return(
-    <div className="gwent_client">
-      <div className="gwent_client_grid">
-        <div className="stats_panel">
+    <div className="gwent-client">
+      <dialog id="game-dialog">{dialogContent}</dialog>
+      <div className="gwent-client-grid">
+        <div className="stats-panel">
           <PlayerStatsPanel
             player={gameState.opponent}
             totalStrength={opponentTotal}
@@ -466,9 +556,9 @@ export default function GwentClient({socket}) {
             totalStrength={playerTotal}
           />
           <p>{gameState.playersTurn == gameState.playerIndex ? <b>YOUR TURN</b> : <b>NOT YOUR TURN</b>}</p>
-          <button onClick={submitPass}>Pass</button>
+          <button onClick={socketSubmitPass}>Pass</button>
         </div>
-        <div className="board_panel">
+        <div className="board-panel">
           <Field 
             board={gameState.board}
             playerIndex={gameState.playerIndex}
@@ -479,21 +569,21 @@ export default function GwentClient({socket}) {
             handleRangeClick={handleRangeClick}
           />
           <br />
-          <div className="player_hand">
+          <div className="player-hand">
             <PlayerHand cards={gameState.player.hand} handleHandCardClick={handleHandCardClick} />
           </div>
         </div>
-        <div className="right_panel">
-          <div className="deck_and_graveyard">
-            <LargeCardView cardData={card1} handleClick={()=>{}} />
+        <div className="right-panel">
+          <div className="deck-and-graveyard">
+            <LargeCardView cardData={geralt} handleClick={()=>{}} />
             <p>opponent graveyard</p>
             <p>opponent deck size: 20</p>
           </div>
-          <div className="card_focus">
+          <div className="card-focus">
             {focusCard ? <LargeCardView cardData={fcard} handleClick={()=>{}} /> : <></>}
           </div>
-          <div className="deck_and_graveyard">
-            <LargeCardView cardData={card1} handleClick={()=>{}} />
+          <div className="deck-and-graveyard">
+            <LargeCardView cardData={geralt} handleClick={()=>{}} />
             <p>player graveyard</p>
             <p>decks & card focus</p>
           </div>

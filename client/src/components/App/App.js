@@ -19,7 +19,7 @@ export default function App() {
   const signOut = useSignOut();
   const navigate = useNavigate();
 
-  let card1 = new CardData("Geralt of Rivia", "geralt_of_rivia.png", "hero", "neutral", "15", "close", "none", "1", "");
+  const geralt = new CardData("Geralt of Rivia", "geralt_of_rivia.png", "hero", "neutral", "15", "close", "none", "1", "");
 
   var socket;
 
@@ -87,8 +87,8 @@ export default function App() {
         }/>
         <Route path="/loginregister" element={<LoginRegister />} />
 
-        <Route path="/smallcardview" element={<SmallCardView cardData={card1} currentStrength={10}/>} />
-        <Route path="/largecardview" element={<LargeCardView cardData={card1} handleClick={() => console.log("nothing")} available={3}/>} />
+        <Route path="/smallcardview" element={<SmallCardView cardData={geralt} currentStrength={10}/>} />
+        <Route path="/largecardview" element={<LargeCardView cardData={geralt} handleClick={() => console.log("nothing")} available={3}/>} />
       </Routes>
       <footer>This is an unofficial, fan made game for demonstration purposes only, and is in no way endorsed by CD PROJEKT RED. It can also only play a maximum of 5 games at a time.</footer>
     </div>

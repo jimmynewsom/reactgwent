@@ -62,24 +62,6 @@ export default function Dashboard({ socket }) {
     return test;
   }
 
-  //temporary - for testing only
-  async function resetGames() {
-    console.log("resetting games");
-    try {
-      let result = await fetch(process.env.REACT_APP_BACKEND_URL + "gwent/resetGames", {
-        headers: { "Authorization": authHeader().split(" ")[1] }
-      });
-      if (result.status == 200) {
-        console.log("games reset successfully. disconnecting from socket.io");
-        setWaitingForOpponent(false);
-        socket.disconnect();
-        await fetchGameList();
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   function createGamesTable() {
     let gameRows = [];
     for (let game of gameList) {
@@ -98,6 +80,24 @@ export default function Dashboard({ socket }) {
         <tbody>{gameRows}</tbody>
       </table>
     );
+  }
+
+  //temporary - for testing only
+  async function resetGames() {
+    console.log("resetting games");
+    try {
+      let result = await fetch(process.env.REACT_APP_BACKEND_URL + "gwent/resetGames", {
+        headers: { "Authorization": authHeader().split(" ")[1] }
+      });
+      if (result.status == 200) {
+        console.log("games reset successfully. disconnecting from socket.io");
+        setWaitingForOpponent(false);
+        socket.disconnect();
+        await fetchGameList();
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 
 

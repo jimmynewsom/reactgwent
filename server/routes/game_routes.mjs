@@ -68,7 +68,7 @@ class MultiplayerGwent{
 //it almost works though
 //also, on the front end, my BrowserRouter refreshes the whole page everytime I change urls, breaking my websocket connections
 //so I need a lot of logic to handle that and reconnect to the right rooms, etc
-export default function create_game_router(io){
+export default function GameRouter(io){
   const game_router = express.Router();
 
   var games = [];

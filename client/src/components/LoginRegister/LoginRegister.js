@@ -129,7 +129,7 @@ export default function LoginRegister({ setToken }) {
   }
 
   return(
-    <div className="login_wrapper">
+    <div className="login-wrapper">
       <h2>Login</h2>
       <span className={`error`}>{errorMessage}</span>
       <form>

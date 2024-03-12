@@ -1,4 +1,4 @@
-.large_card {
+.large-card {
     height: auto;
     width: 100%;
     border-style: solid;
@@ -7,7 +7,7 @@
     margin-bottom: 2rem;
 
     // thank you Bri Camp Gomez! https://codepen.io/brianacamp/pen/ExxrYra
-    .large_card__image {
+    .large-card-image {
       width: 100%;
 
       img {
@@ -16,7 +16,7 @@
       }
     }
 
-    .large_card__availability {
+    .large-card-availability {
       width: 100%;
       background: transparent;
       position: relative;
@@ -29,10 +29,10 @@
   background-color: rgb(255, 255, 255, 0);
 }
 
-.weaker_card {
+.weaker-card {
   color: red;
 }
 
-.stronger_card {
+.stronger-card {
   color: green;
 }

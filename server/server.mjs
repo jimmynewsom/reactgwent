@@ -7,8 +7,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import db from "./db/conn.mjs";
 import authenticateToken from './middleware/authenticateToken.mjs';
-import {cardMap, cardRows, leaderRows, validateDeck, defaultDeck} from './gwent/gwent.mjs';
-import create_game_router from "./routes/game_routes.mjs";
+import {cardRows, leaderRows, validateDeck, defaultDeck} from './gwent/gwent.mjs';
+import GameRouter from "./routes/game_routes.mjs";
 
 
 const app = express();
@@ -116,12 +116,12 @@ app.post("/login", async (req, res) => {
 });
 
 
-app.get("/getCardData", authenticateToken, (req, res) => {
+app.get("/getCardData", (req, res) => {
   return res.json(cardRows);
 });
 
 
-app.get("/getLeaderData", authenticateToken, (req, res) => {
+app.get("/getLeaderData", (req, res) => {
   return res.json(leaderRows);
 });
 
@@ -171,12 +171,16 @@ app.get("/getUserDecks", authenticateToken, async (req, res) => {
   }
 });
 
+//leaderName, and faction get validated in the validateDeck function, so I don't need to sanitize those inputs
+//invalid values won't make it to the database
 
+//card names get validated, and I build a map from the keys, but I might need to sanitize those inputs (todo)
+//(what happens if someone passes invalid arguments to new Map(Object.entries(deck.cards))...? Is there any malicious input that will pass the checks?)
 app.post("/saveUserDeck", authenticateToken, async (req, res) => {
   try {
     let deck = {};
-    deck.faction = sanitizeInput(req.body.faction);
-    deck.leaderName = sanitizeInput(req.body.leaderName);
+    deck.faction = req.body.faction;
+    deck.leaderName = req.body.leaderName;
     deck.cards = req.body.cards;
     deck.owner = sanitizeInput(req.username);
     
@@ -206,7 +210,7 @@ app.post("/saveUserDeck", authenticateToken, async (req, res) => {
 });
 
 
-app.use("/gwent", create_game_router(io));
+app.use("/gwent", GameRouter(io));
 
 
 server.listen(port, () => {

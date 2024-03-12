@@ -19,13 +19,13 @@ export class CardData {
   }
 }
 
-export class LeaderCard {
-  constructor(name, title, image_url, faction, desc){
+export class LeaderCardData {
+  constructor(name, image_url, faction, desc, ability_description){
     this.name = name;
-    this.title = title;
     this.image_url = image_url;
     this.faction = faction;
     this.desc = desc;
+    this.ability_description = ability_description;
   }
 }
 
@@ -58,10 +58,9 @@ fs.readFile("./gwent/leader_cards.csv", function (err, fileData) {
     leaderRows.forEach((row, i) => {
       //the first row is just the names of the columns
       if(i!==0){
-        //each row is [0] leader name, [1] leader title, [2] image url, [3] faction, and [4] description
-        let card = new CardData(row[0], row[1], row[2], row[3], row[4]);
-        //using titles instead of leader names here, because leader names are not unique
-        leaderMap.set(row[1], card);
+        //each row is [0] leader name, [1] image url, [2] faction, [3] description, and [4] ability description
+        let card = new LeaderCardData(row[0], row[1], row[2], row[3], row[4]);
+        leaderMap.set(row[0], card);
       }
     });
   });
@@ -104,18 +103,17 @@ export {cardMap, cardRows, leaderRows, leaderMap, defaultDeck};
 
 
 //deck should have faction, leaderName, cards, and owner fields, from /saveUserDeck route in server.mjs
-//TODO - validate leader exists and is the correct faction
 export function validateDeck(deck){
   let isValid = true, heroCount = 0, specialCount = 0, unitCount = 0, totalCardCount = 0, totalUnitStrength = 0;
   
-  //TODO - validate leader exists and is the correct faction
+  if(!leaderMap.has(deck.leaderName) || leaderMap.get(deck.leaderName).faction != deck.faction)
+    return {isValid: false};
 
   let deckMap = new Map(Object.entries(deck.cards));
   for(let [cardName, numberInDeck] of deckMap){
     //if the user submits a deck with a card name I don't recognize they're not using my app
-    if(!cardMap.has(cardName)){
+    if(!cardMap.has(cardName))
       return {isValid: false};
-    }
 
     let card = cardMap.get(cardName);
     totalCardCount += numberInDeck;
@@ -426,7 +424,6 @@ export class Gwent{
   play cards, following all gwent rules
   */
   playCard(playerIndex, cardIndex, target){
-
     try {
       //first check if it is the player's turn
       if(playerIndex != this.playersTurn)
@@ -550,7 +547,58 @@ export class Gwent{
   }
 
   playLeaderAbility(playerIndex){
-    console.log("nothing for now");
+    try {
+      let player = this.players[playerIndex];
+      let faction = player.faction;
+      let title = player.leader.title;
+
+      if(!player.usedLeaderAbility){
+        if(faction == "Northern Realms"){
+          if(title == "King of Temeria")
+            this.board.weather.ranged = true;
+          else if(title == "Lord Commander of the North")
+            this.board.clearWeather();
+          else if(title == "the Siegemaster")
+            this.board.rallyHorns[playerIndex].siege = true;
+          else if(title == "the Steel-Forged")
+            this.board.scorch(playerIndex, "siege");
+        }
+        else if(faction == "Monsters"){
+          if(title == "Bringer of Death")
+            console.log("restore a card from your graveyard to your hand (todo)");
+          else if(title == "Commander of the Red Riders")
+            this.board.rallyHorns[playerIndex].close = true;
+          else if(title == "Destroyer of Worlds")
+            console.log("discard 2 cards from your hand and draw 1 card from your deck (todo)");
+          else if(title == "King of the Wild Hunt")
+            console.log("pick any weather card from your deck and play it instantly (todo)");
+        }
+        else if(faction == "Nilfgaard"){
+          if(title == "Emperor of Nilfgaard")
+            console.log("look at 3 random cards from your opponent's hand (todo)");
+          else if(title == "His Imperial Majesty")
+            this.board.weather.siege = true;
+          else if(title == "the Relentless")
+            console.log("draw a card from your opponent's graveyard (todo)");
+        }
+        else if(faction == "Scoiatael"){
+          if(title == "the Beautiful")
+            this.board.rallyHorns[playerIndex].ranged = true;
+          else if(title == "Pureblood Elf")
+            this.board.weather.close = true;
+          else if(title == "Queen of Dol Blathanna")
+            this.board.scorch(playerIndex, "close");
+        }
+
+        player.usedLeaderAbility = true;
+      }
+      else {
+        console.log("player has already used their leader ability");
+      }
+    } catch(error){
+      console.log(error);
+    }
+    
   }
 
   //this handles passing and calculates winners for rounds and the game
