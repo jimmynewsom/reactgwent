@@ -147,7 +147,7 @@ function CardRow(board, playerIndex, range, i, rowStrength, handleFieldCardClick
   //todo - if this row is targetable
 
 
-  return(<div className={rowClasses} handleClick={handleRangeClick(range)}>
+  return(<div className={rowClasses} onClick={handleRangeClick(range)}>
     <div className="range">{range}<p>totalStrength: {rowStrength}</p></div>
     <div className="rallyhorn">{rallyHorn ? <SmallCardView cardData={rallyHornCard}/> : <></>}</div>
     <div className="cardrow">{cardViews}</div>
