@@ -16,15 +16,7 @@ import { GiElfHelmet, GiBroadsword, GiCrossbow, GiSpikedShield } from "react-ico
 import { GoSun } from "react-icons/go";
 
 
-//initial leaders for every faction - hardcoding since the leaderMap won't exist until it gets pulled from the server
-const foltest = new LeaderCardData("Foltest", "King of Temeria", "king_foltest.png", "Northern Realms", "censored", "Pick an Impenetrable Fog card from your deck and play it instantly.");
-const eredin = new LeaderCardData("Eredin", "Bringer of Death", "bringer_eredin.png", "Monsters", "It is unavoidable.", "Restore a card from your discard pile to your hand.");
-const emhyr = new LeaderCardData("Emhyr var Emreis", "Emperor of Nilfgaard", "emperor_emhyr.png", "Nilfgaard", "Your motives do not interest me. Only results.", "Look at 3 random cards from your opponent's hand.");
-const francesca = new LeaderCardData("Francesca Findabair", "the Beautiful", "beautiful_francesca.png", "Scoiatael", "The Elder Races have forgotten more than humans can ever hope to know.", "Doubles the strength of all your Ranged Combat units (unless a Commander's Horn is also present on that row).");
-
-//this class is basically a wrapper around my deck objects
-//so I can re-use one hashmap per deck, but still have new objects so that react notices the state changes
-//also, I should maybe include a field for the faction, but right now it's easier to track that separately and add it when I save decks to the database
+//this class is so I can re-use my deck hashmaps, but still have new objects so that react notices the state changes
 export class GwentDeck {
   constructor(deck){
     if(!deck){
@@ -42,12 +34,12 @@ export class GwentDeck {
       this.unitCount = deck.unitCount;
       this.totalCardCount = deck.totalCardCount;
       this.totalUnitStrength = deck.totalUnitStrength;
-      this.leader = deck.leader;
+      this.leaderName = deck.leaderName;
     }
   }
 
-  setLeaderAndReturnDeck(leader){
-    this.leader = leader;
+  setLeaderNameAndReturnDeck(leaderName){
+    this.leaderName = leaderName;
     return this;
   }
 }
@@ -83,11 +75,11 @@ export default function DeckBuilder({socket}) {
   const [cardMap, setCardMap] = useState(new Map());
   const [leaderMap, setLeaderMap] = useState(new Map());
   const [currentFaction, setCurrentFaction] = useState("Northern Realms");
-  const [currentDeck, setCurrentDeck] = useState(new GwentDeck().setLeaderAndReturnDeck(foltest));
+  const [currentDeck, setCurrentDeck] = useState(new GwentDeck().setLeaderTitleAndReturnDeck("Foltest King of Temeria"));
   const [northernRealmsDeck, setNorthernRealmsDeck] = useState(currentDeck);
-  const [nilfgaardDeck, setNilfgaardDeck] = useState(new GwentDeck().setLeaderAndReturnDeck(emhyr));
-  const [scoiataelDeck, setScoiataelDeck] = useState(new GwentDeck().setLeaderAndReturnDeck(francesca));
-  const [monsterDeck, setMonsterDeck] = useState(new GwentDeck().setLeaderAndReturnDeck(eredin));
+  const [nilfgaardDeck, setNilfgaardDeck] = useState(new GwentDeck().setLeaderTitleAndReturnDeck("Emhyr var Emreis Emperor of Nilfgaard"));
+  const [scoiataelDeck, setScoiataelDeck] = useState(new GwentDeck().setLeaderTitleAndReturnDeck("Francesca Findabair the Beautiful"));
+  const [monsterDeck, setMonsterDeck] = useState(new GwentDeck().setLeaderTitleAndReturnDeck("Eredin Bringer of Death"));
   //const [skelligeDeck, setSkelligeDeck] = useState(new GwentDeck());
 
   const { roomName } = useParams();
@@ -242,7 +234,7 @@ export default function DeckBuilder({socket}) {
                             handleClick={addCardToDeck}
                             key={value.name}
                             available={available}
-                        />)
+                        />);
     }
     return cardViews;
   }
@@ -263,9 +255,18 @@ export default function DeckBuilder({socket}) {
                           handleClick={removeCardFromDeck}
                           key={keyy + "2"}
                           available={value}
-                      />)
+                      />);
     }
     return cardViews;
+  }
+
+  function createLeaderCards(){
+    for(let [keyy, value] of leaderMap){
+      if(value.faction != currentFaction)
+        continue;
+
+      cardViews.push(<LeaderCardView leaderCardData={value} />);
+    }
   }
 
   async function saveCurrentDeck(){
@@ -283,7 +284,7 @@ export default function DeckBuilder({socket}) {
         //I am not including the count fields here, because I will calculate those on the server, in case someone trys to cheat
         body: JSON.stringify({
           "faction": currentFaction,
-          "leader": currentDeck.leader,
+          "leaderName": currentDeck.leaderName,
           "cards": cards
         })
       });
@@ -313,7 +314,7 @@ export default function DeckBuilder({socket}) {
         gwentClientDeck.specialCount = mongoDeck.specialCount;
         gwentClientDeck.totalUnitStrength = mongoDeck.totalUnitStrength;
         gwentClientDeck.heroCount = mongoDeck.heroCount;
-        gwentClientDeck.leader = mongoDeck.leader;
+        gwentClientDeck.leaderName = mongoDeck.leaderName;
 
         if(mongoDeck.faction == "Northern Realms"){
           setCurrentDeck(gwentClientDeck);
@@ -340,7 +341,7 @@ export default function DeckBuilder({socket}) {
     let cards = Object.fromEntries(currentDeck.cards.entries());
     let serializableDeck = {
       "faction": currentFaction,
-      "leader": currentDeck.leader,
+      "leaderName": currentDeck.leaderName,
       "cards": cards
     };
     document.getElementById("ready").disabled = true;
@@ -368,7 +369,7 @@ export default function DeckBuilder({socket}) {
   return(
     <div className="deckbuilder">
       <div className="deckbuilder-border">
-        <dialog id=""></dialog>
+        <dialog id="deckbuilder-dialog"></dialog>
         <h1 className={'screen-heading'}>DeckBuilder</h1>
         <div className="faction-select">
           <button className={'primary-button'} onClick={previousFaction}> previous faction </button>

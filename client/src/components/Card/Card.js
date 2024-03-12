@@ -16,9 +16,8 @@ export class CardData {
 }
 
 export class LeaderCardData {
-  constructor(name, title, image_url, faction, desc, ability_description){
+  constructor(name, image_url, faction, desc, ability_description){
     this.name = name;
-    this.title = title;
     this.image_url = image_url;
     this.faction = faction;
     this.desc = desc;
@@ -81,6 +80,7 @@ export function LeaderCardView({ leaderCardData, width=180, height=320 }) {
           height={height}
         />
       </div>
+      <p>{leaderCardData.name}</p>
       <p>{leaderCardData.ability_description}</p>
     </div>
   );

@@ -171,12 +171,16 @@ app.get("/getUserDecks", authenticateToken, async (req, res) => {
   }
 });
 
+//leaderName, and faction get validated in the validateDeck function, so I don't need to sanitize those inputs
+//invalid values won't make it to the database
 
+//card names get validated, and I build a map from the keys, but I might need to sanitize those inputs (todo)
+//(what happens if someone passes invalid arguments to new Map(Object.entries(deck.cards))...? Is there any malicious input that will pass the checks?)
 app.post("/saveUserDeck", authenticateToken, async (req, res) => {
   try {
     let deck = {};
-    deck.faction = sanitizeInput(req.body.faction);
-    deck.leaderName = sanitizeInput(req.body.leaderName);
+    deck.faction = req.body.faction;
+    deck.leaderName = req.body.leaderName;
     deck.cards = req.body.cards;
     deck.owner = sanitizeInput(req.username);
     

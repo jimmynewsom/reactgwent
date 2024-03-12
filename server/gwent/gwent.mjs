@@ -20,9 +20,8 @@ export class CardData {
 }
 
 export class LeaderCardData {
-  constructor(name, title, image_url, faction, desc, ability_description){
+  constructor(name, image_url, faction, desc, ability_description){
     this.name = name;
-    this.title = title;
     this.image_url = image_url;
     this.faction = faction;
     this.desc = desc;
@@ -59,10 +58,9 @@ fs.readFile("./gwent/leader_cards.csv", function (err, fileData) {
     leaderRows.forEach((row, i) => {
       //the first row is just the names of the columns
       if(i!==0){
-        //each row is [0] leader name, [1] leader title, [2] image url, [3] faction, [4] description, and [5] ability description
-        let card = new LeaderCardData(row[0], row[1], row[2], row[3], row[4], row[5]);
-        //using titles for keys instead of leader names here, because leader names are not unique
-        leaderMap.set(row[1], card);
+        //each row is [0] leader name, [1] image url, [2] faction, [3] description, and [4] ability description
+        let card = new LeaderCardData(row[0], row[1], row[2], row[3], row[4]);
+        leaderMap.set(row[0], card);
       }
     });
   });
@@ -104,11 +102,11 @@ const defaultDeck = {
 export {cardMap, cardRows, leaderRows, leaderMap, defaultDeck};
 
 
-//deck should have faction, leaderTitle, cards, and owner fields, from /saveUserDeck route in server.mjs
+//deck should have faction, leaderName, cards, and owner fields, from /saveUserDeck route in server.mjs
 export function validateDeck(deck){
   let isValid = true, heroCount = 0, specialCount = 0, unitCount = 0, totalCardCount = 0, totalUnitStrength = 0;
   
-  if(!leaderMap.has(deck.leaderTitle) || leaderMap.get(deck.leaderTitle).faction != deck.faction)
+  if(!leaderMap.has(deck.leaderName) || leaderMap.get(deck.leaderName).faction != deck.faction)
     return {isValid: false};
 
   let deckMap = new Map(Object.entries(deck.cards));
