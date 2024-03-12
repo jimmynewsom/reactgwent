@@ -94,7 +94,7 @@ const defaultDeck = {
   "totalCardCount": 30,
   "totalUnitStrength": 84,
   "heroCount": 0,
-  "leaderName": "Foltest, King of Temeria",
+  "leaderName": "Foltest King of Temeria",
   "specialCount": 8,
   "unitCount": 22
 }
