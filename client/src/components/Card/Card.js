@@ -16,21 +16,21 @@ export class CardData {
 }
 
 export class LeaderCardData {
-  constructor(name, title, image_url, faction, desc, ability_description){
+  constructor(name, title, image_url, faction, desc, abilityDescription){
     this.name = name;
     this.title = title;
     this.image_url = image_url;
     this.faction = faction;
     this.desc = desc;
-    this.ability_description = ability_description;
+    this.abilityDescription = abilityDescription;
   }
 }
 
 export function LargeCardView({ cardData, handleClick, available = 0 }) {
 
   return (
-    <div className="large_card" onClick={handleClick(cardData)}>
-      <div className="large_card__image">
+    <div className="large-card" onClick={handleClick(cardData)}>
+      <div className="large-card-image">
         <img
           src={process.env.REACT_APP_UNIT_IMAGE_BASE_URL + cardData.image_url}
           alt={"image url is wrong for " + cardData.name + " with image url " + cardData.image_url}
@@ -38,7 +38,7 @@ export function LargeCardView({ cardData, handleClick, available = 0 }) {
           height="320"
         />
       </div>
-      <div className="large_card__availability">
+      <div className="large-card-availability">
         {available ? <div className="available"><p>Available: {available}</p></div> : <></>}
       </div>
     </div>
@@ -51,13 +51,13 @@ export function SmallCardView({ cardData, handleClick, currentStrength }) {
     if (currentStrength == cardData.strength)
       strength = <p>{currentStrength}</p>
     else if (currentStrength < cardData.strength)
-      strength = <p className="weaker_card">{currentStrength}</p>
+      strength = <p className="weaker-card">{currentStrength}</p>
     else
-      strength = <p className="stronger_card">{currentStrength}</p>
+      strength = <p className="stronger-card">{currentStrength}</p>
   }
 
   return (
-    <div className="small_card" onClick={handleClick ? handleClick : () => { }}>
+    <div className="small-card" onClick={handleClick ? handleClick : () => { }}>
       {currentStrength || currentStrength == 0 ? <>{strength}</> : <p></p>}
       <img
         src={process.env.REACT_APP_UNIT_IMAGE_BASE_URL + cardData.image_url}
@@ -72,8 +72,8 @@ export function SmallCardView({ cardData, handleClick, currentStrength }) {
 export function LeaderCardView({ leaderCardData, width=180, height=320 }) {
 
   return (
-    <div className="leader_card">
-      <div className="leader_card__image">
+    <div className="leader-card">
+      <div className="leader-card-image">
         <img
           src={process.env.REACT_APP_UNIT_IMAGE_BASE_URL + leaderCardData.image_url}
           alt={"image url is wrong for " + leaderCardData.name + " " + leaderCardData.title + " with image url " + leaderCardData.image_url}
