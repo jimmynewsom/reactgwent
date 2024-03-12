@@ -75,11 +75,11 @@ export default function DeckBuilder({socket}) {
   const [cardMap, setCardMap] = useState(new Map());
   const [leaderMap, setLeaderMap] = useState(new Map());
   const [currentFaction, setCurrentFaction] = useState("Northern Realms");
-  const [currentDeck, setCurrentDeck] = useState(new GwentDeck().setLeaderTitleAndReturnDeck("Foltest King of Temeria"));
+  const [currentDeck, setCurrentDeck] = useState(new GwentDeck().setLeaderNameAndReturnDeck("Foltest King of Temeria"));
   const [northernRealmsDeck, setNorthernRealmsDeck] = useState(currentDeck);
-  const [nilfgaardDeck, setNilfgaardDeck] = useState(new GwentDeck().setLeaderTitleAndReturnDeck("Emhyr var Emreis Emperor of Nilfgaard"));
-  const [scoiataelDeck, setScoiataelDeck] = useState(new GwentDeck().setLeaderTitleAndReturnDeck("Francesca Findabair the Beautiful"));
-  const [monsterDeck, setMonsterDeck] = useState(new GwentDeck().setLeaderTitleAndReturnDeck("Eredin Bringer of Death"));
+  const [nilfgaardDeck, setNilfgaardDeck] = useState(new GwentDeck().setLeaderNameAndReturnDeck("Emhyr var Emreis Emperor of Nilfgaard"));
+  const [scoiataelDeck, setScoiataelDeck] = useState(new GwentDeck().setLeaderNameAndReturnDeck("Francesca Findabair the Beautiful"));
+  const [monsterDeck, setMonsterDeck] = useState(new GwentDeck().setLeaderNameAndReturnDeck("Eredin Bringer of Death"));
   //const [skelligeDeck, setSkelligeDeck] = useState(new GwentDeck());
 
   const { roomName } = useParams();
@@ -261,12 +261,41 @@ export default function DeckBuilder({socket}) {
   }
 
   function createLeaderCards(){
+    let cardViews = [];
     for(let [keyy, value] of leaderMap){
       if(value.faction != currentFaction)
         continue;
 
-      cardViews.push(<LeaderCardView leaderCardData={value} />);
+      cardViews.push(<div onClick={()=>{chooseLeader(value.name)}}><LeaderCardView leaderCardData={value} /><p>{value.ability_description}</p></div>);
     }
+  }
+
+  function chooseLeader(leaderName){
+    currentDeck.leaderName = leaderName;
+    setCurrentDeck(new GwentDeck(currentDeck));
+
+    if(currentFaction == "Northern Realms")
+      setNorthernRealmsDeck(currentDeck);
+    else if(currentFaction == "Monsters")
+      setMonsterDeck(currentDeck);
+    // else if(currentFaction == "Skellige")
+    //   setSkelligeDeck(currentDeck);
+    else if(currentFaction == "Nilfgaard")
+      setNilfgaardDeck(currentDeck);
+    else if(currentFaction == "Scoiatael")
+      setScoiataelDeck(currentDeck);
+
+    hideLeaderDialog();
+  }
+
+  function showLeaderDialog(){
+    let dialog = document.getElementById("leader-dialog");
+    dialog.showModal();
+  }
+
+  function hideLeaderDialog(){
+    let dialog = document.getElementById("leader-dialog");
+    dialog.close();
   }
 
   async function saveCurrentDeck(){
@@ -366,10 +395,13 @@ export default function DeckBuilder({socket}) {
   },  []);
 
 
+  if(cardMap.size == 0 || leaderMap.size == 0)
+    return;
+
   return(
     <div className="deckbuilder">
       <div className="deckbuilder-border">
-        <dialog id="deckbuilder-dialog"></dialog>
+        <dialog id="leader-dialog">{createLeaderCards()}</dialog>
         <h1 className={'screen-heading'}>DeckBuilder</h1>
         <div className="faction-select">
           <button className={'primary-button'} onClick={previousFaction}> previous faction </button>
@@ -385,7 +417,8 @@ export default function DeckBuilder({socket}) {
             </div>
           </div>
           <div className="two">
-            <LeaderCardView leaderCardData={currentDeck.leader} />
+            <LeaderCardView leaderCardData={leaderMap.get(currentDeck.leaderName)} />
+            <div><button onClick={showLeaderDialog}>Choose Leader</button></div>
             <strong>Total cards in deck</strong>
             <p className="card-stat"><TbCards />{currentDeck.totalCardCount}</p>
             <strong>Number of Unit Cards</strong>

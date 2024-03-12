@@ -2,7 +2,7 @@ import './GwentClient.scss';
 import React, { useState, useEffect } from 'react';
 import { useAuthHeader } from 'react-auth-kit';
 
-import {LargeCardView, CardData, SmallCardView} from '../Card/Card';
+import {CardData, SmallCardView, LargeCardView, LeaderCardData, LeaderCardView} from '../Card/Card';
 
 
 function PlayerStatsPanel({player, totalStrength}){
@@ -170,26 +170,26 @@ function PlayerHand({cards, handleHandCardClick}){
 }
 
 //CardRowDialogs are for swapping cards at the start of the game, medics, and graveyards
-function CardRowDialog(cards, handleDialogClick){
-  console.log("rendering card view dialog");
+// function CardRowDialog(cards, handleDialogClick){
+//   console.log("rendering card view dialog");
 
-  let cardViews = [];
+//   let cardViews = [];
   
-  for(let j=0; j < cards.length; j++){
-    let card = cards[j];
-    cardViews.push(<LargeCardView
-                      cardData={card}
-                      key={(range + i) + j}
-                      handleClick={handleDialogClick}
-                  />);
-  }
+//   for(let j=0; j < cards.length; j++){
+//     let card = cards[j];
+//     cardViews.push(<LargeCardView
+//                       cardData={card}
+//                       key={(range + i) + j}
+//                       handleClick={handleDialogClick}
+//                   />);
+//   }
 
-  return(
-    <dialog className="card-dialog">
+//   return(
+//     <dialog className="card-dialog">
       
-    </dialog>
-  );
-}
+//     </dialog>
+//   );
+// }
 
 
 //first, checks for cardRows in localStorage
@@ -236,7 +236,7 @@ export function getCardData(setcardmap, setleadermap) {
     let map = new Map();
     leaderRows.forEach((row, i) => {
       if(i !== 0){
-        let card = new LeaderCardData(row[0], row[1], row[2], row[3], row[4], row[5]);
+        let card = new LeaderCardData(row[0], row[1], row[2], row[3], row[4]);
         map.set(row[0], card);
       }
     });
@@ -251,7 +251,7 @@ export function getCardData(setcardmap, setleadermap) {
         let map = new Map();
         leaderRows.forEach((row, i) => {
           if(i !== 0){
-            let card = new LeaderCardData(row[0], row[1], row[2], row[3], row[4], row[5]);
+            let card = new LeaderCardData(row[0], row[1], row[2], row[3], row[4]);
             map.set(row[0], card);
           }
         });
@@ -493,7 +493,7 @@ export default function GwentClient({socket}) {
   ////////////////// Render Logic /////////////////////
   ////////////////////////////////////////////////////
   
-  if(gameState == undefined)
+  if(cardMap.size == 0 || leaderMap.size == 0 || gameState == undefined)
     return;
 
   if(gameOverMessage)

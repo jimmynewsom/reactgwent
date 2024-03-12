@@ -74,14 +74,12 @@ export function LeaderCardView({ leaderCardData, width=180, height=320 }) {
     <div className="leader-card">
       <div className="leader-card-image">
         <img
-          src={process.env.REACT_APP_UNIT_IMAGE_BASE_URL + leaderCardData.image_url}
+          src={process.env.REACT_APP_LEADER_IMAGE_BASE_URL + leaderCardData.image_url}
           alt={"image url is wrong for " + leaderCardData.name + " " + leaderCardData.title + " with image url " + leaderCardData.image_url}
           width={width}
           height={height}
         />
       </div>
-      <p>{leaderCardData.name}</p>
-      <p>{leaderCardData.ability_description}</p>
     </div>
   );
 }
