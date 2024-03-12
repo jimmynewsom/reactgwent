@@ -104,19 +104,18 @@ const defaultDeck = {
 export {cardMap, cardRows, leaderRows, leaderMap, defaultDeck};
 
 
-//deck should have faction, leaderName, cards, and owner fields, from /saveUserDeck route in server.mjs
-//TODO - validate leader exists and is the correct faction
+//deck should have faction, leaderTitle, cards, and owner fields, from /saveUserDeck route in server.mjs
 export function validateDeck(deck){
   let isValid = true, heroCount = 0, specialCount = 0, unitCount = 0, totalCardCount = 0, totalUnitStrength = 0;
   
-  //TODO - validate leader exists and is the correct faction
+  if(!leaderMap.has(deck.leaderTitle) || leaderMap.get(deck.leaderTitle).faction != deck.faction)
+    return {isValid: false};
 
   let deckMap = new Map(Object.entries(deck.cards));
   for(let [cardName, numberInDeck] of deckMap){
     //if the user submits a deck with a card name I don't recognize they're not using my app
-    if(!cardMap.has(cardName)){
+    if(!cardMap.has(cardName))
       return {isValid: false};
-    }
 
     let card = cardMap.get(cardName);
     totalCardCount += numberInDeck;
