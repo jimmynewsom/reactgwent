@@ -266,7 +266,7 @@ export default function DeckBuilder({socket}) {
       if(value.faction != currentFaction)
         continue;
 
-      cardViews.push(<div onClick={()=>{chooseLeader(value.name)}}><LeaderCardView leaderCardData={value} /><p>{value.ability_description}</p></div>);
+      cardViews.push(<div key={value.name} onClick={()=>{chooseLeader(value.name)}}><LeaderCardView leaderCardData={value} /><p>{value.ability_description}</p></div>);
     }
     return cardViews;
   }
