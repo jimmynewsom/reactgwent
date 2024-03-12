@@ -69,8 +69,7 @@ class MultiplayerGwent{
 //also, on the front end, my BrowserRouter refreshes the whole page everytime I change urls, breaking my websocket connections
 //so I need a lot of logic to handle that and reconnect to the right rooms, etc
 export default function GameRouter(io){
-  const game_router = express.Router();
-
+  const gameRouter = express.Router();
   var games = [];
   var userGameMap = new Map();
   //I am hard coding a max number of games, because CDPR gave me permission to make this, but only for demonstration purposes
@@ -84,7 +83,7 @@ export default function GameRouter(io){
   //if so, return an error
   //otherwise, create a new game and add the user as user1
   //then call socket.connect() on the front end, which should add them to the right room now using the map
-  game_router.get("/createGame", authenticateToken, (req, res) => {
+  gameRouter.get("/createGame", authenticateToken, (req, res) => {
     let username = sanitizeInput(req.username);
 
     if(games.length >= MAX_GAMES){
@@ -102,7 +101,7 @@ export default function GameRouter(io){
 
   //when a user tries to join a game, check they are not already in a game and the target opponent exists
   //if nothings wrong, add them as user2, then call socket.connect() on the front end
-  game_router.get("/joinGame/:targetOpponent", authenticateToken, (req, res) => {
+  gameRouter.get("/joinGame/:targetOpponent", authenticateToken, (req, res) => {
     let username = sanitizeInput(req.username);
     let targetOpponent = req.params.targetOpponent;
 
@@ -125,7 +124,7 @@ export default function GameRouter(io){
   });
 
 
-  game_router.get("/getGameList", authenticateToken, (req, res) => {
+  gameRouter.get("/getGameList", authenticateToken, (req, res) => {
     let gamePlayersList = [];
     for(let game of games){
       if(game.user2)
@@ -138,15 +137,20 @@ export default function GameRouter(io){
 
 
   //temporary
-  game_router.get("/resetGames", (req, res) => {
-    console.log("resetting games");
-    games = [];
-    userGameMap = new Map();
-    return res.status(200).json({message: "games reset"});
+  gameRouter.get("/resetGames", authenticateToken, (req, res) => {
+    if(req.username == "jimmynewsom"){
+      console.log("resetting games");
+      games = [];
+      userGameMap = new Map();
+      return res.status(200).json({message: "games reset"});
+    }
+    else {
+      return res.status(400).end();
+    }
   });
 
 
-  game_router.get("/checkUserHasGameInProgress", authenticateToken, (req, res) => {
+  gameRouter.get("/checkUserHasGameInProgress", authenticateToken, (req, res) => {
     let username = sanitizeInput(req.username);
     if(userGameMap.has(username))
       return res.json({inProgress: true});
@@ -234,6 +238,7 @@ export default function GameRouter(io){
       io.to(game.player2socketid).emit("game_update", game.getGameState(1));
     });
 
+    //game.pass returns 0 for game still in progress, 1 for p1 wins, 2 for p2 wins, and 3 for ties
     socket.on("pass", () => {
       //console.log("player " + playerIndex + " passes");
       let result = game.game.pass(playerIndex);
@@ -245,16 +250,16 @@ export default function GameRouter(io){
         console.log("game over");
 
         if(result == 1)
-          io.to(game.player1.playerName).emit("game_over", {winner: 0});
-        else if(result == 2)
           io.to(game.player1.playerName).emit("game_over", {winner: 1});
-        else
+        else if(result == 2)
           io.to(game.player1.playerName).emit("game_over", {winner: 2});
+        else
+          io.to(game.player1.playerName).emit("game_over", {winner: 3});
 
         //todo - update players wins and losses in the database
       }
     });
   });
 
-  return game_router;
+  return gameRouter;
 }
