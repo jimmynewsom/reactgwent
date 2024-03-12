@@ -444,7 +444,7 @@ export default function DeckBuilder({socket}) {
             <strong>Hero Cards</strong>
             <p className="card-stat"><GiElfHelmet />{currentDeck.heroCount}</p>
 
-            {!roomName ? <button className="primary-button" id="save-button" onClick={saveCurrentDeck}> Save current deck </button> : <button id="ready" onClick={submitReady}> Ready (use current deck) </button>}
+            {!roomName ? <button className="primary-button" id="save-button" onClick={saveCurrentDeck}> Save current deck </button> : <button className="primary-button" id="ready" onClick={submitReady}> Ready (use current deck) </button>}
           </div>
           <div className="three">
           <p className="filters"><TbCards /><GiBroadsword /><GiCrossbow /><GiElfHelmet /><GoSun /><GiSpikedShield />(filters - todo)</p>
