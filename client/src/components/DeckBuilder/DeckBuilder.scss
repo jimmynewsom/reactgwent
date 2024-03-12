@@ -96,3 +96,22 @@
 li {
   list-style-type: none;
 }
+
+#leader-dialog {
+  border: 5px solid white;
+}
+
+.leader-select-border {
+  display: flex;
+  border: 2px solid white;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.leader-select-card {
+  display: block;
+  border: 4px solid white;
+  border-radius: 10%;
+  margin: 20px;
+  max-width: 300px;
+}
