@@ -43,6 +43,9 @@ app.post("/register", async (req, res) => {
     let username = sanitizeInput(req.body.username);
     let password = sanitizeInput(req.body.password);
 
+    if(!username || !password)
+      return res.status(400).json({ error: 'username and password must not be blank, and must contain characters besdies "$.<>"'});
+
     let collection = await db.collection("users");
     let user = await collection.findOne({"_id": username});
 
@@ -84,6 +87,9 @@ app.post("/login", async (req, res) => {
   try {
     let username = sanitizeInput(req.body.username);
     let password = sanitizeInput(req.body.password);
+
+    if(!username || !password)
+      return res.status(400).json({ error: 'username and password must not be blank, and must contain characters besdies "$.<>"'});
 
     let collection = await db.collection("users");
     let user = await collection.findOne({"_id": username});

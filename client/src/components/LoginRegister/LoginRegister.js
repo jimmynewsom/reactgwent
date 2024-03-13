@@ -144,10 +144,10 @@ export default function LoginRegister({ setToken }) {
         </div>
         <div className={'login-button'}>
           <button className={`primary-button`} id="login" onClick={login}>{showLoginSuccessMessage ? loginSuccessMessage : "Login" }</button>
+          <button className={`primary-button`} id="register" onClick={register}>{showSignupSuccessMessage ? signupSuccessMessage : "Register as a new user"}</button>
         </div>        
       </form>
       <hr />
-      <button className={`secondary-button`} id="register" onClick={register}>{showSignupSuccessMessage ? signupSuccessMessage : "Register as a new user"}</button>
     </div>
   );
 }
