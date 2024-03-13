@@ -332,7 +332,7 @@ export default function GwentClient({socket}) {
     setGameState(gameState);
     setPlayerTotal(gameState.board.getTotalStrength(gameState.playerIndex));
     setOpponentTotal(gameState.board.getTotalStrength((gameState.playerIndex + 1) % 2));
-    console.log(gameState)
+    //console.log(gameState)
   };
 
   function socketSubmitCardSwap(cardIndex){
@@ -399,7 +399,7 @@ export default function GwentClient({socket}) {
             setFocusCard();
           }
           else if(card.range == "agile"){
-            console.log("agile unit selected, please select row");
+            alert("agile unit selected, please select row");
           }
           else {
             //todo - implement medic targeting logic
@@ -415,10 +415,10 @@ export default function GwentClient({socket}) {
             setFocusCard();
           }
           else if(card.name == "Commanders Horn"){
-            console.log("rally horn selected, please select row");
+            alert("rally horn selected, please select row");
           }
           else {
-            console.log("decoy selected, please select target");
+            alert("decoy selected, please select target");
           }
         }
       }
