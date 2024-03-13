@@ -251,7 +251,7 @@ export default function Dashboard({ socket }) {
 
           {createGamesTable()}
           <button className={`primary-button`} onClick={showInstructionsDialog}>Instructions</button>
-          <button className={`secondary-button`} onClick={resetGames}>Reset</button>
+          {auth().username == "jimmynewsom" ? <button className={`secondary-button`} onClick={resetGames}>Reset</button> : <></>}
         </div>
       </div>
       <p>Right now everything works except the medic card ability, the Scoiatael faction ability, all the leader abilities, and swapping cards at the start of the game. Hopefully I can add these later when I have time, but I do have other things I need to do.</p>
