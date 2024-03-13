@@ -263,6 +263,30 @@ export async function incrementGamesThisMonth(username){
 }
 
 
+app.get("/resetGamesThisMonth", authenticateToken, async (req, res) => {
+  try {
+    if(req.username == "jimmynewsom"){
+      console.log("resetting gamesThisMonth counters for all users");
+
+      let query = {};
+      let update = { gamesThisMonth: 0 };
+      let collection = await db.collection("users");
+      await collection.updateMany(query, update);
+      console.log("gamesThisMonth counters reset for all users");
+
+      return res.status(200).end();
+    }
+    else {
+      return res.status(400).json({error: "you do not have authorization to reset games"});
+    }
+  }
+  catch(error){
+    console.log(error);
+    return res.status(500).end();
+  }
+});
+
+
 app.use("/gwent", GameRouter(io));
 
 
