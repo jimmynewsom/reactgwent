@@ -272,6 +272,7 @@ export default function Dashboard({ socket }) {
         </div>
       </div>
       <p>Right now everything works except the medic card ability, the Scoiatael faction ability, all the leader abilities, and swapping cards at the start of the game. Hopefully I can add these later when I have time, but I do have other things I need to do.</p>
+      <p>Also I gave Triss the scorch ranged ability, since otherwise she is objectively a worse card than Yennefer and I didn't like that.</p>
       <p>If you would like to report any bugs, please email jimmy.newsom@icloud.com .</p>
     </div>
   );
