@@ -410,7 +410,7 @@ export default function DeckBuilder({socket}) {
           <div className="leader-select-border">
             {createLeaderCards()}
           </div>
-          <button className="primary-button">Close</button>
+          <button className="primary-button" onClick={hideLeaderDialog}>Close</button>
         </dialog>
         <h1 className={'screen-heading'}>DeckBuilder</h1>
         <div className="faction-select">
