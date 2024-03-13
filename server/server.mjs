@@ -269,7 +269,7 @@ app.get("/resetGamesThisMonth", authenticateToken, async (req, res) => {
       console.log("resetting gamesThisMonth counters for all users");
 
       let query = {};
-      let update = { gamesThisMonth: 0 };
+      let update = { $set: {gamesThisMonth: 0 }};
       let collection = await db.collection("users");
       await collection.updateMany(query, update);
       console.log("gamesThisMonth counters reset for all users");
