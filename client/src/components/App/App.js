@@ -90,7 +90,7 @@ export default function App() {
         <Route path="/smallcardview" element={<SmallCardView cardData={geralt} currentStrength={10}/>} />
         <Route path="/largecardview" element={<LargeCardView cardData={geralt} handleClick={() => console.log("nothing")} available={3}/>} />
       </Routes>
-      <footer>This is an unofficial, fan made game for demonstration purposes only, and is in no way endorsed by CD PROJEKT RED. It can also only play a maximum of 5 games at a time.</footer>
+      <footer>This is an unofficial, fan made game for demonstration purposes only, and is in no way endorsed by CD PROJEKT RED. It can also only play a maximum of 5 games at a time, and individual users can only play a maximum of 10 games per month.</footer>
     </div>
   );
 }
