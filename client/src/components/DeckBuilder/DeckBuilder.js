@@ -266,7 +266,10 @@ export default function DeckBuilder({socket}) {
       if(value.faction != currentFaction)
         continue;
 
-      cardViews.push(<div key={value.name} onClick={()=>{chooseLeader(value.name)}}><LeaderCardView leaderCardData={value} /><p>{value.ability_description}</p></div>);
+      cardViews.push(<div key={value.name} className="leader-select-card" onClick={()=>{chooseLeader(value.name)}}>
+          <LeaderCardView leaderCardData={value} />
+          <p>{value.ability_description}</p>
+        </div>);
     }
     return cardViews;
   }
@@ -402,7 +405,13 @@ export default function DeckBuilder({socket}) {
   return(
     <div className="deckbuilder">
       <div className="deckbuilder-border">
-        <dialog id="leader-dialog">{createLeaderCards()}</dialog>
+        <dialog id="leader-dialog">
+          <h3>Select Leader</h3>
+          <div className="leader-select-border">
+            {createLeaderCards()}
+          </div>
+          <button className="primary-button">Close</button>
+        </dialog>
         <h1 className={'screen-heading'}>DeckBuilder</h1>
         <div className="faction-select">
           <button className={'primary-button'} onClick={previousFaction}> previous faction </button>
@@ -419,7 +428,7 @@ export default function DeckBuilder({socket}) {
           </div>
           <div className="two">
             <LeaderCardView leaderCardData={leaderMap.get(currentDeck.leaderName)} />
-            <div><button onClick={showLeaderDialog}>Choose Leader</button></div>
+            <div><button className="primary-button" onClick={showLeaderDialog}>Choose Leader</button></div>
             <strong>Total cards in deck</strong>
             <p className="card-stat"><TbCards />{currentDeck.totalCardCount}</p>
             <strong>Number of Unit Cards</strong>
@@ -435,7 +444,7 @@ export default function DeckBuilder({socket}) {
             <strong>Hero Cards</strong>
             <p className="card-stat"><GiElfHelmet />{currentDeck.heroCount}</p>
 
-            {!roomName ? <button className="primary-button" id="save-button" onClick={saveCurrentDeck}> Save current deck </button> : <button id="ready" onClick={submitReady}> Ready (use current deck) </button>}
+            {!roomName ? <button className="primary-button" id="save-button" onClick={saveCurrentDeck}> Save current deck </button> : <button className="primary-button" id="ready" onClick={submitReady}> Ready (use current deck) </button>}
           </div>
           <div className="three">
           <p className="filters"><TbCards /><GiBroadsword /><GiCrossbow /><GiElfHelmet /><GoSun /><GiSpikedShield />(filters - todo)</p>

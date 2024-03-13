@@ -1,11 +1,11 @@
-- add brute force protection to login route (except maybe something can do this for me when I deploy it)
-- (optional) add a display name to users, different from the username, to make it harder to hack accounts
 - implement medic card special ability, and add a dialog element to display cards in the graveyard
 - add dialog element for swapping up to 2 cards at the beginning of the game
 - implement scoiatael faction ability (add dialog for Scoiatael faction to choose who goes first)
-- implement all leader abilities and add leader selection to deckbuilder component
+- implement all leader abilities
 - improve styling
 - update wins and losses at the end of games
 - add timeout / dc functions for players who leave a game
 - add filter functionality to deckbuilder
+- add brute force protection to login route (except maybe something can do this for me when I deploy it)
+- (optional) add a display name to users, different from the username, to make it harder to hack accounts
 - deploy it (if CDPR says I can)

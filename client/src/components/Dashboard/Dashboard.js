@@ -82,7 +82,7 @@ export default function Dashboard({ socket }) {
     );
   }
 
-  //temporary - for testing only
+  // hidden / for admin only
   async function resetGames() {
     console.log("resetting games");
     try {
@@ -90,10 +90,23 @@ export default function Dashboard({ socket }) {
         headers: { "Authorization": authHeader().split(" ")[1] }
       });
       if (result.status == 200) {
-        console.log("games reset successfully. disconnecting from socket.io");
+        console.log("games reset successfully.");
         setWaitingForOpponent(false);
-        socket.disconnect();
         await fetchGameList();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function resetGamesThisMonthCounters(){
+    console.log("resetting gamesThisMonth counters");
+    try {
+      let result = await fetch(process.env.REACT_APP_BACKEND_URL + "resetGamesThisMonth", {
+        headers: { "Authorization": authHeader().split(" ")[1] }
+      });
+      if (result.status == 200) {
+        console.log("gamesThisMonth counters reset successfully for all users.");
       }
     } catch (error) {
       console.log(error);
@@ -251,9 +264,14 @@ export default function Dashboard({ socket }) {
 
           {createGamesTable()}
           <button className={`primary-button`} onClick={showInstructionsDialog}>Instructions</button>
-          <button className={`secondary-button`} onClick={resetGames}>Reset</button>
+          <div></div>
+          {auth().username == "jimmynewsom" ? <button className={`secondary-button`} onClick={resetGames}>Reset Games</button> : <></>}
+          <div></div>
+          {auth().username == "jimmynewsom" ? <button className={`secondary-button`} onClick={resetGamesThisMonthCounters}>Reset gamesThisMonth Counters</button> : <></>}
         </div>
       </div>
+      <p>Right now everything works except the medic card ability, the Scoiatael faction ability, all the leader abilities, and swapping cards at the start of the game. Hopefully I can add these later when I have time, but I do have other things I need to do.</p>
+      <p>If you would like to report any bugs, please email jimmy.newsom@icloud.com .</p>
     </div>
   );
 }

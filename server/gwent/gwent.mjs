@@ -94,7 +94,7 @@ const defaultDeck = {
   "totalCardCount": 30,
   "totalUnitStrength": 84,
   "heroCount": 0,
-  "leaderName": "Foltest, King of Temeria",
+  "leaderName": "Foltest King of Temeria",
   "specialCount": 8,
   "unitCount": 22
 }
@@ -605,50 +605,55 @@ export class Gwent{
   //when the game is over, return 1 for player1 wins, 2 for player2 wins, and 3 for ties
   //otherwise return 0 for game still in progress;
   pass(playerIndex){
-    if(this.playersTurn != playerIndex)
+    try{
+      if(this.playersTurn != playerIndex)
       return;
 
-    this.players[playerIndex].player.passed = true;
+      this.players[playerIndex].player.passed = true;
 
-    let result;
-    //once both players pass, endRoundAndCalculateWinner
-    if(this.players[(playerIndex + 1) % 2].player.passed){
-      result = this.board.endRoundAndCalculateWinner(this.players[0].player.faction, this.players[1].player.faction);
-      if(result == 1){
-        this.players[1].player.lives--;
-        if(this.players[1].player.lives == 0)
-          return 1;
-        else if(this.players[0].player.faction == "Northern Realms")
-          this.players[0].hand.push(...this.draw(0, 1));
+      let result;
+      //once both players pass, endRoundAndCalculateWinner
+      if(this.players[(playerIndex + 1) % 2].player.passed){
+        result = this.board.endRoundAndCalculateWinner(this.players[0].player.faction, this.players[1].player.faction);
+        if(result == 1){
+          this.players[1].player.lives--;
+          if(this.players[1].player.lives == 0)
+            return 1;
+          else if(this.players[0].player.faction == "Northern Realms")
+            this.players[0].hand.push(...this.draw(0, 1));
+        }
+        else if(result == 2){
+          this.players[0].player.lives--;
+          if(this.players[0].player.lives == 0)
+            return 2;
+          else if(this.players[1].player.faction == "Northern Realms")
+            this.players[1].hand.push(...this.draw(1, 1));
+        }
+
+        //if we finish round 3, there are 3 possibilities
+        //either 1) 1 player won 1 round and 2 rounds were ties, in which case 1 player wins
+        //or 2) every round was a tie, or 3) each player won 1 round and there was 1 tie, and in those cases it's a tie game
+        else if(this.round == 3){
+          if(this.players[0].player.lives > this.players[1].player.lives)
+            return 1;
+          else if(this.players[0].player.lives < this.players[1].player.lives)
+            return 2;
+          else
+            return 3;
+        }
+
+        this.round++;
+        this.players[0].player.passed = false;
+        this.players[1].player.passed = false;
       }
-      else if(result == 2){
-        this.players[0].player.lives--;
-        if(this.players[0].player.lives == 0)
-          return 2;
-        else if(this.players[1].player.faction == "Northern Realms")
-          this.players[1].hand.push(...this.draw(1, 1));
+      else{
+        this.playersTurn = (this.playersTurn + 1) % 2;
       }
 
-      //if we finish round 3, there are 3 possibilities
-      //either 1) 1 player won 1 round and 2 rounds were ties, in which case 1 player wins
-      //or 2) every round was a tie, or 3) each player won 1 round and there was 1 tie, and in those cases it's a tie game
-      else if(this.round == 3){
-        if(this.players[0].player.lives > this.players[1].player.lives)
-          return 1;
-        else if(this.players[0].player.lives < this.players[1].player.lives)
-          return 2;
-        else
-          return 3;
-      }
-
-      this.round++;
-      this.players[0].player.passed = false;
-      this.players[1].player.passed = false;
+      return 0;
     }
-    else{
-      this.playersTurn = (this.playersTurn + 1) % 2;
+    catch(error){
+      console.log(error);
     }
-
-    return 0;
   }
 }

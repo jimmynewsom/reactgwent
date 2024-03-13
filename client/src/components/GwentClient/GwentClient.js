@@ -147,7 +147,7 @@ function CardRow(board, playerIndex, range, i, rowStrength, handleFieldCardClick
   //todo - if this row is targetable
 
 
-  return(<div className={rowClasses} handleClick={handleRangeClick(range)}>
+  return(<div className={rowClasses} onClick={handleRangeClick(range)}>
     <div className="range">{range}<p>totalStrength: {rowStrength}</p></div>
     <div className="rallyhorn">{rallyHorn ? <SmallCardView cardData={rallyHornCard}/> : <></>}</div>
     <div className="cardrow">{cardViews}</div>
@@ -289,7 +289,8 @@ let initialGameState = {
     playerName: "jimmynewsom",
     faction: "Northern Realms",
     leaderName: "leaderwoman",
-    hand: [geralt, yenn, triss, ciri]
+    hand: [geralt, yenn, triss, ciri],
+    deckSize: 25
   },
   opponent: {
     lives: 2,
@@ -297,7 +298,8 @@ let initialGameState = {
     playerName: "opponent",
     faction: "Northern Realms",
     leaderName: "leaderman",
-    hand: {length: 10}//this is a hack, so I can reuse my Player panel for both players, but not send 1 player what's in the other players hand
+    hand: {length: 10},//this is a hack, so I can reuse my Player panel for both players, but not send 1 player what's in the other players hand
+    deckSize: 25
   }
 }
 
@@ -319,7 +321,7 @@ export default function GwentClient({socket}) {
   //I'm using a state variable for this instead of just an html dialog so that it won't render at all unless I need it
   //Otherwise I think a hidden html dialog would get recomputed every render phase
   //can be [null, "cardSwap", "playerGY", "opponentGY", or "medic"]
-  const [dialogStatus, setDialogStatus] = useState();
+  //const [dialogStatus, setDialogStatus] = useState();
 
   function socketGameUpdateReceived(gameState){
     console.log("game update received");
@@ -347,14 +349,8 @@ export default function GwentClient({socket}) {
   }
 
   function socketGameOverReceived(result){
-    console.log("game over");
-
-    if(result.winner == gameState.playerIndex)
-      setGameOverMessage("You Win!");
-    else if(result.winner != 2)
-      setGameOverMessage("You Lose!");
-    else
-      setGameOverMessage("Tie Game.");
+    console.log(result);
+    setGameOverMessage(result);
   }
 
   useEffect(() => {
@@ -374,7 +370,7 @@ export default function GwentClient({socket}) {
     });
   }, []);
 
-  function handleHandCardClick(socket, focusCard, gameState, cardIndex, setFocusCard){
+  function handleHandCardClick(cardIndex){
     return () => {
       if(!socket.connected){
         alert("websocket is disconnected. please refresh the page!");
@@ -499,32 +495,6 @@ export default function GwentClient({socket}) {
   if(gameOverMessage)
     return <h3>{gameOverMessage}</h3>
 
-  let dialogContent;
-  if(dialogStatus){
-    if(dialogStatus == "cardSwap"){
-      dialogContent = <div>Card Swap</div>;
-    }
-    else if(dialogStatus == "playerGY"){
-      dialogContent = (
-        <div>
-          <p>player GY</p>
-          <button onClick={()=>{setDialogStatus()}}>Close GY</button>  
-        </div>
-      );
-    }
-    else if(dialogStatus == "opponentGY"){
-      dialogContent = (
-        <div>
-          <p>opponent GY</p>
-          <button onClick={()=>{setDialogStatus()}}>Close GY</button>  
-        </div>
-      );
-    }
-  }
-  else {
-    dialogContent = <></>;
-  }
-
 
 
   //focusCard has shape [range (or hand), index, player or opponent]
@@ -540,7 +510,6 @@ export default function GwentClient({socket}) {
 
   return(
     <div className="gwent-client">
-      <dialog id="game-dialog">{dialogContent}</dialog>
       <div className="gwent-client-grid">
         <div className="stats-panel">
           <PlayerStatsPanel
@@ -575,17 +544,15 @@ export default function GwentClient({socket}) {
         </div>
         <div className="right-panel">
           <div className="deck-and-graveyard">
-            <LargeCardView cardData={geralt} handleClick={()=>{}} />
-            <p>opponent graveyard</p>
-            <p>opponent deck size: 20</p>
+            <p>opponent graveyard size: {gameState.board.field[(gameState.playerIndex + 1) % 2].graveyard.length}</p>
+            <p>opponent deck size: {gameState.opponent.deckSize}</p>
           </div>
           <div className="card-focus">
             {focusCard ? <LargeCardView cardData={fcard} handleClick={()=>{}} /> : <></>}
           </div>
           <div className="deck-and-graveyard">
-            <LargeCardView cardData={geralt} handleClick={()=>{}} />
-            <p>player graveyard</p>
-            <p>decks & card focus</p>
+            <p>player graveyard size: {gameState.board.field[gameState.playerIndex].graveyard.length}</p>
+            <p>player deck size: {gameState.player.deckSize}</p>
           </div>
         </div>
       </div>
