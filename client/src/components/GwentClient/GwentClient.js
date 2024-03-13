@@ -319,7 +319,7 @@ export default function GwentClient({socket}) {
   //I'm using a state variable for this instead of just an html dialog so that it won't render at all unless I need it
   //Otherwise I think a hidden html dialog would get recomputed every render phase
   //can be [null, "cardSwap", "playerGY", "opponentGY", or "medic"]
-  const [dialogStatus, setDialogStatus] = useState();
+  //const [dialogStatus, setDialogStatus] = useState();
 
   function socketGameUpdateReceived(gameState){
     console.log("game update received");
@@ -348,6 +348,8 @@ export default function GwentClient({socket}) {
 
   function socketGameOverReceived(result){
     console.log("game over");
+    console.log("playerIndex: " + gameState.playerIndex);
+    console.log("gameState: " + gameState);
 
     if(result.winner == gameState.playerIndex + 1)
       setGameOverMessage("You Win!");
@@ -499,32 +501,6 @@ export default function GwentClient({socket}) {
   if(gameOverMessage)
     return <h3>{gameOverMessage}</h3>
 
-  let dialogContent;
-  if(dialogStatus){
-    if(dialogStatus == "cardSwap"){
-      dialogContent = <div>Card Swap</div>;
-    }
-    else if(dialogStatus == "playerGY"){
-      dialogContent = (
-        <div>
-          <p>player GY</p>
-          <button onClick={()=>{setDialogStatus()}}>Close GY</button>  
-        </div>
-      );
-    }
-    else if(dialogStatus == "opponentGY"){
-      dialogContent = (
-        <div>
-          <p>opponent GY</p>
-          <button onClick={()=>{setDialogStatus()}}>Close GY</button>  
-        </div>
-      );
-    }
-  }
-  else {
-    dialogContent = <></>;
-  }
-
 
 
   //focusCard has shape [range (or hand), index, player or opponent]
@@ -540,7 +516,6 @@ export default function GwentClient({socket}) {
 
   return(
     <div className="gwent-client">
-      <dialog id="game-dialog">{dialogContent}</dialog>
       <div className="gwent-client-grid">
         <div className="stats-panel">
           <PlayerStatsPanel
