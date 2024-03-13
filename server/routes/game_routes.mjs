@@ -261,17 +261,19 @@ export default function GameRouter(io){
         console.log("game over");
 
         if(result == 1){
-          io.to(game.player1.playerName).emit("game_over", {winner: 1});
+          io.to(game.player1socketid).emit("game_over", "You Win!");
+          io.to(game.player2socketid).emit("game_over", "You Lose!");
           updateWinsAndLosses(game.player1.playerName, true);
           updateWinsAndLosses(game.player2.playerName, false);
         }
         else if(result == 2){
-          io.to(game.player1.playerName).emit("game_over", {winner: 2});
+          io.to(game.player1socketid).emit("game_over", "You Lose!");
+        io.to(game.player2socketid).emit("game_over", "You Win!");
           updateWinsAndLosses(game.player1.playerName, false);
           updateWinsAndLosses(game.player2.playerName, true);
         }
         else
-          io.to(game.player1.playerName).emit("game_over", {winner: 3});
+          io.to(game.player1.playerName).emit("game_over", "Tie Game!");
 
         incrementGamesThisMonth(game.player1.playerName);
         incrementGamesThisMonth(game.player2.playerName);

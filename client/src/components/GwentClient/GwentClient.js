@@ -349,16 +349,8 @@ export default function GwentClient({socket}) {
   }
 
   function socketGameOverReceived(result){
-    console.log("game over");
-    console.log("playerIndex: " + gameState.playerIndex);
-    console.log(gameState);
-
-    if(result.winner == gameState.playerIndex + 1)
-      setGameOverMessage("You Win!");
-    else if(result.winner != 3)
-      setGameOverMessage("You Lose!");
-    else
-      setGameOverMessage("Tie Game.");
+    console.log(result);
+    setGameOverMessage(result);
   }
 
   useEffect(() => {
