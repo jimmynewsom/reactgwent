@@ -136,7 +136,7 @@ export default function GameRouter(io){
   gameRouter.get("/getGameList", authenticateToken, (req, res) => {
     let gamePlayersList = [];
     for(let game of games){
-      if(game.user2)
+      if(game.player2)
         gamePlayersList.push([game.player1.playerName, game.player2.playerName]);
       else
         gamePlayersList.push([game.player1.playerName]);
