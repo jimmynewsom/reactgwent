@@ -435,8 +435,11 @@ export class Gwent{
       //unit cards and hero cards that aren't spies get added to their respective range
       //if the unit range is agile, target should specify the range
       if((card.type == "unit" || card.type == "hero") && card.special != "spy"){
-        if(card.range == "close")
+        if(card.range == "close"){
           this.board.field[playerIndex].close.push(card);
+          if(card.special == "horn")
+            this.board.rallyHorns[playerIndex].close = true;
+        }
         else if(card.range == "ranged")
           this.board.field[playerIndex].ranged.push(card);
         else if(card.range == "siege")
@@ -457,6 +460,10 @@ export class Gwent{
         }
         else if(card.special == "scorchClose")
           this.board.scorch(playerIndex, "close");
+        else if(card.special == "scorchRanged")
+          this.board.scorch(playerIndex, "ranged");
+        else if(card.special == "scorchSiege")
+          this.board.scorch(playerIndex, "siege");
         //if the player plays a medic card, target should specify indexes in graveyard
         //since medics can revive medics, target is an array here
         else if(card.special == "medic"){

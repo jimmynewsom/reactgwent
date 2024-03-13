@@ -2,7 +2,7 @@
 Geralt of Rivia,geralt_of_rivia.png,hero,neutral,15,close,none,1,
 Cirilla Fiona Elen Riannon,ciri.png,hero,neutral,15,close,none,1,
 Yennefer of Vengerberg,yennefer_of_vengerberg.png,hero,neutral,7,ranged,medic,1,
-Triss Merigold,triss_merigold.png,hero,neutral,7,close,scorch,1,
+Triss Merigold,triss_merigold.png,hero,neutral,7,close,scorchRanged,1,
 Avallach,avallach.png,hero,neutral,0,close,spy,1,
 Vernon Roche,vernon_roche.png,hero,Northern Realms,10,close,none,1,
 Philippa Eilhart,philippa_eilhart.png,hero,Northern Realms,10,ranged,none,1,
