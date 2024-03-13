@@ -167,7 +167,7 @@ export default function Dashboard({ socket }) {
   return (
     <div className="dashboard">
       <h1 className={`screen-heading`}> Dashboard / Lobby </h1>
-      {waitingForOpponent ? <h3>Waiting for opponent to Join Game</h3> : <></>}
+      {waitingForOpponent ? <h2>Waiting for opponent to Join Game</h2> : <></>}
 
       <dialog id="instructions-dialog">
         <h2>Gwent</h2>
