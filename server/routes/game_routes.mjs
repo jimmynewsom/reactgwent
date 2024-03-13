@@ -280,7 +280,7 @@ export default function GameRouter(io){
 
         userGameMap.delete(game.player1.playerName);
         userGameMap.delete(game.player2.playerName);
-        games.slice(games.indexOf(game));
+        games.splice(games.indexOf(game), 1);
       }
     });
   });
