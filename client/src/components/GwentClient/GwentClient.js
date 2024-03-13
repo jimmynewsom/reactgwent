@@ -289,7 +289,8 @@ let initialGameState = {
     playerName: "jimmynewsom",
     faction: "Northern Realms",
     leaderName: "leaderwoman",
-    hand: [geralt, yenn, triss, ciri]
+    hand: [geralt, yenn, triss, ciri],
+    deckSize: 25
   },
   opponent: {
     lives: 2,
@@ -297,7 +298,8 @@ let initialGameState = {
     playerName: "opponent",
     faction: "Northern Realms",
     leaderName: "leaderman",
-    hand: {length: 10}//this is a hack, so I can reuse my Player panel for both players, but not send 1 player what's in the other players hand
+    hand: {length: 10},//this is a hack, so I can reuse my Player panel for both players, but not send 1 player what's in the other players hand
+    deckSize: 25
   }
 }
 
@@ -349,7 +351,7 @@ export default function GwentClient({socket}) {
   function socketGameOverReceived(result){
     console.log("game over");
     console.log("playerIndex: " + gameState.playerIndex);
-    console.log("gameState: " + gameState);
+    console.log(gameState);
 
     if(result.winner == gameState.playerIndex + 1)
       setGameOverMessage("You Win!");
@@ -550,15 +552,15 @@ export default function GwentClient({socket}) {
         </div>
         <div className="right-panel">
           <div className="deck-and-graveyard">
-            <p>opponent graveyard</p>
-            <p>opponent deck size: 20</p>
+            <p>opponent graveyard size: {gameState.board.field[(gameState.playerIndex + 1) % 2].graveyard.length}</p>
+            <p>opponent deck size: {gameState.opponent.deckSize}</p>
           </div>
           <div className="card-focus">
             {focusCard ? <LargeCardView cardData={fcard} handleClick={()=>{}} /> : <></>}
           </div>
           <div className="deck-and-graveyard">
-            <p>player graveyard</p>
-            <p>decks & card focus</p>
+            <p>player graveyard size: {gameState.board.field[gameState.playerIndex].graveyard.length}</p>
+            <p>player deck size: {gameState.player.deckSize}</p>
           </div>
         </div>
       </div>
