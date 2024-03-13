@@ -28,9 +28,9 @@ function sanitizeInput(input){
 }
 
 
-// app.get("/", (req, res) => {
-//   return res.send("Hello World!");
-// });
+app.get("/", (req, res) => {
+  return res.send("Hello World!");
+});
 
 
 // app.post("/test-sanitize", (req, res) => {
