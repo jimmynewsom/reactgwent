@@ -1,7 +1,8 @@
 import express from "express";
 import validator from "validator";
-import authenticateToken, {verifyWebsocketToken} from "../middleware/authenticateToken.mjs";
+import authenticateToken, { verifyWebsocketToken } from "../middleware/authenticateToken.mjs";
 import { Player, Gwent, cardMap, validateDeck, defaultDeck } from "../gwent/gwent.mjs";
+import { updateWinsAndLosses, checkGamesThisMonth, incrementGamesThisMonth } from "../server.mjs";
 
 
 //wrapper class for Gwent Online Multiplayer
@@ -80,15 +81,19 @@ export default function GameRouter(io){
   }
 
   //when a user tries to create a game, check if there is already more games in progress than max games or if the user is already in a game
+  //or if the user has already played 10 or more games this month
   //if so, return an error
   //otherwise, create a new game and add the user as user1
   //then call socket.connect() on the front end, which should add them to the right room now using the map
-  gameRouter.get("/createGame", authenticateToken, (req, res) => {
+  gameRouter.get("/createGame", authenticateToken, async (req, res) => {
     let username = sanitizeInput(req.username);
 
-    if(games.length >= MAX_GAMES){
-      return res.status(503).json({ error: 'server already has the maximum number of games already in progress. Please try again later.' });
-    }
+    let gamesThisMonth = await checkGamesThisMonth(username);
+    if(gamesThisMonth >= 10)
+      return res.status(400).json({ error: "you have already played the maximum number of games this month for this demo"});
+
+    if(games.length >= MAX_GAMES)
+      return res.status(503).json({ error: 'server already has the maximum number of games currently in progress. Please try again later.' });
 
     if(userGameMap.has(username))
       return res.status(400).json({ error: "you already have a game in progress. Fuck off! :)"});
@@ -101,9 +106,13 @@ export default function GameRouter(io){
 
   //when a user tries to join a game, check they are not already in a game and the target opponent exists
   //if nothings wrong, add them as user2, then call socket.connect() on the front end
-  gameRouter.get("/joinGame/:targetOpponent", authenticateToken, (req, res) => {
+  gameRouter.get("/joinGame/:targetOpponent", authenticateToken, async (req, res) => {
     let username = sanitizeInput(req.username);
     let targetOpponent = req.params.targetOpponent;
+
+    let gamesThisMonth = await checkGamesThisMonth(username);
+    if(gamesThisMonth >= 10)
+      return res.status(400).json({ error: "you have already played the maximum number of games this month for this demo"});
 
     if(userGameMap.has(username))
       return res.status(400).json({ error: "you already have a game in progress. Fuck off! :)"});
@@ -145,7 +154,7 @@ export default function GameRouter(io){
       return res.status(200).json({message: "games reset"});
     }
     else {
-      return res.status(400).end();
+      return res.status(400).json({error: "you do not have authorization to reset games"});
     }
   });
 
@@ -249,14 +258,25 @@ export default function GameRouter(io){
       else{
         console.log("game over");
 
-        if(result == 1)
+        if(result == 1){
           io.to(game.player1.playerName).emit("game_over", {winner: 1});
-        else if(result == 2)
+          updateWinsAndLosses(game.player1.playerName, true);
+          updateWinsAndLosses(game.player2.playerName, false);
+        }
+        else if(result == 2){
           io.to(game.player1.playerName).emit("game_over", {winner: 2});
+          updateWinsAndLosses(game.player1.playerName, false);
+          updateWinsAndLosses(game.player2.playerName, true);
+        }
         else
           io.to(game.player1.playerName).emit("game_over", {winner: 3});
 
-        //todo - update players wins and losses in the database
+        incrementGamesThisMonth(game.player1.playerName);
+        incrementGamesThisMonth(game.player2.playerName);
+
+        userGameMap.delete(game.player1.playerName);
+        userGameMap.delete(game.player2.playerName);
+        games.slice(games.indexOf(game));
       }
     });
   });

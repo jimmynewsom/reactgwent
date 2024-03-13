@@ -58,7 +58,8 @@ app.post("/register", async (req, res) => {
       passwordHash: hash,
       wins: 0,
       losses: 0,
-      createdAt: new Date()
+      createdAt: new Date(),
+      gamesThisMonth: 0
     };
 
     let result = await collection.insertOne(newUser);
@@ -200,7 +201,7 @@ app.post("/saveUserDeck", authenticateToken, async (req, res) => {
       let options = {upsert: true};
 
       let collection = await db.collection("decks");
-      collection.updateOne(query, update, options);
+      await collection.updateOne(query, update, options);
       return res.status(200).json({message: "deck saved to database"});
     } 
   } catch (error) {
@@ -208,6 +209,58 @@ app.post("/saveUserDeck", authenticateToken, async (req, res) => {
     return res.status(500);
   }
 });
+
+
+export async function updateWinsAndLosses(username, userWon){
+  try{
+    let query = { _id: username};
+    let update;
+    if(userWon)
+      update = { $inc: { wins: 1 } };
+    else
+      update = { $inc: { losses: 1 } };
+
+    let collection = await db.collection("users");
+    await collection.updateOne(query, update);
+    console.log(username + " wins/losses updated.");
+  }
+  catch(error){
+    console.log(error);
+  }
+
+  return;
+}
+
+
+export async function checkGamesThisMonth(username){
+  try{
+    let collection = await db.collection("users");
+    let user = await collection.findOne({"_id": username});
+    return user.gamesThisMonth;
+  }
+  catch(error){
+    console.log(error);
+  }
+
+  return;
+}
+
+
+export async function incrementGamesThisMonth(username){
+  try{
+    let query = { _id: username};
+    let update = { $inc: { gamesThisMonth: 1 } };
+
+    let collection = await db.collection("users");
+    await collection.updateOne(query, update);
+    console.log(username + " gamesThisMonth updated.");
+  }
+  catch(error){
+    console.log(error);
+  }
+
+  return;
+}
 
 
 app.use("/gwent", GameRouter(io));
