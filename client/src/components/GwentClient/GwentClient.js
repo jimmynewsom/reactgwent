@@ -459,7 +459,7 @@ export default function GwentClient({socket}) {
       }
   
       if(!focusCard || focusCard[0] != range || focusCard[1] != cardIndex || focusCard[2] != "opponent");
-        setFocusCard(range, cardIndex, "opponent");
+        setFocusCard([range, cardIndex, "opponent"]);
     }
   }
   
