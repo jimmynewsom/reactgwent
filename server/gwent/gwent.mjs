@@ -206,7 +206,7 @@ class Board{
 
   getCardStrength(playerIndex, range, cardIndex){
     let card = this.field[playerIndex][range][cardIndex];
-    if(card.type == "hero")
+    if(card.type == "hero" || card.name == "Decoy")
       return card.strength;
 
     let morale = this.morale[playerIndex][range];
