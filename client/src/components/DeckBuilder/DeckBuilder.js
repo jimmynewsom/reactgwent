@@ -48,17 +48,18 @@ export class GwentDeck {
 /*
 So, my approach is as follows:
 1)load all the card data into a cardMap
-2)track currentFaction, currentDeck, and 1 deck per faction
+2)track currentFaction, currentDeck, and 1 deck per faction as state variables
 3)load the left panel (available cards) by looking at the cardMap, currentFaction, and currentDeck
 4)load the right panel by looking at the currentDeck
 5)when a user clicks a card in the left panel
   - check if there is already the max # of that card in the current deck. if so, do nothing
-  - otherwise, add 1 to that card in the deck, and make a new deck object from the old deck object. set current deck equal to the new deck
+  - otherwise, add 1 to that card in the current deck object, then make a new identical deck object from the old deck object so react notices the changes
+    set current deck equal to the new deck object
   - finally, set the respective faction deck equal to the new current deck. this will save changes if a user switches factions later
 
 6)when a user clicks a card in the right panel
   - check if there is currently 0 of that card in the current deck. if so, do nothing
-  - otherwise, subtract 1 from that card in the current deck, and a make a new deck object from the old deck object. set current deck equal to the new deck
+  - otherwise, subtract 1 from that card in the current deck object, and make a new deck object from the old deck object. set current deck equal to the new deck
   - finally, set the respective faction deck equal to the new current deck. same reason as above
 
 7)when a user switches factions
@@ -302,6 +303,7 @@ export default function DeckBuilder({socket}) {
     dialog.close();
   }
 
+  //saves current faction deck to the database
   async function saveCurrentDeck(){
     let button = document.getElementById("save-button");
     button.disabled = true;
@@ -382,7 +384,7 @@ export default function DeckBuilder({socket}) {
   }
 
 
-  //uses getCardData function from GwentClient class
+  //uses getCardData and getLeaderData functions from GwentClient class
   //then loads the users decks from the server (or the default decks if the user has no saved decks, handled by server-side logic)
   useEffect(() => {
     getCardData(setCardMap, setLeaderMap);
@@ -399,6 +401,7 @@ export default function DeckBuilder({socket}) {
   },  []);
 
 
+  //this is so that if these objects haven't finished loading yet (from the server or localStorage) I don't get errors
   if(cardMap.size == 0 || leaderMap.size == 0)
     return;
 
