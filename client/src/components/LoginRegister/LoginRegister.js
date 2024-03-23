@@ -5,10 +5,9 @@ import './LoginRegister.scss';
 
 
 //TODO - add flash messages for login and registration successes and failures
-
-
-
 export default function LoginRegister({ setToken }) {
+  console.log("rendering LoginRegister component");
+  
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loginSuccessMessage, setLoginSuccessMessage] = useState("");
