@@ -18,7 +18,6 @@ export default function Dashboard({ socket }) {
 
 
   //mostly finished stuff
-
   function showInstructionsDialog() {
     let dialog = document.getElementById("instructions-dialog");
     dialog.showModal();
@@ -45,6 +44,7 @@ export default function Dashboard({ socket }) {
     }
   }
 
+  //returns handleClick async functions for buttons to join the different available games 
   function joinGame(opponentName) {
     const test = async () => {
       try {
@@ -113,10 +113,7 @@ export default function Dashboard({ socket }) {
     }
   }
 
-
-
   //fully finished stuff
-
   async function fetchUserData() {
     try {
       let result = await fetch(process.env.REACT_APP_BACKEND_URL + "userStats", {
