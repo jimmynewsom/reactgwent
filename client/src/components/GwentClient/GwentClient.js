@@ -102,15 +102,15 @@ class Board{
 const rallyHornCard = new CardData("Commanders Horn", "commanders_horn.png", "special", "neutral", "0", "special", "horn", "3", "");
 
 //Field is a view / react component for my Board data class made of CardRow components
-function Field({board, playerIndex, playerTotal, opponentTotal, handlePFieldCardClick, handleOFieldCardClick, handleRangeClick}){
+function Field({gameState, playerTotal, opponentTotal, handleCardClick, handleRangeClick}){
   console.log("rendering field component");
 
-  let r1 = CardRow(board, playerIndex, "siege", 1, opponentTotal.siege, handleOFieldCardClick, () => {});
-  let r2 = CardRow(board, playerIndex, "ranged", 1, opponentTotal.ranged, handleOFieldCardClick, () => {});
-  let r3 = CardRow(board, playerIndex, "close", 1, opponentTotal.close, handleOFieldCardClick, () => {});
-  let r4 = CardRow(board, playerIndex, "close", 0, playerTotal.close, handlePFieldCardClick, handleRangeClick);
-  let r5 = CardRow(board, playerIndex, "ranged", 0, playerTotal.ranged, handlePFieldCardClick, handleRangeClick);
-  let r6 = CardRow(board, playerIndex, "siege", 0, playerTotal.siege, handlePFieldCardClick, handleRangeClick);
+  let r1 = CardRow(gameState, "siege", "opponent", opponentTotal.siege, handleCardClick, () => {});
+  let r2 = CardRow(gameState, "ranged", "opponent", opponentTotal.ranged, handleCardClick, () => {});
+  let r3 = CardRow(gameState, "close", "opponent", opponentTotal.close, handleCardClick, () => {});
+  let r4 = CardRow(gameState, "close", "player", playerTotal.close, handleCardClick, handleRangeClick);
+  let r5 = CardRow(gameState, "ranged", "player", playerTotal.ranged, handleCardClick, handleRangeClick);
+  let r6 = CardRow(gameState, "siege", "player", playerTotal.siege, handleCardClick, handleRangeClick);
 
   return(
     <div className="field-grid">
@@ -120,10 +120,13 @@ function Field({board, playerIndex, playerTotal, opponentTotal, handlePFieldCard
 }
 
 //CardRows are a row of cards plus weather, row totals, and rally horns
-function CardRow(board, playerIndex, range, i, rowStrength, handleFieldCardClick, handleRangeClick){
+function CardRow(gameState, range, player, rowStrength, handleCardClick, handleRangeClick){
   console.log("rendering CardRow component");
 
   let cardViews = [];
+  let board = gameState.board;
+  let playerIndex = gameState.playerIndex;
+  let i = player == "player" ? 0 : 1;
   let cards = board.field[(playerIndex + i) % 2][range];
   let rowWeather = board.weather[range];
   
@@ -133,7 +136,7 @@ function CardRow(board, playerIndex, range, i, rowStrength, handleFieldCardClick
                       cardData={card}
                       key={(range + i) + j}
                       currentStrength={board.getCardStrength((playerIndex + i) % 2, range, j)}
-                      handleClick={handleFieldCardClick(range, j)}
+                      handleClick={() => handleCardClick(range, j, player)}
                   />);
   }
 
@@ -147,7 +150,7 @@ function CardRow(board, playerIndex, range, i, rowStrength, handleFieldCardClick
   //todo - if this row is targetable
 
 
-  return(<div className={rowClasses} onClick={handleRangeClick(range)}>
+  return(<div className={rowClasses} onClick={() => handleRangeClick(range)}>
     <div className="range">{range}<p>totalStrength: {rowStrength}</p></div>
     <div className="rallyhorn">{rallyHorn ? <SmallCardView cardData={rallyHornCard}/> : <></>}</div>
     <div className="cardrow">{cardViews}</div>
@@ -155,13 +158,14 @@ function CardRow(board, playerIndex, range, i, rowStrength, handleFieldCardClick
 }
 
 //this is kind of a repeat of my CardRow component, but hands don't need weather, rally horns, and row totals
-function PlayerHand({cards, handleHandCardClick}){
+function PlayerHand({gameState, handleCardClick}){
+  let cards = gameState.player.hand
   let cardViews = [];
   for(let i = 0; i < cards.length; i++){
     let card = cards[i];
     cardViews.push(<SmallCardView
                       cardData={card}
-                      handleClick={handleHandCardClick(i)}
+                      handleClick={() => handleCardClick("hand", i, "player")}
                       currentStrength={card.strength}
                       key={"hand" + i}
                   />)
@@ -323,6 +327,16 @@ export default function GwentClient({socket}) {
   //can be [null, "cardSwap", "playerGY", "opponentGY", or "medic"]
   //const [dialogStatus, setDialogStatus] = useState();
 
+  function showGameDialog() {
+    let dialog = document.getElementById("game-dialog");
+    dialog.showModal();
+  }
+  
+  function hideGameDialog() {
+    let dialog = document.getElementById("game-dialog");
+    dialog.close();
+  }
+
   function socketGameUpdateReceived(gameState){
     console.log("game update received");
     gameState.board.tightBondsMaps = [new Map(Object.entries(gameState.tightBondsMaps[0])),
@@ -370,18 +384,59 @@ export default function GwentClient({socket}) {
     });
   }, []);
 
-  function handleHandCardClick(cardIndex){
-    return () => {
-      if(!socket.connected){
-        alert("websocket is disconnected. please refresh the page!");
-        return;
+  //one handleClick function for all cards
+  //behaves differently for cards in the player's hand, cards on the player's side of the field, or cards on the opponent's side of the field
+  //similar to focus card, inputs look like [range or "hand", cardIndex, "player" or "opponent"]
+  function handleCardClick(range, cardIndex, player){
+    if(!socket.connected){
+      alert("websocket is disconnected. please refresh the page!");
+      return;
+    }
+
+    let card;
+
+    //clicking a card on the opponent's side of the field sets that card as the focus card
+    if(player == "opponent"){
+      card = gameState.board.field[(gameState.playerIndex + 1) % 2][range][cardIndex];
+      if(!focusCard || focusCard[0] != range || focusCard[1] != cardIndex || focusCard[2] != player);{
+        setFocusCard([range, cardIndex, player, card]);
       }
 
-      let card = gameState.player.hand[cardIndex];
-  
+      return;
+    }
+    //clicking a card on the player's side of the field sets that card as the focus card
+    //unless the player currently has a decoy from their hand selected as the focus card
+    //in which case, if the card clicked is a regular unit card, swap the decoy for that card on the field (if it's their turn)
+    else if(range != "hand"){
+      card = gameState.board.field[gameState.playerIndex][range][cardIndex];
+
+      if(focusCard && focusCard[0] == "hand" && focusCard[3].special == "decoy"){
+        if(gameState.playersTurn != gameState.playerIndex){
+          alert("it's not your turn");
+          return;
+        }
+        
+        if(card.type == "unit"){
+          socket.emit("play_card", focusCard[1], {range: range, index: cardIndex});
+          setFocusCard();
+        }
+      }
+      else {
+        if(!focusCard || focusCard[0] != range || focusCard[1] != cardIndex || focusCard[2] != player);{
+          setFocusCard([range, cardIndex, player, card]);
+        }
+      }
+
+      return;
+    }
+    //if the player clicks a card in their hand, the first click makes it the focus card, the second click plays the card
+    //unless the card has special targetting rules (decoys, rallyHorns, and agile units)
+    else {
+      card = gameState.player.hand[cardIndex];
+
       //first click makes the card the focus card
-      if(!focusCard || focusCard[0] != "hand" || focusCard[1] != cardIndex)
-        setFocusCard(["hand", cardIndex, "player", card]);
+      if(!focusCard || focusCard[0] != range || focusCard[1] != cardIndex)
+        setFocusCard([range, cardIndex, player, card]);
       else {
         //if the card is already the focus and they click it again, play the card, unless it has targeting rules
         //but first check if it's the players turn
@@ -392,7 +447,7 @@ export default function GwentClient({socket}) {
         
         console.log("socket connected: " + socket.connected);
         console.log(card.name + " played");
-  
+
         if(card.type == "unit" || card.type == "hero"){
           if(card.special != "medic" && card.range != "agile"){
             socket.emit("play_card", cardIndex);
@@ -421,66 +476,17 @@ export default function GwentClient({socket}) {
             alert("decoy selected, please select target");
           }
         }
-      }
+      }      
     }
   }
   
-  function handlePFieldCardClick(range, cardIndex){
-    return () => {
-      if(!socket.connected){
-        alert("websocket is disconnected. please refresh the page!");
-        return;
-      }
-  
-      //if the focus card is a decoy in the player's hand, clicking a card on your side of the field will make it the target for the decoy
-      if(focusCard && focusCard[0] == "hand"){
-        if(gameState.playersTurn != gameState.playerIndex){
-          alert("it's not your turn");
-          return;
-        }
-  
-        if(gameState.player.hand[focusCard[1]].special == "decoy"){
-          if(gameState.board.field[gameState.playerIndex][range][cardIndex].type == "unit")
-            socket.emit("play_card", focusCard[1], {range: range, index: cardIndex});
-        }
-      }
-  
-      //otherwise, set the focus card to the card that was clicked
-      else if(!focusCard || focusCard[0] != range || focusCard[1] != cardIndex || focusCard[2] == "player");
-        setFocusCard([range, cardIndex, "player"]);
-    }
-  }
-  
-  function handleOFieldCardClick(range, cardIndex){
-    return () => {
-      if(!socket.connected){
-        alert("websocket is disconnected. please refresh the page!");
-        return;
-      }
-  
-      if(!focusCard || focusCard[0] != range || focusCard[1] != cardIndex || focusCard[2] != "opponent");
-        setFocusCard([range, cardIndex, "opponent"]);
-    }
-  }
-  
+  //if the player has a rallyHorn or agile unit from their hand selected as the focus card, play the card when they select an appropriate range
   function handleRangeClick(range){
-    return () => {
-      if(focusCard && focusCard[0] == "hand"){
-        let fcard = gameState.player.hand[focusCard[1]];
-        if((fcard.name == "Commanders Horn") || (fcard.range == "agile" && range != "siege"))
-          socket.emit("play_card", focusCard[1], range);
-      }
+    if(focusCard && focusCard[0] == "hand"){
+      let card = focusCard[3];
+      if((card.name == "Commanders Horn") || (card.range == "agile" && range != "siege"))
+        socket.emit("play_card", focusCard[1], range);
     }
-  }
-
-  function showGameDialog() {
-    let dialog = document.getElementById("game-dialog");
-    dialog.showModal();
-  }
-  
-  function hideGameDialog() {
-    let dialog = document.getElementById("game-dialog");
-    dialog.close();
   }
 
   
@@ -495,18 +501,6 @@ export default function GwentClient({socket}) {
   if(gameOverMessage)
     return <h3>{gameOverMessage}</h3>
 
-
-
-  //focusCard has shape [range (or hand), index, player or opponent]
-  //but I might refactor it to be [range (or hand), index, player or opponent, card]
-  let fcard;
-  if(focusCard && focusCard[0] == "hand"){
-    fcard = gameState.player.hand[focusCard[1]];
-  }
-  else if(focusCard && focusCard[2] == "player")
-    fcard = gameState.board.field[gameState.playerIndex][focusCard[0]][focusCard[1]];
-  else if(focusCard && focusCard[2] == "opponent")
-    fcard = gameState.board.field[(gameState.playerIndex + 1) % 2][focusCard[0]][focusCard[1]];
 
   return(
     <div className="gwent-client">
@@ -529,17 +523,15 @@ export default function GwentClient({socket}) {
         </div>
         <div className="board-panel">
           <Field 
-            board={gameState.board}
-            playerIndex={gameState.playerIndex}
+            gameState={gameState}
             playerTotal={playerTotal}
             opponentTotal={opponentTotal}
-            handlePFieldCardClick={handlePFieldCardClick}
-            handleOFieldCardClick={handleOFieldCardClick}
+            handleCardClick={handleCardClick}
             handleRangeClick={handleRangeClick}
           />
           <br />
           <div className="player-hand">
-            <PlayerHand cards={gameState.player.hand} handleHandCardClick={handleHandCardClick} />
+            <PlayerHand gameState={gameState} handleCardClick={handleCardClick} />
           </div>
         </div>
         <div className="right-panel">
@@ -548,7 +540,7 @@ export default function GwentClient({socket}) {
             <p>opponent deck size: {gameState.opponent.deckSize}</p>
           </div>
           <div className="card-focus">
-            {focusCard ? <LargeCardView cardData={fcard} handleClick={()=>{}} /> : <></>}
+            {focusCard ? <LargeCardView cardData={focusCard[3]} handleClick={()=>{}} /> : <></>}
           </div>
           <div className="deck-and-graveyard">
             <p>player graveyard size: {gameState.board.field[gameState.playerIndex].graveyard.length}</p>
