@@ -228,7 +228,6 @@ export default function GameRouter(io){
           }
 
           console.log(username + " submitted valid deck");
-          io.to(socket.id).emit("deck_validation_passed");
 
           if(playerIndex == 0){
             game.setDeck1(deck);
@@ -246,6 +245,9 @@ export default function GameRouter(io){
             game.startGame();
             game.setStatus("gameInProgress");
             io.to(game.player1.playerName).emit("redirect", "/gwent");
+          }
+          else {
+            io.to(socket.id).emit("deck_validation_passed");
           }
         }
       } catch(error){
