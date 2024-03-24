@@ -554,6 +554,7 @@ export class Gwent{
     this.board.field[playerIndex][card.range].push(card);
   }
 
+  //todo
   playLeaderAbility(playerIndex){
     try {
       let player = this.players[playerIndex];
