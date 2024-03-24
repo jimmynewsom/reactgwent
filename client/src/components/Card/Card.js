@@ -28,7 +28,7 @@ export class LeaderCardData {
 export function LargeCardView({ cardData, handleClick, available = 0 }) {
 
   return (
-    <div className="large-card" onClick={handleClick(cardData)}>
+    <div className="large-card" onClick={() => handleClick(cardData)}>
       <div className="large-card-image">
         <img
           src={process.env.REACT_APP_UNIT_IMAGE_BASE_URL + cardData.image_url}
@@ -68,7 +68,7 @@ export function SmallCardView({ cardData, handleClick, currentStrength }) {
   );
 }
 
-export function LeaderCardView({ leaderCardData, width=180, height=320 }) {
+export function LeaderCardView({ leaderCardData, width = 180, height = 320 }) {
 
   return (
     <div className="leader-card">

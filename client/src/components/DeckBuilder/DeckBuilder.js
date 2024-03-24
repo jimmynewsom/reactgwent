@@ -137,88 +137,84 @@ export default function DeckBuilder({socket}) {
   }
   
   function addCardToDeck(cardData){
-    return (() => {
-      if(currentDeck.cards.has(cardData.name) && currentDeck.cards.get(cardData.name) == cardData.available){
-        console.log("error! maximum number of card " + cardData.name + " already in deck!");
-      }
-      else {
-        currentDeck.totalCardCount++;
+    if(currentDeck.cards.has(cardData.name) && currentDeck.cards.get(cardData.name) == cardData.available){
+      console.log("error! maximum number of card " + cardData.name + " already in deck!");
+      return;
+    }
 
-        if(cardData.type == "unit"){
-          currentDeck.unitCount++;
-          currentDeck.totalUnitStrength += cardData.strength;
-        }
-        else if(cardData.type == "special"){
-          currentDeck.specialCount++;
-        }
-        else if(cardData.type == "hero"){
-          currentDeck.unitCount++;
-          currentDeck.totalUnitStrength += cardData.strength;
-          currentDeck.heroCount++;
-        }
+    currentDeck.totalCardCount++;
 
-        if(currentDeck.cards.has(cardData.name)){
-          currentDeck.cards.set(cardData.name, currentDeck.cards.get(cardData.name) + 1);
-        }
-        else {
-          currentDeck.cards.set(cardData.name, 1);
-        }
+    if(cardData.type == "unit"){
+      currentDeck.unitCount++;
+      currentDeck.totalUnitStrength += cardData.strength;
+    }
+    else if(cardData.type == "special"){
+      currentDeck.specialCount++;
+    }
+    else if(cardData.type == "hero"){
+      currentDeck.unitCount++;
+      currentDeck.totalUnitStrength += cardData.strength;
+      currentDeck.heroCount++;
+    }
 
-        setCurrentDeck(new GwentDeck(currentDeck));
-        
-        if(currentFaction == "Northern Realms")
-          setNorthernRealmsDeck(currentDeck);
-        else if(currentFaction == "Monsters")
-          setMonsterDeck(currentDeck);
-        // else if(currentFaction == "Skellige")
-        //   setSkelligeDeck(currentDeck);
-        else if(currentFaction == "Nilfgaard")
-          setNilfgaardDeck(currentDeck);
-        else if(currentFaction == "Scoiatael")
-          setScoiataelDeck(currentDeck);
-      }
-    });
+    if(currentDeck.cards.has(cardData.name)){
+      currentDeck.cards.set(cardData.name, currentDeck.cards.get(cardData.name) + 1);
+    }
+    else {
+      currentDeck.cards.set(cardData.name, 1);
+    }
+
+    setCurrentDeck(new GwentDeck(currentDeck));
+    
+    if(currentFaction == "Northern Realms")
+      setNorthernRealmsDeck(currentDeck);
+    else if(currentFaction == "Monsters")
+      setMonsterDeck(currentDeck);
+    // else if(currentFaction == "Skellige")
+    //   setSkelligeDeck(currentDeck);
+    else if(currentFaction == "Nilfgaard")
+      setNilfgaardDeck(currentDeck);
+    else if(currentFaction == "Scoiatael")
+      setScoiataelDeck(currentDeck);
   }
   
   function removeCardFromDeck(cardData){
-    return (() => {
-      if(currentDeck.cards.get(cardData.name) == 0){
-        //I'm pretty sure this check is unneccessary, because if there are 0 in the deck the card shouldn't be in the view and thus unclickable
-        //but I'm including this in case people click really fast or something
-        console.log("error! current deck already has 0 of this card!");
-        return;
-      }
+    if(currentDeck.cards.get(cardData.name) == 0){
+      //I'm pretty sure this check is unneccessary, because if there are 0 in the deck the card shouldn't be in the view and thus unclickable
+      //but I'm including this in case people click really fast or something
+      console.log("error! current deck already has 0 of this card!");
+      return;
+    }
 
-      currentDeck.totalCardCount--;
+    currentDeck.totalCardCount--;
 
-      if(cardData.type == "unit"){
-        currentDeck.unitCount--;
-        currentDeck.totalUnitStrength -= cardData.strength;
-      }
-      else if(cardData.type == "special"){
-        currentDeck.specialCount--;
-      }
-      else if(cardData.type == "hero"){
-        currentDeck.unitCount--;
-        currentDeck.totalUnitStrength -= cardData.strength;
-        currentDeck.heroCount--;
-      }
+    if(cardData.type == "unit"){
+      currentDeck.unitCount--;
+      currentDeck.totalUnitStrength -= cardData.strength;
+    }
+    else if(cardData.type == "special"){
+      currentDeck.specialCount--;
+    }
+    else if(cardData.type == "hero"){
+      currentDeck.unitCount--;
+      currentDeck.totalUnitStrength -= cardData.strength;
+      currentDeck.heroCount--;
+    }
 
-      currentDeck.cards.set(cardData.name, currentDeck.cards.get(cardData.name) - 1);
+    currentDeck.cards.set(cardData.name, currentDeck.cards.get(cardData.name) - 1);
 
-      setCurrentDeck(new GwentDeck(currentDeck));
+    setCurrentDeck(new GwentDeck(currentDeck));
 
-      if(currentFaction == "Northern Realms")
-          setNorthernRealmsDeck(currentDeck);
-      else if(currentFaction == "Monsters")
-        setMonsterDeck(currentDeck);
-      // else if(currentFaction == "Skellige")
-      //   setSkelligeDeck(currentDeck);
-      else if(currentFaction == "Nilfgaard")
-        setNilfgaardDeck(currentDeck);
-      else if(currentFaction == "Scoiatael")
-        setScoiataelDeck(currentDeck);
-    });
+    if(currentFaction == "Northern Realms")
+        setNorthernRealmsDeck(currentDeck);
+    else if(currentFaction == "Monsters")
+      setMonsterDeck(currentDeck);
+    // else if(currentFaction == "Skellige")
+    //   setSkelligeDeck(currentDeck);
+    else if(currentFaction == "Nilfgaard")
+      setNilfgaardDeck(currentDeck);
+    else if(currentFaction == "Scoiatael")
+      setScoiataelDeck(currentDeck);
   }
 
   function createAvailableCards(){
