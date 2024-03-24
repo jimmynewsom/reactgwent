@@ -305,6 +305,11 @@ export default function DeckBuilder({socket}) {
     button.disabled = true;
     try {
       let cards = Object.fromEntries(currentDeck.cards.entries());
+      let serializableDeck = {
+        "faction": currentFaction,
+        "leaderName": currentDeck.leaderName,
+        "cards": cards
+      };
       let result = await fetch(process.env.REACT_APP_BACKEND_URL + "saveUserDeck", {
         method: 'POST',
         headers: {
@@ -313,11 +318,7 @@ export default function DeckBuilder({socket}) {
           "Content-Type": 'application/json'
         },
         //I am not including the count fields here, because I will calculate those on the server, in case someone trys to cheat
-        body: JSON.stringify({
-          "faction": currentFaction,
-          "leaderName": currentDeck.leaderName,
-          "cards": cards
-        })
+        body: JSON.stringify(serializableDeck)
       });
       let message = await result.json();
       console.log(message);
@@ -367,7 +368,10 @@ export default function DeckBuilder({socket}) {
   }
 
   function submitReady(){
-    console.log("test - socket is connected: " + socket.connected);
+    if(!socket.connected){
+      alert("websocket is disconnected. please refresh the page!");
+      return;
+    }
 
     let cards = Object.fromEntries(currentDeck.cards.entries());
     let serializableDeck = {
@@ -375,7 +379,9 @@ export default function DeckBuilder({socket}) {
       "leaderName": currentDeck.leaderName,
       "cards": cards
     };
-    document.getElementById("ready").disabled = true;
+    let button = document.getElementById("ready");
+    button.disabled = true;
+    setTimeout(() => {button.disabled = false}, 3000);
     socket.emit("ready_for_game", serializableDeck);
   }
 
