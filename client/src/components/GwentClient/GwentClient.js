@@ -159,7 +159,7 @@ function CardRow(gameState, range, player, rowStrength, handleCardClick, handleR
 
 //this is kind of a repeat of my CardRow component, but hands don't need weather, rally horns, and row totals
 function PlayerHand({gameState, handleCardClick}){
-  let cards = gameState.player.hand
+  let cards = gameState.player.hand;
   let cardViews = [];
   for(let i = 0; i < cards.length; i++){
     let card = cards[i];
@@ -173,26 +173,9 @@ function PlayerHand({gameState, handleCardClick}){
   return cardViews;
 }
 
-//CardRowDialogs are for swapping cards at the start of the game, medics, and graveyards
+//todo: CardRowDialogs are for swapping cards at the start of the game, reviving cards with medics, and expanded graveyard views
 // function CardRowDialog(cards, handleDialogClick){
 //   console.log("rendering card view dialog");
-
-//   let cardViews = [];
-  
-//   for(let j=0; j < cards.length; j++){
-//     let card = cards[j];
-//     cardViews.push(<LargeCardView
-//                       cardData={card}
-//                       key={(range + i) + j}
-//                       handleClick={handleDialogClick}
-//                   />);
-//   }
-
-//   return(
-//     <dialog className="card-dialog">
-      
-//     </dialog>
-//   );
 // }
 
 
@@ -322,9 +305,8 @@ export default function GwentClient({socket}) {
   const [playerTotal, setPlayerTotal] = useState(initialGameState.board.getTotalStrength(initialGameState.playerIndex));
   const [opponentTotal, setOpponentTotal] = useState(initialGameState.board.getTotalStrength((initialGameState.playerIndex + 1) % 2));
 
-  //I'm using a state variable for this instead of just an html dialog so that it won't render at all unless I need it
-  //Otherwise I think a hidden html dialog would get recomputed every render phase
-  //can be [null, "cardSwap", "playerGY", "opponentGY", or "medic"]
+  //todo: add dialog (or div I show or hide based on state variables)
+  //can be [null, "cardSwap", "playerGY", "opponentGY", or "medicRevive"]
   //const [dialogStatus, setDialogStatus] = useState();
 
   function showGameDialog() {
@@ -361,6 +343,8 @@ export default function GwentClient({socket}) {
 
     socket.emit("pass");
   }
+
+  //todo: socketSubmitUseLeaderAbility
 
   function socketGameOverReceived(result){
     console.log(result);
@@ -404,9 +388,10 @@ export default function GwentClient({socket}) {
 
       return;
     }
+
     //clicking a card on the player's side of the field sets that card as the focus card
     //unless the player currently has a decoy from their hand selected as the focus card
-    //in which case, if the card clicked is a regular unit card, swap the decoy for that card on the field (if it's their turn)
+    //in which case, if the card clicked is a regular unit card and it is their turn, swap the decoy for that card on the field
     else if(range != "hand"){
       card = gameState.board.field[gameState.playerIndex][range][cardIndex];
 
@@ -429,7 +414,8 @@ export default function GwentClient({socket}) {
 
       return;
     }
-    //if the player clicks a card in their hand, the first click makes it the focus card, the second click plays the card
+
+    //if the player clicks a card in their hand, the first click makes it the focus card, the second click plays the card (if it's their turn)
     //unless the card has special targetting rules (decoys, rallyHorns, and agile units)
     else {
       card = gameState.player.hand[cardIndex];
@@ -444,9 +430,6 @@ export default function GwentClient({socket}) {
           alert("it's not your turn");
           return;
         }
-        
-        console.log("socket connected: " + socket.connected);
-        console.log(card.name + " played");
 
         if(card.type == "unit" || card.type == "hero"){
           if(card.special != "medic" && card.range != "agile"){
@@ -482,10 +465,21 @@ export default function GwentClient({socket}) {
   
   //if the player has a rallyHorn or agile unit from their hand selected as the focus card, play the card when they select an appropriate range
   function handleRangeClick(range){
+    if(!socket.connected){
+      alert("websocket is disconnected. please refresh the page!");
+      return;
+    }
+    
     if(focusCard && focusCard[0] == "hand"){
       let card = focusCard[3];
-      if((card.name == "Commanders Horn") || (card.range == "agile" && range != "siege"))
+      if((card.name == "Commanders Horn") || (card.range == "agile" && range != "siege")){
+        if(gameState.playersTurn != gameState.playerIndex){
+          alert("it's not your turn");
+          return;
+        }
+
         socket.emit("play_card", focusCard[1], range);
+      }
     }
   }
 
