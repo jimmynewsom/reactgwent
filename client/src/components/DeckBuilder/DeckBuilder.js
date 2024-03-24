@@ -320,6 +320,9 @@ export default function DeckBuilder({socket}) {
         //I am not including the count fields here, because I will calculate those on the server, in case someone trys to cheat
         body: JSON.stringify(serializableDeck)
       });
+      if(result.status == 400)
+        alert("invalid deck submitted!");
+
       let message = await result.json();
       console.log(message);
     }
