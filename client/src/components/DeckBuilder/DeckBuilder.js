@@ -395,6 +395,10 @@ export default function DeckBuilder({socket}) {
     if(roomName){
       console.log("connecting to websocket");
       socket.connect();
+      socket.removeAllListeners("deck_validation_passed");
+      socket.removeAllListeners("deck_validation_failed");
+      socket.on("deck_validation_passed", () => {alert("deck passed validation! waiting for opponent")});
+      socket.on("deck_validation_failed", () => {alert("deck failed validation! please submit a valid deck")});
       return (() => {
         socket.disconnect();
         console.log("disconnecting socket");
