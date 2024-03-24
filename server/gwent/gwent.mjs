@@ -158,6 +158,7 @@ export function validateDeck(deck){
 export class Player{
   lives = 2;
   passed = false;
+  usedLeaderAbility = false;
 
   constructor(playerName){
     this.playerName = playerName;
@@ -387,8 +388,8 @@ Then, the server needs to send both clients all of the data they need every turn
 
 Clients need to know what's on the board and what's in their hand every turn, and whose turn it is.
 And then clients will tell the server their move every turn, which can be 1 of 3 things:
-  1: client plays a card (so I need to know the card name and sometimes a target)
-  2: client plays their leader ability (to be implemented later)
+  1: client plays a card (so I need to know the card name or index and sometimes a target)
+  2: client plays their leader ability (todo)
   3: client passes
 
 I think that's all I need to make this work
