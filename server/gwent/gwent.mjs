@@ -102,7 +102,7 @@ const defaultDeck = {
 export {cardMap, cardRows, leaderRows, leaderMap, defaultDeck};
 
 
-//deck should have faction, leaderName, cards, and owner fields, from /saveUserDeck route in server.mjs
+//deck should have faction, leaderName, and cards fields, from /saveUserDeck route in server.mjs and ready_for_game event in routes/game_routes.mjs
 export function validateDeck(deck){
   let isValid = true, heroCount = 0, specialCount = 0, unitCount = 0, totalCardCount = 0, totalUnitStrength = 0;
   

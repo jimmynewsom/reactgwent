@@ -5,6 +5,10 @@ import { Player, Gwent, cardMap, validateDeck, defaultDeck } from "../gwent/gwen
 import { updateWinsAndLosses, checkGamesThisMonth, incrementGamesThisMonth } from "../server.mjs";
 
 
+//this code is kind of hacky and gross, but it works
+//if you're a recruiter, please look at everything else first. Most of the code is better, but this needs polishing...
+
+
 //wrapper class for Gwent Online Multiplayer
 //basically I am going to feed one move in at a time, and then send the game state back to both players
 //Also, right now the decks in MultiplayerGwent have additional fields besides just the cards
@@ -207,33 +211,47 @@ export default function GameRouter(io){
     });
 
     //todo - add step for deck validation, but I want to get a working prototype first
-    socket.on("ready_for_game", (deckObject) => {
-      console.log("username ready: " + username);
-
-      let deck = [];
-      for(let cardName in deckObject.cards){
-        let card = cardMap.get(cardName);
-        for(let i = 0; i < deckObject.cards[cardName]; i++){
-          deck.push(card);
+    socket.on("ready_for_game", (serializableDeck) => {
+      try{
+        let result = validateDeck(serializableDeck);
+        if(!result.isValid){
+          console.log(username + " submitted invalid deck");
+          io.to(socket.id).emit("deck_validation_failed");
         }
-      }
+        else {
+          let deck = [];
+          for(let cardName in serializableDeck.cards){
+            let card = cardMap.get(cardName);
+            for(let i = 0; i < serializableDeck.cards[cardName]; i++){
+              deck.push(card);
+            }
+          }
 
-      if(playerIndex == 0){
-        game.setDeck1(deck);
-        game.player1.setFaction(deckObject.faction);
-        game.player1.setLeader(deckObject.leaderName);
-      }
-      else {
-        game.setDeck2(deck);
-        game.player2.setFaction(deckObject.faction);
-        game.player2.setLeader(deckObject.leaderName);
-      }
+          console.log(username + " submitted valid deck");
 
-      if(game.deck1 != undefined && game.deck2 != undefined){
-        console.log("both players ready, redirecting to game view");
-        game.startGame();
-        game.setStatus("gameInProgress");
-        io.to(game.player1.playerName).emit("redirect", "/gwent");
+          if(playerIndex == 0){
+            game.setDeck1(deck);
+            game.player1.setFaction(serializableDeck.faction);
+            game.player1.setLeader(serializableDeck.leaderName);
+          }
+          else {
+            game.setDeck2(deck);
+            game.player2.setFaction(serializableDeck.faction);
+            game.player2.setLeader(serializableDeck.leaderName);
+          }
+
+          if(game.deck1 != undefined && game.deck2 != undefined){
+            console.log("both players ready, redirecting to game view");
+            game.startGame();
+            game.setStatus("gameInProgress");
+            io.to(game.player1.playerName).emit("redirect", "/gwent");
+          }
+          else {
+            io.to(socket.id).emit("deck_validation_passed");
+          }
+        }
+      } catch(error){
+        console.log(error);
       }
     });
 
