@@ -557,6 +557,10 @@ export class Gwent{
   //todo
   playLeaderAbility(playerIndex){
     try {
+      //first check if it is the player's turn
+      if(playerIndex != this.playersTurn)
+        return;
+      
       let player = this.players[playerIndex];
       let faction = player.faction;
       let title = player.leader.title;
