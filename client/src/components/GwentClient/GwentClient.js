@@ -469,7 +469,7 @@ export default function GwentClient({socket}) {
       alert("websocket is disconnected. please refresh the page!");
       return;
     }
-    
+
     if(focusCard && focusCard[0] == "hand"){
       let card = focusCard[3];
       if((card.name == "Commanders Horn") || (card.range == "agile" && range != "siege")){
@@ -479,6 +479,7 @@ export default function GwentClient({socket}) {
         }
 
         socket.emit("play_card", focusCard[1], range);
+        setFocusCard();
       }
     }
   }
