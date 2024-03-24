@@ -138,6 +138,32 @@ export default function GameRouter(io){
     }
   });
 
+  
+  gameRouter.get("/cancelGame/:hostName", authenticateToken, async (req, res) => {
+    let username = sanitizeInput(req.username);
+    let hostName = req.params.hostName;
+
+    if(username != hostName && username != "jimmynewsom")
+      return res.status(400).json({error: "you do not have authorization to cancel this game"});
+    
+    if(userGameMap.has(username))
+      return res.status(400).json({ error: "you already have a game in progress. Fuck off! :)"});
+
+    else if(!userGameMap.has(targetOpponent))
+      return res.status(400).json({error: "game not found"});
+
+    else if(userGameMap.get(targetOpponent).user2 != undefined)
+      return res.status(400).json({error: "game is full"});
+
+    else{
+      let game = userGameMap.get(targetOpponent);
+      game.addPlayerTwo(username);
+      game.setStatus("redirect to deckbuilder");
+      userGameMap.set(username, game);
+      return res.status(200).json({message: "game joined"});
+    }
+  });
+
 
   gameRouter.get("/getGameList", authenticateToken, (req, res) => {
     let gamePlayersList = [];
@@ -151,7 +177,16 @@ export default function GameRouter(io){
   });
 
 
-  //temporary
+  gameRouter.get("/checkUserHasGameInProgress", authenticateToken, (req, res) => {
+    let username = sanitizeInput(req.username);
+    if(userGameMap.has(username))
+      return res.json({inProgress: true});
+    else
+      return res.json({inProgress: false});
+  });
+
+
+  //admin only
   gameRouter.get("/resetGames", authenticateToken, (req, res) => {
     if(req.username == "jimmynewsom"){
       console.log("resetting games");
@@ -162,15 +197,6 @@ export default function GameRouter(io){
     else {
       return res.status(400).json({error: "you do not have authorization to reset games"});
     }
-  });
-
-
-  gameRouter.get("/checkUserHasGameInProgress", authenticateToken, (req, res) => {
-    let username = sanitizeInput(req.username);
-    if(userGameMap.has(username))
-      return res.json({inProgress: true});
-    else
-      return res.json({inProgress: false});
   });
 
 

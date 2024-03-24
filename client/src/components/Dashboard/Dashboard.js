@@ -45,21 +45,32 @@ export default function Dashboard({ socket }) {
   }
 
   //returns handleClick async functions for buttons to join the different available games 
-  function joinGame(opponentName) {
-    const test = async () => {
-      try {
-        let result = await fetch(process.env.REACT_APP_BACKEND_URL + "gwent/joinGame/" + opponentName, {
-          headers: { "Authorization": authHeader().split(" ")[1] }
-        });
-        if (result.status == 200) {
-          console.log("game joined. connecting to socket.io game room...");
-          socket.connect();
-        }
-      } catch (error) {
-        console.log(error);
+  async function joinGame(opponentName) {
+    try {
+      let result = await fetch(process.env.REACT_APP_BACKEND_URL + "gwent/joinGame/" + opponentName, {
+        headers: { "Authorization": authHeader().split(" ")[1] }
+      });
+      if (result.status == 200) {
+        console.log("game joined. connecting to socket.io game room...");
+        socket.connect();
       }
+    } catch (error) {
+      console.log(error);
     }
-    return test;
+  }
+
+  async function cancelGame(hostName) {
+    try {
+      let result = await fetch(process.env.REACT_APP_BACKEND_URL + "gwent/cancelGame/" + opponentName, {
+        headers: { "Authorization": authHeader().split(" ")[1] }
+      });
+      if (result.status == 200) {
+        console.log("game cancelled. leaving socket.io game room...");
+        socket.disconnect();
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   function createGamesTable() {
@@ -68,8 +79,12 @@ export default function Dashboard({ socket }) {
       gameRows.push(
         <tr key={game[0]}>
           <td>{game[0]}</td>
-          <td>{game[1] ? game[1] : !waitingForOpponent ? <button className={`primary-button`} onClick={joinGame(game[0])}>Join Game</button> : "Waiting for Opponent"}</td>
-          <td>{game[1] ? "Game in Progress" : "Waiting for players..."}</td>
+          <td>{game[1] ? game[1] : waitingForOpponent ? "Waiting for Opponent" :
+            <button className={`primary-button`} onClick={() => {joinGame(game[0])}}>Join Game</button>}
+          </td>
+          <td>{game[1] ? "Game in Progress" : "Waiting for opponent..."}</td>
+          {auth().username == game[0] || auth().username == "jimmynewsom" ?
+            <td className='small-td'><button onClick={() => {cancelGame(game[0])}}>Cancel Game</button></td> : <></>}
         </tr>
       );
     }
