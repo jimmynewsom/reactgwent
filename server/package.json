@@ -72,7 +72,7 @@
     "vary": "^1.1.2"
   },
   "scripts": {
-    "test": "node --experimental-vm-modules ./node_modules/.bin/jest"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "author": "",
   "license": "ISC"
