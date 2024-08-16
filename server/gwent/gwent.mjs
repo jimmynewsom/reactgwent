@@ -1,9 +1,8 @@
 import fs from 'fs';
-import { parse } from 'csv-parse';
+import { parse } from 'csv-parse/sync';
 
 
 //CARD AND DECK LOGIC!!!!
-
 
 export class CardData {
   constructor(name, image_url, type, faction, strength, range, special, available, description){
@@ -29,41 +28,32 @@ export class LeaderCardData {
   }
 }
 
-let cardRows;
+
+//load card data from unit_cards.csv
+const cardFileData = fs.readFileSync("./gwent/unit_cards.csv");
+const cardRows = parse(cardFileData, {columns: false, trim: true});
 const cardMap = new Map();
-
-//these should maybe be synchronous instead of async, since I need them to initialize at start up. but it's not that important
-fs.readFile("./gwent/unit_cards.csv", function (err, fileData) {
-  parse(fileData, {columns: false, trim: true}, function(err, rows) {
-    cardRows = rows;
-
-    cardRows.forEach((row, i) => {
-      //the first row is just the names of the columns
-      if(i!==0){
-        //each row is [0] card name, [1] image url, [2] type, [3] faction, [4], available, [5] strength, [6] range, [7] special, [8] avaialble, and [9] description
-        let card = new CardData(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9]);
-        cardMap.set(row[0], card);
-      }
-    });
-  });
+cardRows.forEach((row, i) => {
+  //the first row is just the names of the columns
+  if(i!==0){
+    //each row is [0] card name, [1] image url, [2] type, [3] faction, [4], available, [5] strength, [6] range, [7] special, [8] avaialble, and [9] description
+    let card = new CardData(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9]);
+    cardMap.set(row[0], card);
+  }
 });
 
-let leaderRows;
+
+//load leader data from leader_cards.csv
+const leaderFileData = fs.readFileSync("./gwent/leader_cards.csv");
+const leaderRows = parse(leaderFileData, {columns: false, trim: true});;
 const leaderMap = new Map();
-
-fs.readFile("./gwent/leader_cards.csv", function (err, fileData) {
-  parse(fileData, {columns: false, trim: true}, function(err, rows) {
-    leaderRows = rows;
-
-    leaderRows.forEach((row, i) => {
-      //the first row is just the names of the columns
-      if(i!==0){
-        //each row is [0] leader name, [1] image url, [2] faction, [3] description, and [4] ability description
-        let card = new LeaderCardData(row[0], row[1], row[2], row[3], row[4]);
-        leaderMap.set(row[0], card);
-      }
-    });
-  });
+leaderRows.forEach((row, i) => {
+  //the first row is just the names of the columns
+  if(i!==0){
+    //each row is [0] leader name, [1] image url, [2] faction, [3] description, and [4] ability description
+    let card = new LeaderCardData(row[0], row[1], row[2], row[3], row[4]);
+    leaderMap.set(row[0], card);
+  }
 });
 
 const defaultDeck = {
@@ -102,15 +92,13 @@ const defaultDeck = {
 export {cardMap, cardRows, leaderRows, leaderMap, defaultDeck};
 
 
-//deck should have faction, leaderName, cards, and owner fields, from /saveUserDeck route in server.mjs
+//deck should have owner, faction, leaderName, and cards fields, from /saveUserDeck route in server.mjs
+//returns {isValid, message} for invalid results, or more fields for successful validation
 export function validateDeck(deck){
-  let isValid = true, message = "", heroCount = 0, specialCount = 0, unitCount = 0, totalCardCount = 0, totalUnitStrength = 0;
-
-  if(cardMap.size == 0)
-    return {message: leaderMap.size};
+  let isValid = true, heroCount = 0, specialCount = 0, unitCount = 0, totalCardCount = 0, totalUnitStrength = 0;
   
-  // if(!leaderMap.has(deck.leaderName) || leaderMap.get(deck.leaderName).faction != deck.faction)
-  //   return {isValid: false, message: "leaderName invalid or wrong faction"};
+  if(!leaderMap.has(deck.leaderName) || leaderMap.get(deck.leaderName).faction != deck.faction)
+    return {isValid: false, message: "leaderName invalid or wrong faction"};
 
   let deckMap = new Map(Object.entries(deck.cards));
   for(let [cardName, numberInDeck] of deckMap){
@@ -121,16 +109,11 @@ export function validateDeck(deck){
     let card = cardMap.get(cardName);
     totalCardCount += numberInDeck;
 
-    if(numberInDeck > card.available){
-      isValid = false;
-      message = "too many " + cardName + " in deck";
-    }
-      
+    if(numberInDeck > card.available)
+      return {isValid: false, message: "too many " + cardName + " in deck"};
 
-    if(card.faction != deck.faction && card.faction != "neutral"){
-      isValid = false;
-      message = cardName + " is not part of " + deck.faction;
-    } 
+    if(card.faction != deck.faction && card.faction != "neutral")
+      return {isValid: false, message: cardName + " is not part of " + deck.faction};
 
     if(card.type == "hero"){
       heroCount++;
@@ -138,8 +121,9 @@ export function validateDeck(deck){
       totalUnitStrength += card.strength;
     }
 
-    if(card.type == "special")
+    if(card.type == "special"){
       specialCount = specialCount + numberInDeck;
+    }
 
     if(card.type == "unit"){
       unitCount += numberInDeck;
@@ -147,19 +131,11 @@ export function validateDeck(deck){
     }
   }
 
-  if(specialCount > 10){
-    isValid = false;
-    message = "too many special cards";
-  }
+  if(specialCount > 10)
+    return {isValid: false, message: "too many special cards"};
 
-  if(unitCount < 22){
-    isValid = false;
-    message = "not enough unit cards";
-  }
-
-  if(!isValid)
-    return {isValid, message};
-
+  if(unitCount < 22)
+    return {isValid: false, message: "not enough unit cards"};
 
   let result = {isValid, unitCount, heroCount, specialCount, totalCardCount, totalUnitStrength};
   return result;
