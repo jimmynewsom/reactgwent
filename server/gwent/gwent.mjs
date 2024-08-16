@@ -69,6 +69,7 @@ fs.readFile("./gwent/leader_cards.csv", function (err, fileData) {
 const defaultDeck = {
   "owner": "default",
   "faction": "Northern Realms",
+  "leaderName": "Foltest King of Temeria",
   "cards": {
     "Biting Frost": 2,
     "Impenetrable Fog": 2,
@@ -94,7 +95,6 @@ const defaultDeck = {
   "totalCardCount": 30,
   "totalUnitStrength": 84,
   "heroCount": 0,
-  "leaderName": "Foltest King of Temeria",
   "specialCount": 8,
   "unitCount": 22
 }
@@ -104,25 +104,33 @@ export {cardMap, cardRows, leaderRows, leaderMap, defaultDeck};
 
 //deck should have faction, leaderName, cards, and owner fields, from /saveUserDeck route in server.mjs
 export function validateDeck(deck){
-  let isValid = true, heroCount = 0, specialCount = 0, unitCount = 0, totalCardCount = 0, totalUnitStrength = 0;
+  let isValid = true, message = "", heroCount = 0, specialCount = 0, unitCount = 0, totalCardCount = 0, totalUnitStrength = 0;
+
+  if(cardMap.size == 0)
+    return {message: leaderMap.size};
   
-  if(!leaderMap.has(deck.leaderName) || leaderMap.get(deck.leaderName).faction != deck.faction)
-    return {isValid: false};
+  // if(!leaderMap.has(deck.leaderName) || leaderMap.get(deck.leaderName).faction != deck.faction)
+  //   return {isValid: false, message: "leaderName invalid or wrong faction"};
 
   let deckMap = new Map(Object.entries(deck.cards));
   for(let [cardName, numberInDeck] of deckMap){
     //if the user submits a deck with a card name I don't recognize they're not using my app
     if(!cardMap.has(cardName))
-      return {isValid: false};
+      return {isValid: false, message: "cardName invalid"};
 
     let card = cardMap.get(cardName);
     totalCardCount += numberInDeck;
 
-    if(numberInDeck > card.available)
+    if(numberInDeck > card.available){
       isValid = false;
+      message = "too many " + cardName + " in deck";
+    }
+      
 
-    if(card.faction != deck.faction && card.faction != "neutral")
+    if(card.faction != deck.faction && card.faction != "neutral"){
       isValid = false;
+      message = cardName + " is not part of " + deck.faction;
+    } 
 
     if(card.type == "hero"){
       heroCount++;
@@ -139,11 +147,19 @@ export function validateDeck(deck){
     }
   }
 
-  if(specialCount > 10)
+  if(specialCount > 10){
     isValid = false;
+    message = "too many special cards";
+  }
 
-  if(unitCount < 22)
+  if(unitCount < 22){
     isValid = false;
+    message = "not enough unit cards";
+  }
+
+  if(!isValid)
+    return {isValid, message};
+
 
   let result = {isValid, unitCount, heroCount, specialCount, totalCardCount, totalUnitStrength};
   return result;
