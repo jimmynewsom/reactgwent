@@ -154,15 +154,9 @@ export class Player{
   passed = false;
   usedLeaderAbility = false;
 
-  constructor(playerName){
+  constructor(playerName, faction, leaderName){
     this.playerName = playerName;
-  }
-
-  setFaction(faction){
     this.faction = faction;
-  }
-
-  setLeader(leaderName){
     this.leaderName = leaderName;
   }
 }

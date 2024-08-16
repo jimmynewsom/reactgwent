@@ -21,7 +21,6 @@ test('testing LeaderCardData constructor format: ', () => {
 });
 
 
-
 /////deck validation tests/////
 
 test('testing validateDeck function for valid/default deck: ', () => {
@@ -31,7 +30,7 @@ test('testing validateDeck function for valid/default deck: ', () => {
 });
 
 
-test('testing validateDeck for invalid leader name / faction, invalid card name / faction, too many specials, and not enough units: ', () => {
+test('testing validateDeck for invalid leader name / faction, invalid card name / faction, too many of 1 card, too many specials, and not enough units: ', () => {
   defaultDeck.leaderName = "asdlkj";
   const f1 = validateDeck(defaultDeck);
   expect(f1).toEqual({isValid: false, message: "leaderName invalid or wrong faction"});
@@ -69,12 +68,20 @@ test('testing validateDeck for invalid leader name / faction, invalid card name 
 });
 
 
-
 /////game tests/////
-const p1 = new Player("player one"), p2 = new Player("player two");
-const d1 = [], d2 = [];
 
+test('testing Player constructor format: ', () => {
+  const player1 = new Player("player one", "Northern Realms", "Foltest King of Temeria");
 
+  expect(player1).toEqual({playerName: "player one", faction: "Northern Realms", leaderName: "Foltest King of Temeria", lives: 2, passed: false, usedLeaderAbility: false});
+});
 
+test('testing Game for : ', () => {
+  const player1 = new Player("player one", "Northern Realms", "Foltest King of Temeria");
+  const player2 = new Player("player two", "Northern Realms", "Foltest King of Temeria");
+  const deck1 = defaultDeck;
+  const deck2 = JSON.parse(JSON.stringify(defaultDeck));
+  const game = new Gwent(player1, player2, deck1, deck2);
 
-const game = new Gwent(p1, p2, d1, d2);
+  expect(game.players).toEqual([{player: player1, deck: deck1}, {player: player2, deck: deck2}]);
+});
