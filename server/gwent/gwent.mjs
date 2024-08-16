@@ -56,6 +56,7 @@ leaderRows.forEach((row, i) => {
   }
 });
 
+
 const defaultDeck = {
   "owner": "default",
   "faction": "Northern Realms",
@@ -88,6 +89,7 @@ const defaultDeck = {
   "specialCount": 8,
   "unitCount": 22
 }
+
 
 export {cardMap, cardRows, leaderRows, leaderMap, defaultDeck};
 
