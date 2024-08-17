@@ -1,4 +1,4 @@
-import { cardMap, CardData, LeaderCardData, defaultDeck, validateDeck, Player, Gwent, leaderMap } from "./gwent.mjs";
+import { cardMap, leaderMap, CardData, LeaderCardData, defaultDeck, validateDeck, Player, Gwent } from "./gwent.mjs";
 
 /////card tests/////
 
@@ -76,12 +76,88 @@ test('testing Player constructor format: ', () => {
   expect(player1).toEqual({playerName: "player one", faction: "Northern Realms", leaderName: "Foltest King of Temeria", lives: 2, passed: false, usedLeaderAbility: false});
 });
 
-test('testing Game for : ', () => {
+test('testing Game initial set up: ', () => {
   const player1 = new Player("player one", "Northern Realms", "Foltest King of Temeria");
   const player2 = new Player("player two", "Northern Realms", "Foltest King of Temeria");
-  const deck1 = defaultDeck;
-  const deck2 = JSON.parse(JSON.stringify(defaultDeck));
+  
+  const deck1 = [], deck2 = []; 
+  for(let cardName in defaultDeck.cards){
+    for(let i = 0; i < defaultDeck.cards[cardName]; i++){
+      deck1.push(cardMap.get(cardName));
+      deck2.push(cardMap.get(cardName));
+    }
+  }
+  
   const game = new Gwent(player1, player2, deck1, deck2);
 
-  expect(game.players).toEqual([{player: player1, deck: deck1}, {player: player2, deck: deck2}]);
+  expect(game.round).toBe(1);
+  expect(game.players).toEqual([{player: player1, deck: deck1, hand: game.players[0].hand}, {player: player2, deck: deck2, hand: game.players[1].hand}]);
+  expect(game.board).toEqual({
+    field: [{close: [], ranged: [], siege: []}, {close: [], ranged: [], siege: []}],
+    weather: {close: false, ranged: false, siege: false},
+    rallyHorns: [{close: false, ranged: false, siege: false}, {close: false, ranged: false, siege: false}],
+    morale: [{close: 0, ranged: 0, siege: 0}, {close: 0, ranged: 0, siege: 0}],
+    tightBondsMaps: [new Map(), new Map()]
+  });
+
+
 });
+
+// test("testing combat strength calculations - normal, decoy, weather, rallyHorn, morale, tightBonds", () => {
+//   const player1 = new Player("player one", "Northern Realms", "Foltest King of Temeria");
+//   const player2 = new Player("player two", "Northern Realms", "Foltest King of Temeria");
+  
+//   const deck1 = [], deck2 = []; 
+//   for(let cardName in defaultDeck.cards){
+//     for(let i = 0; i < defaultDeck.cards[cardName]; i++){
+//       deck1.push(cardMap.get(cardName));
+//       deck2.push(cardMap.get(cardName));
+//     }
+//   }
+  
+//   const game = new Gwent(player1, player2, deck1, deck2);
+  
+//   game.players[0].hand = [
+//     cardMap.get("Yarpen Zigrin"),
+//     cardMap.get("Vesemir"),
+//     cardMap.get("Geralt of Rivia"),
+//     cardMap.get("Decoy"),
+//     cardMap.get("Prince Stennis"),
+//     cardMap.get("Crone: Brewess"),
+//     cardMap.get("Crone: Weavess"),
+//     cardMap.get("Crone: Whispess"),
+//     cardMap.get("Scorch"),
+//     cardMap.get("Biting Frost"),
+//     cardMap.get("Clear Weather"),
+//     cardMap.get("Commanders Horn")
+//   ];
+
+//   game.players[1].hand = [
+//     cardMap.get("Torrential Rain"),
+//     cardMap.get("Torrential Rain"),
+//     cardMap.get("Torrential Rain"),
+//     cardMap.get("Torrential Rain"),
+//     cardMap.get("Torrential Rain"),
+//     cardMap.get("Torrential Rain"),
+//     cardMap.get("Torrential Rain"),
+//     cardMap.get("Torrential Rain"),
+//     cardMap.get("Torrential Rain"),
+//     cardMap.get("Torrential Rain"),
+//     cardMap.get("Torrential Rain")
+//   ];
+
+//   game.playCard(0, 0);
+
+
+
+//   game.playCard(0, 0);
+//   game.playCard(0, 0);
+//   game.playCard(0, 0);
+//   game.playCard(0, 0);
+//   game.playCard(0, 0);
+//   game.playCard(0, 0);
+//   game.playCard(0, 0);
+//   game.playCard(0, 0);
+
+
+// });
