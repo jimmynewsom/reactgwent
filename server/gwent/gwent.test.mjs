@@ -1,6 +1,7 @@
 import { cardMap, leaderMap, CardData, LeaderCardData, defaultDeck, validateDeck, Player, Gwent } from "./gwent.mjs";
 
-/////card tests/////
+
+///// CARD TESTS /////
 
 test('testing CardData constructor format: ', () => {
   //               CardData( name,             image_url,             type,  faction, strength, range, special, available, description)
@@ -9,7 +10,6 @@ test('testing CardData constructor format: ', () => {
   expect(card).toEqual({name: "Geralt of Rivia", image_url: "geralt_of_rivia.png", type: "hero", faction: "neutral", strength: 15,
                         range: "close", special: "none", available: 1, description: ""});
 });
-
 
 test('testing LeaderCardData constructor format: ', () => {
   //                     LeaderCardData( name,                      image_url,         faction,           desc, ability_description)
@@ -21,7 +21,7 @@ test('testing LeaderCardData constructor format: ', () => {
 });
 
 
-/////deck validation tests/////
+///// DECK VALIDATION TESTS /////
 
 test('testing validateDeck function for valid/default deck: ', () => {
   const defaultValidation = validateDeck(defaultDeck);
@@ -29,8 +29,8 @@ test('testing validateDeck function for valid/default deck: ', () => {
   expect(defaultValidation).toEqual({isValid: true, unitCount: 22, heroCount: 0, specialCount: 8, totalCardCount: 30, totalUnitStrength: 84});
 });
 
-
-test('testing validateDeck for invalid leader name / faction, invalid card name / faction, too many of 1 card, too many specials, and not enough units: ', () => {
+//decks must have leaders of the correct faction, 22 or more unit cards, and at most 10 special cards
+test('testing validateDeck for invalid decks (invalid leader name / faction, invalid card name / faction, too many of 1 card, too many specials, and not enough units): ', () => {
   defaultDeck.leaderName = "asdlkj";
   const f1 = validateDeck(defaultDeck);
   expect(f1).toEqual({isValid: false, message: "leaderName invalid or wrong faction"});
@@ -68,7 +68,7 @@ test('testing validateDeck for invalid leader name / faction, invalid card name 
 });
 
 
-/////game tests/////
+///// GAME TESTS /////
 
 test('testing Player constructor format: ', () => {
   const player1 = new Player("player one", "Northern Realms", "Foltest King of Temeria");
@@ -93,7 +93,7 @@ test('testing Game initial set up: ', () => {
   expect(game.round).toBe(1);
   expect(game.players).toEqual([{player: player1, deck: deck1, hand: game.players[0].hand}, {player: player2, deck: deck2, hand: game.players[1].hand}]);
   expect(game.board).toEqual({
-    field: [{close: [], ranged: [], siege: []}, {close: [], ranged: [], siege: []}],
+    field: [{close: [], ranged: [], siege: [], graveyard: []}, {close: [], ranged: [], siege: [], graveyard: []}],
     weather: {close: false, ranged: false, siege: false},
     rallyHorns: [{close: false, ranged: false, siege: false}, {close: false, ranged: false, siege: false}],
     morale: [{close: 0, ranged: 0, siege: 0}, {close: 0, ranged: 0, siege: 0}],
@@ -103,61 +103,155 @@ test('testing Game initial set up: ', () => {
 
 });
 
-// test("testing combat strength calculations - normal, decoy, weather, rallyHorn, morale, tightBonds", () => {
-//   const player1 = new Player("player one", "Northern Realms", "Foltest King of Temeria");
-//   const player2 = new Player("player two", "Northern Realms", "Foltest King of Temeria");
+//Vesemir is a normal unit, Geralt is a hero unit, and Decoy is a special unit, so this test covers all unit types
+//normal units are subject to weather and rally horns, hero and special units are not
+//then I test normal conditions, weather on, rallyHorns on, and weather and rallyHorns on
+test("testing combat strength calculations - normal, hero, decoy, weather, rallyHorn, morale: ", () => {
+  const player1 = new Player("player one", "Northern Realms", "Foltest King of Temeria");
+  const player2 = new Player("player two", "Northern Realms", "Foltest King of Temeria");
   
-//   const deck1 = [], deck2 = []; 
-//   for(let cardName in defaultDeck.cards){
-//     for(let i = 0; i < defaultDeck.cards[cardName]; i++){
-//       deck1.push(cardMap.get(cardName));
-//       deck2.push(cardMap.get(cardName));
-//     }
-//   }
+  const deck1 = [], deck2 = []; 
+  for(let cardName in defaultDeck.cards){
+    for(let i = 0; i < defaultDeck.cards[cardName]; i++){
+      deck1.push(cardMap.get(cardName));
+      deck2.push(cardMap.get(cardName));
+    }
+  }
   
-//   const game = new Gwent(player1, player2, deck1, deck2);
+  const game = new Gwent(player1, player2, deck1, deck2);
+
+  game.board.field[0].close = [cardMap.get("Vesemir"), cardMap.get("Geralt of Rivia"), cardMap.get("Decoy")];
+
+  expect(game.board.getCardStrength(0, "close", 0)).toBe(6);
+  expect(game.board.getCardStrength(0, "close", 1)).toBe(15);
+  expect(game.board.getCardStrength(0, "close", 2)).toBe(0);
+  expect(game.board.getRowStrength(0, "close")).toBe(21);
+
+  game.board.rallyHorns[0].close = true;
+
+  expect(game.board.getCardStrength(0, "close", 0)).toBe(12);
+  expect(game.board.getCardStrength(0, "close", 1)).toBe(15);
+  expect(game.board.getCardStrength(0, "close", 2)).toBe(0);
+  expect(game.board.getRowStrength(0, "close")).toBe(27);
+
+  game.board.rallyHorns[0].close = false;
+  game.board.weather.close = true;
+
+  expect(game.board.getCardStrength(0, "close", 0)).toBe(1);
+  expect(game.board.getCardStrength(0, "close", 1)).toBe(15);
+  expect(game.board.getCardStrength(0, "close", 2)).toBe(0);
+  expect(game.board.getRowStrength(0, "close")).toBe(16);
+
+  game.board.rallyHorns[0].close = true;
+
+  expect(game.board.getCardStrength(0, "close", 0)).toBe(2);
+  expect(game.board.getCardStrength(0, "close", 1)).toBe(15);
+  expect(game.board.getCardStrength(0, "close", 2)).toBe(0);
+  expect(game.board.getRowStrength(0, "close")).toBe(17);
+
+  game.board.weather.close = false;
+  game.board.rallyHorns[0].close = false;
+  game.board.morale[0].close = 5;
+
+  expect(game.board.getCardStrength(0, "close", 0)).toBe(11);
+  expect(game.board.getCardStrength(0, "close", 1)).toBe(15);
+  expect(game.board.getCardStrength(0, "close", 2)).toBe(0);
+  expect(game.board.getRowStrength(0, "close")).toBe(26);
+
+  game.board.weather.close = true;
+
+  expect(game.board.getCardStrength(0, "close", 0)).toBe(6);
+  expect(game.board.getCardStrength(0, "close", 1)).toBe(15);
+  expect(game.board.getCardStrength(0, "close", 2)).toBe(0);
+  expect(game.board.getRowStrength(0, "close")).toBe(21);
+
+  game.board.rallyHorns[0].close = true;
+
+  expect(game.board.getCardStrength(0, "close", 0)).toBe(12);
+  expect(game.board.getCardStrength(0, "close", 1)).toBe(15);
+  expect(game.board.getCardStrength(0, "close", 2)).toBe(0);
+  expect(game.board.getRowStrength(0, "close")).toBe(27);
+});
+
+test("testing tight bonds: ", () => {
+  const player1 = new Player("player one", "Northern Realms", "Foltest King of Temeria");
+  const player2 = new Player("player two", "Northern Realms", "Foltest King of Temeria");
   
-//   game.players[0].hand = [
-//     cardMap.get("Yarpen Zigrin"),
-//     cardMap.get("Vesemir"),
-//     cardMap.get("Geralt of Rivia"),
-//     cardMap.get("Decoy"),
-//     cardMap.get("Prince Stennis"),
-//     cardMap.get("Crone: Brewess"),
-//     cardMap.get("Crone: Weavess"),
-//     cardMap.get("Crone: Whispess"),
-//     cardMap.get("Scorch"),
-//     cardMap.get("Biting Frost"),
-//     cardMap.get("Clear Weather"),
-//     cardMap.get("Commanders Horn")
-//   ];
+  const deck1 = [], deck2 = []; 
+  for(let cardName in defaultDeck.cards){
+    for(let i = 0; i < defaultDeck.cards[cardName]; i++){
+      deck1.push(cardMap.get(cardName));
+      deck2.push(cardMap.get(cardName));
+    }
+  }
+  
+  const game = new Gwent(player1, player2, deck1, deck2);
+  game.players[0].hand = [cardMap.get("Blue Stripes Commando"), cardMap.get("Blue Stripes Commando"), cardMap.get("Blue Stripes Commando")];
+  
+  game.playersTurn = 0;
+  game.playCard(0, 0);
 
-//   game.players[1].hand = [
-//     cardMap.get("Torrential Rain"),
-//     cardMap.get("Torrential Rain"),
-//     cardMap.get("Torrential Rain"),
-//     cardMap.get("Torrential Rain"),
-//     cardMap.get("Torrential Rain"),
-//     cardMap.get("Torrential Rain"),
-//     cardMap.get("Torrential Rain"),
-//     cardMap.get("Torrential Rain"),
-//     cardMap.get("Torrential Rain"),
-//     cardMap.get("Torrential Rain"),
-//     cardMap.get("Torrential Rain")
-//   ];
+  expect(game.board.getCardStrength(0, "close", 0)).toBe(4);
 
-//   game.playCard(0, 0);
+  game.playersTurn = 0;
+  game.playCard(0, 0);
 
+  expect(game.board.getCardStrength(0, "close", 0)).toBe(8);
+  
+  game.playersTurn = 0;
+  game.playCard(0, 0);
 
+  expect(game.board.getCardStrength(0, "close", 0)).toBe(16);
+  
+  game.board.weather.close = true;
 
-//   game.playCard(0, 0);
-//   game.playCard(0, 0);
-//   game.playCard(0, 0);
-//   game.playCard(0, 0);
-//   game.playCard(0, 0);
-//   game.playCard(0, 0);
-//   game.playCard(0, 0);
-//   game.playCard(0, 0);
+  expect(game.board.getCardStrength(0, "close", 0)).toBe(4);
 
+  game.board.morale[0].close = 2;
 
-// });
+  expect(game.board.getCardStrength(0, "close", 0)).toBe(12);
+
+  game.board.rallyHorns[0].close = true;
+  
+  expect(game.board.getCardStrength(0, "close", 0)).toBe(24);
+});
+
+//technically I should test every muster group, but I am lazy and this a free project....
+//might add more test cases later. this covers muster with cards in your hand and deck
+test("testing muster: ", () => {
+  const player1 = new Player("player one", "Northern Realms", "Foltest King of Temeria");
+  const player2 = new Player("player two", "Northern Realms", "Foltest King of Temeria");
+  
+  const deck1 = [], deck2 = []; 
+  for(let cardName in defaultDeck.cards){
+    for(let i = 0; i < defaultDeck.cards[cardName]; i++){
+      deck1.push(cardMap.get(cardName));
+      deck2.push(cardMap.get(cardName));
+    }
+  }
+  
+  const game = new Gwent(player1, player2, deck1, deck2);
+  game.players[0].hand = [cardMap.get("Crone: Brewess"), cardMap.get("Crone: Weavess")];
+  game.players[0].deck.push(cardMap.get("Crone: Whispess"));
+
+  game.playersTurn = 0;
+  game.playCard(0, 0);
+
+  expect(game.board.getRowStrength(0, "close")).toBe(18);
+});
+
+test("testing scorch: ", () => {
+  const player1 = new Player("player one", "Northern Realms", "Foltest King of Temeria");
+  const player2 = new Player("player two", "Northern Realms", "Foltest King of Temeria");
+  
+  const deck1 = [], deck2 = []; 
+  for(let cardName in defaultDeck.cards){
+    for(let i = 0; i < defaultDeck.cards[cardName]; i++){
+      deck1.push(cardMap.get(cardName));
+      deck2.push(cardMap.get(cardName));
+    }
+  }
+  
+  const game = new Gwent(player1, player2, deck1, deck2);
+
+});
