@@ -147,8 +147,7 @@ export function validateDeck(deck){
 //GAME LOGIC!!!!
 //a lot of this might need to get optimized, and if it's really slow this might block my event loop
 //but I'm just going to write a sloppy v1 first and then optimize later if necessary
-//also, I only have to do this at the end of rounds. Normal turns I can getCardStrength and getRowStrength client-side
-
+//also, I only have to do this at the end of rounds. Normal turns I can call getCardStrength and getRowStrength client-side
 export class Player{
   lives = 2;
   passed = false;

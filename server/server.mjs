@@ -237,7 +237,7 @@ export async function updateWinsAndLosses(username, userWon){
   return;
 }
 
-
+//this code is garbage for the demo, please ignore
 export async function checkGamesThisMonth(username){
   try{
     let collection = await db.collection("users");
@@ -251,7 +251,7 @@ export async function checkGamesThisMonth(username){
   return;
 }
 
-
+//this code is garbage for the demo, please ignore
 export async function incrementGamesThisMonth(username){
   try{
     let query = { _id: username};
@@ -268,7 +268,7 @@ export async function incrementGamesThisMonth(username){
   return;
 }
 
-
+//this code is garbage for the demo, please ignore
 app.get("/resetGamesThisMonth", authenticateToken, async (req, res) => {
   try {
     if(req.username == "jimmynewsom"){
