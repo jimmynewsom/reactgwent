@@ -1,5 +1,6 @@
 import { cardMap, leaderMap, CardData, LeaderCardData, defaultDeck, validateDeck, Player, Gwent } from "./gwent.mjs";
 
+//TODO: test scorch<Range> and medic
 
 ///// CARD TESTS /////
 
@@ -19,6 +20,7 @@ test('testing LeaderCardData constructor format: ', () => {
   expect(leaderCard).toEqual({name: "Foltest King of Temeria", image_url: "king_foltest.png", faction: "Northern Realms", desc: "censored",
     ability_description: "Pick an Impenetrable Fog card from your deck and play it instantly."});
 });
+
 
 
 ///// DECK VALIDATION TESTS /////
@@ -68,6 +70,7 @@ test('testing validateDeck for invalid decks (invalid leader name / faction, inv
 });
 
 
+
 ///// GAME TESTS /////
 
 test('testing Player constructor format: ', () => {
@@ -105,7 +108,7 @@ test('testing Game initial set up: ', () => {
 
 //Vesemir is a normal unit, Geralt is a hero unit, and Decoy is a special unit, so this test covers all unit types
 //normal units are subject to weather and rally horns, hero and special units are not
-//then I test normal conditions, weather on, rallyHorns on, and weather and rallyHorns on
+//testing normal conditions, weather on, rallyHorns on, and weather and rallyHorns on
 test("testing combat strength calculations - normal, hero, decoy, weather, rallyHorn, morale: ", () => {
   const player1 = new Player("player one", "Northern Realms", "Foltest King of Temeria");
   const player2 = new Player("player two", "Northern Realms", "Foltest King of Temeria");
@@ -216,7 +219,7 @@ test("testing tight bonds: ", () => {
   expect(game.board.getCardStrength(0, "close", 0)).toBe(24);
 });
 
-//technically I should test every muster group, but I am lazy and this a free project....
+//technically I should test every muster group for full coverage, but I am lazy and this a free project....
 //might add more test cases later. this covers muster with cards in your hand and deck
 test("testing muster: ", () => {
   const player1 = new Player("player one", "Northern Realms", "Foltest King of Temeria");
@@ -254,4 +257,168 @@ test("testing scorch: ", () => {
   
   const game = new Gwent(player1, player2, deck1, deck2);
 
+  //scorch should burn the vesemirs but leave the rest
+  game.players[0].hand = [cardMap.get("Scorch")];
+  game.board.field[1].close = [cardMap.get("Geralt of Rivia"), cardMap.get("Vesemir"), cardMap.get("Keira Metz")];
+  game.board.field[1].siege = [cardMap.get("Dun Banner Medic")];
+  game.board.field[0].close = [cardMap.get("Vesemir"), cardMap.get("Vesemir")];
+
+  game.playersTurn = 0;
+  game.playCard(0, 0);
+
+  expect(game.board.getRowStrength(1, "close")).toBe(20);
+  expect(game.board.getRowStrength(1, "siege")).toBe(5);
+  expect(game.board.getRowStrength(0, "close")).toBe(0);
+});
+
+test("testing spy: ", () => {
+  const player1 = new Player("player one", "Northern Realms", "Foltest King of Temeria");
+  const player2 = new Player("player two", "Northern Realms", "Foltest King of Temeria");
+  
+  const deck1 = [], deck2 = []; 
+  for(let cardName in defaultDeck.cards){
+    for(let i = 0; i < defaultDeck.cards[cardName]; i++){
+      deck1.push(cardMap.get(cardName));
+      deck2.push(cardMap.get(cardName));
+    }
+  }
+  
+  const game = new Gwent(player1, player2, deck1, deck2);
+  game.players[0].hand = [cardMap.get("Sigismund Dijkstra")];
+  game.playersTurn = 0;
+  game.playCard(0, 0);
+
+  //player 0 should get extra cards, Sigismund Dijkstra should be in opponents close range section
+  expect(game.players[0].hand.length).toBe(2);
+  expect(game.board.getRowStrength(1, "close")).toBe(4);
+});
+
+test("testing morale (via playCard method): ", () => {
+  const player1 = new Player("player one", "Northern Realms", "Foltest King of Temeria");
+  const player2 = new Player("player two", "Northern Realms", "Foltest King of Temeria");
+  
+  const deck1 = [], deck2 = []; 
+  for(let cardName in defaultDeck.cards){
+    for(let i = 0; i < defaultDeck.cards[cardName]; i++){
+      deck1.push(cardMap.get(cardName));
+      deck2.push(cardMap.get(cardName));
+    }
+  }
+  
+  const game = new Gwent(player1, player2, deck1, deck2);
+  game.players[0].hand = [cardMap.get("Kaedweni Siege Expert")];
+  game.playersTurn = 0;
+  game.playCard(0, 0);
+
+  expect(game.board.morale[0].siege).toBe(1);
+});
+
+test("testing weather: ", () => {
+  const player1 = new Player("player one", "Northern Realms", "Foltest King of Temeria");
+  const player2 = new Player("player two", "Northern Realms", "Foltest King of Temeria");
+  
+  const deck1 = [], deck2 = []; 
+  for(let cardName in defaultDeck.cards){
+    for(let i = 0; i < defaultDeck.cards[cardName]; i++){
+      deck1.push(cardMap.get(cardName));
+      deck2.push(cardMap.get(cardName));
+    }
+  }
+  
+  const game = new Gwent(player1, player2, deck1, deck2);
+  game.players[0].hand = [cardMap.get("Biting Frost"), cardMap.get("Impenetrable Fog"), cardMap.get("Torrential Rain"), cardMap.get("Clear Weather")];
+  game.playersTurn = 0;
+  game.playCard(0, 0);
+  game.playersTurn = 0;
+  game.playCard(0, 0);
+  game.playersTurn = 0;
+  game.playCard(0, 0);
+
+  expect(game.board.weather.close).toBe(true);
+  expect(game.board.weather.ranged).toBe(true);
+  expect(game.board.weather.siege).toBe(true);
+
+  game.playersTurn = 0;
+  game.playCard(0, 0);
+
+  expect(game.board.weather.close).toBe(false);
+});
+
+//if the player plays a commanders horn, target should specify the range
+test("testing rally horns: ", () => {
+  const player1 = new Player("player one", "Northern Realms", "Foltest King of Temeria");
+  const player2 = new Player("player two", "Northern Realms", "Foltest King of Temeria");
+  
+  const deck1 = [], deck2 = []; 
+  for(let cardName in defaultDeck.cards){
+    for(let i = 0; i < defaultDeck.cards[cardName]; i++){
+      deck1.push(cardMap.get(cardName));
+      deck2.push(cardMap.get(cardName));
+    }
+  }
+  
+  const game = new Gwent(player1, player2, deck1, deck2);
+  game.players[0].hand = [cardMap.get("Commanders Horn")];
+  game.playersTurn = 0;
+  game.playCard(0, 0, "close");
+
+  expect(game.board.rallyHorns[0].close).toBe(true);
+});
+
+//if the player plays a decoy, target should specify range & index, eg. {range: "close", index: 3}
+test("testing decoy: ", () => {
+  const player1 = new Player("player one", "Northern Realms", "Foltest King of Temeria");
+  const player2 = new Player("player two", "Northern Realms", "Foltest King of Temeria");
+  
+  const deck1 = [], deck2 = []; 
+  for(let cardName in defaultDeck.cards){
+    for(let i = 0; i < defaultDeck.cards[cardName]; i++){
+      deck1.push(cardMap.get(cardName));
+      deck2.push(cardMap.get(cardName));
+    }
+  }
+  
+  const game = new Gwent(player1, player2, deck1, deck2);
+  game.players[0].hand = [cardMap.get("Decoy")];
+  game.board.field[0].close = [cardMap.get("Vesemir")];
+  game.playersTurn = 0;
+  game.playCard(0, 0, {range: "close", index: 0});
+
+  expect(game.board.getCardStrength(0, "close", 0)).toBe(0);
+});
+
+//Nilfgaard wins ties
+test("testing endRoundAndCalculateWinner: ", () => {
+  const player1 = new Player("player one", "Northern Realms", "Foltest King of Temeria");
+  const player2 = new Player("player two", "Northern Realms", "Foltest King of Temeria");
+  
+  const deck1 = [], deck2 = []; 
+  for(let cardName in defaultDeck.cards){
+    for(let i = 0; i < defaultDeck.cards[cardName]; i++){
+      deck1.push(cardMap.get(cardName));
+      deck2.push(cardMap.get(cardName));
+    }
+  }
+  
+  const game = new Gwent(player1, player2, deck1, deck2);
+  game.players[1].player.faction = "Nilfgaard";
+  game.playersTurn = 0;
+  game.pass(0);
+  game.pass(1);
+
+  expect(game.players[0].player.lives).toBe(1);
+
+  game.board.field[0].close = [cardMap.get("Geralt of Rivia")];
+  game.playersTurn = 0;
+  game.pass(0);
+  game.pass(1);
+
+  expect(game.players[1].player.lives).toBe(1);
+
+  game.board.field[0].close = [cardMap.get("Geralt of Rivia")];
+  game.playersTurn = 0;
+  game.pass(0);
+  game.pass(1);
+
+  expect(game.players[1].player.lives).toBe(0);
 });
