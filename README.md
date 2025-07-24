@@ -3,10 +3,11 @@ Hey, how's it going?
 This is a react based implementation of Gwent from the Witcher 3, with online multiplayer. Or it will be soon. It's getting there.
 
 There is version running live here if you're curious: https://reactgwent-front-end.onrender.com/loginregister .
+Everything is on free hosting, so it might need time for a cold start. Press login, wait 30 seconds, then try again.
 
 So far in the master branch you can create accounts, edit and save decks to the database, and play games with other players. All card abilities work except medic, all faction abilities work except Scoiatael, but none of the leader abilities work yet.
 
-To run this, first download the repo, cd into the server folder and run npm install, and then cd to the client folder and run npm install again.
+To run this locally, first download the repo, cd into the server folder and run npm install, and then cd to the client folder and run npm install again.
 You also need to have mongodb running somewhere, and you need a config.env file in the server folder with a DB_URL variable pointing to it ("mongodb://127.0.0.1:27017" for local instance),
 as well as a JWT_SECRET variable in the same file.
 You also need a .env (no config) file in the client folder with a REACT_APP_BACKEND_URL pointing to the express server (usually "http://localhost:5000/").
