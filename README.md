@@ -4,6 +4,7 @@ This is a react based implementation of Gwent from the Witcher 3, with online mu
 
 There is version running live here if you're curious: https://reactgwent-front-end.onrender.com/loginregister .
 Everything is on free hosting, so it might need time for a cold start. Press login, wait 30 seconds, then try again.
+If you want to try multiplayer, make a separate account in an incognito window.
 
 So far in the master branch you can create accounts, edit and save decks to the database, and play games with other players. All card abilities work except medic, all faction abilities work except Scoiatael, but none of the leader abilities work yet.
 
