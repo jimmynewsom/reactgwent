@@ -126,7 +126,7 @@ export default function GameRouter(io){
     else if(!userGameMap.has(targetOpponent))
       return res.status(400).json({error: "game not found"});
 
-    else if(userGameMap.get(targetOpponent).user2 != undefined)
+    else if(userGameMap.get(targetOpponent).player2 != undefined)
       return res.status(400).json({error: "game is full"});
 
     else{
@@ -305,3 +305,6 @@ export default function GameRouter(io){
 
   return gameRouter;
 }
+
+// Export class to allow unit testing of game-wrapper behavior
+export { MultiplayerGwent };
