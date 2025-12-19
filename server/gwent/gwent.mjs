@@ -158,6 +158,14 @@ export class Player{
     this.faction = faction;
     this.leaderName = leaderName;
   }
+
+  setFaction(faction){
+    this.faction = faction;
+  }
+
+  setLeader(leaderName){
+    this.leaderName = leaderName;
+  }
 }
 
 class Board{
