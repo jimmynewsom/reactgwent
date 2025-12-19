@@ -1,9 +1,8 @@
 import fs from 'fs';
-import { parse } from 'csv-parse';
+import { parse } from 'csv-parse/sync';
 
 
 //CARD AND DECK LOGIC!!!!
-
 
 export class CardData {
   constructor(name, image_url, type, faction, strength, range, special, available, description){
@@ -29,46 +28,39 @@ export class LeaderCardData {
   }
 }
 
-let cardRows;
+
+//load card data from unit_cards.csv
+const cardFileData = fs.readFileSync("./gwent/unit_cards.csv");
+const cardRows = parse(cardFileData, {columns: false, trim: true});
 const cardMap = new Map();
-
-//these should maybe be synchronous instead of async, since I need them to initialize at start up. but it's not that important
-fs.readFile("./gwent/unit_cards.csv", function (err, fileData) {
-  parse(fileData, {columns: false, trim: true}, function(err, rows) {
-    cardRows = rows;
-
-    cardRows.forEach((row, i) => {
-      //the first row is just the names of the columns
-      if(i!==0){
-        //each row is [0] card name, [1] image url, [2] type, [3] faction, [4], available, [5] strength, [6] range, [7] special, [8] avaialble, and [9] description
-        let card = new CardData(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9]);
-        cardMap.set(row[0], card);
-      }
-    });
-  });
+cardRows.forEach((row, i) => {
+  //the first row is just the names of the columns
+  if(i!==0){
+    //each row is [0] card name, [1] image url, [2] type, [3] faction, [4], available, [5] strength, [6] range, [7] special, [8] avaialble, and [9] description
+    let card = new CardData(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9]);
+    cardMap.set(row[0], card);
+  }
 });
 
-let leaderRows;
+
+//load leader data from leader_cards.csv
+const leaderFileData = fs.readFileSync("./gwent/leader_cards.csv");
+const leaderRows = parse(leaderFileData, {columns: false, trim: true});;
 const leaderMap = new Map();
-
-fs.readFile("./gwent/leader_cards.csv", function (err, fileData) {
-  parse(fileData, {columns: false, trim: true}, function(err, rows) {
-    leaderRows = rows;
-
-    leaderRows.forEach((row, i) => {
-      //the first row is just the names of the columns
-      if(i!==0){
-        //each row is [0] leader name, [1] image url, [2] faction, [3] description, and [4] ability description
-        let card = new LeaderCardData(row[0], row[1], row[2], row[3], row[4]);
-        leaderMap.set(row[0], card);
-      }
-    });
-  });
+leaderRows.forEach((row, i) => {
+  //the first row is just the names of the columns
+  if(i!==0){
+    //each row is [0] leader name, [1] image url, [2] faction, [3] description, and [4] ability description
+    let card = new LeaderCardData(row[0], row[1], row[2], row[3], row[4]);
+    leaderMap.set(row[0], card);
+  }
 });
+
 
 const defaultDeck = {
   "owner": "default",
   "faction": "Northern Realms",
+  "leaderName": "Foltest King of Temeria",
   "cards": {
     "Biting Frost": 2,
     "Impenetrable Fog": 2,
@@ -94,35 +86,36 @@ const defaultDeck = {
   "totalCardCount": 30,
   "totalUnitStrength": 84,
   "heroCount": 0,
-  "leaderName": "Foltest King of Temeria",
   "specialCount": 8,
   "unitCount": 22
 }
 
+
 export {cardMap, cardRows, leaderRows, leaderMap, defaultDeck};
 
 
-//deck should have faction, leaderName, and cards fields, from /saveUserDeck route in server.mjs and ready_for_game event in routes/game_routes.mjs
+//deck should have owner, faction, leaderName, and cards fields, from /saveUserDeck route in server.mjs
+//returns {isValid, message} for invalid results, or more fields for successful validation
 export function validateDeck(deck){
   let isValid = true, heroCount = 0, specialCount = 0, unitCount = 0, totalCardCount = 0, totalUnitStrength = 0;
   
   if(!leaderMap.has(deck.leaderName) || leaderMap.get(deck.leaderName).faction != deck.faction)
-    return {isValid: false};
+    return {isValid: false, message: "leaderName invalid or wrong faction"};
 
   let deckMap = new Map(Object.entries(deck.cards));
   for(let [cardName, numberInDeck] of deckMap){
     //if the user submits a deck with a card name I don't recognize they're not using my app
     if(!cardMap.has(cardName))
-      return {isValid: false};
+      return {isValid: false, message: "cardName invalid"};
 
     let card = cardMap.get(cardName);
     totalCardCount += numberInDeck;
 
     if(numberInDeck > card.available)
-      isValid = false;
+      return {isValid: false, message: "too many " + cardName + " in deck"};
 
     if(card.faction != deck.faction && card.faction != "neutral")
-      isValid = false;
+      return {isValid: false, message: cardName + " is not part of " + deck.faction};
 
     if(card.type == "hero"){
       heroCount++;
@@ -130,8 +123,9 @@ export function validateDeck(deck){
       totalUnitStrength += card.strength;
     }
 
-    if(card.type == "special")
+    if(card.type == "special"){
       specialCount = specialCount + numberInDeck;
+    }
 
     if(card.type == "unit"){
       unitCount += numberInDeck;
@@ -140,10 +134,10 @@ export function validateDeck(deck){
   }
 
   if(specialCount > 10)
-    isValid = false;
+    return {isValid: false, message: "too many special cards"};
 
   if(unitCount < 22)
-    isValid = false;
+    return {isValid: false, message: "not enough unit cards"};
 
   let result = {isValid, unitCount, heroCount, specialCount, totalCardCount, totalUnitStrength};
   return result;
@@ -153,22 +147,15 @@ export function validateDeck(deck){
 //GAME LOGIC!!!!
 //a lot of this might need to get optimized, and if it's really slow this might block my event loop
 //but I'm just going to write a sloppy v1 first and then optimize later if necessary
-//also, I only have to do this at the end of rounds. Normal turns I can getCardStrength and getRowStrength client-side
-
+//also, I only have to do this at the end of rounds. Normal turns I can call getCardStrength and getRowStrength client-side
 export class Player{
   lives = 2;
   passed = false;
   usedLeaderAbility = false;
 
-  constructor(playerName){
+  constructor(playerName, faction, leaderName){
     this.playerName = playerName;
-  }
-
-  setFaction(faction){
     this.faction = faction;
-  }
-
-  setLeader(leaderName){
     this.leaderName = leaderName;
   }
 }
@@ -397,10 +384,7 @@ I think that's all I need to make this work
 export class Gwent{
   constructor(player1, player2, deck1, deck2){
     this.round = 1;
-    this.deck1 = shuffle(deck1);
-    this.deck2 = shuffle(deck2);
-
-    this.players = [{player: player1, deck: deck1, hand: []}, {player: player2, deck: deck2, hand: []}];
+    this.players = [{player: player1, deck: shuffle(deck1), hand: []}, {player: player2, deck: shuffle(deck2), hand: []}];
     this.board = new Board();
     this.players[0].hand = this.draw(0, 10);
     this.players[1].hand = this.draw(1, 10);
