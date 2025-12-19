@@ -217,6 +217,7 @@ app.post("/saveUserDeck", authenticateToken, async (req, res) => {
 });
 
 
+//userWon is a boolean, and false for losses, so I can use one function for wins and losses
 export async function updateWinsAndLosses(username, userWon){
   try{
     let query = { _id: username};
