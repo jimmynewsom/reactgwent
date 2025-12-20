@@ -8,11 +8,12 @@
 
 # environment variables and tests
 /server/config.env
+/server/config.env.example
 /server/test.mjs
 /client/public/geralt_of_rivia.png
 
 # testing
-/coverage
+/server/coverage
 
 # production
 /build

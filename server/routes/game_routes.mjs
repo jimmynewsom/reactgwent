@@ -3,6 +3,7 @@ import validator from "validator";
 import authenticateToken, { verifyWebsocketToken } from "../middleware/authenticateToken.mjs";
 import { Player, Gwent, cardMap, validateDeck, defaultDeck } from "../gwent/gwent.mjs";
 import { updateWinsAndLosses, checkGamesThisMonth, incrementGamesThisMonth } from "../server.mjs";
+import { GwentGameManager } from './gwent_game_manager.mjs';
 
 
 //this code is kind of hacky and gross, but it works
@@ -77,10 +78,9 @@ class MultiplayerGwent{
 //so I need a lot of logic to handle that and reconnect to the right rooms, etc
 export default function GameRouter(io){
   const gameRouter = express.Router();
-  var games = [];
-  var userGameMap = new Map();
-  //I am hard coding a max number of games, because CDPR gave me permission to make this, but only for demonstration purposes
+  // Manager that holds all active games and user mappings
   const MAX_GAMES = 5;
+  const manager = new GwentGameManager(MAX_GAMES);
 
   function sanitizeInput(input){
     return validator.blacklist(input + "", "$.<>");
@@ -98,16 +98,11 @@ export default function GameRouter(io){
     if(gamesThisMonth >= 10)
       return res.status(400).json({ error: "you have already played the maximum number of games this month for this demo"});
 
-    if(games.length >= MAX_GAMES)
-      return res.status(503).json({ error: 'server already has the maximum number of games currently in progress. Please try again later.' });
+    const result = manager.createGame(username);
+    if(!result.ok)
+      return res.status(result.code).json({ error: result.message });
 
-    if(userGameMap.has(username))
-      return res.status(400).json({ error: "you already have a game in progress. Fuck off! :)"});
-
-    let game = new MultiplayerGwent(username);
-    games.push(game);
-    userGameMap.set(username, game);
-    return res.status(200).json({message: "game created"});
+    return res.status(200).json({ message: "game created" });
   });
 
   //when a user tries to join a game, check they are not already in a game and the target opponent exists
@@ -120,34 +115,17 @@ export default function GameRouter(io){
     if(gamesThisMonth >= 10)
       return res.status(400).json({ error: "you have already played the maximum number of games this month for this demo"});
 
-    if(userGameMap.has(username))
-      return res.status(400).json({ error: "you already have a game in progress. Fuck off! :)"});
+    const result = manager.joinGame(targetOpponent, username);
+    if(!result.ok)
+      return res.status(result.code).json({ error: result.message });
 
-    else if(!userGameMap.has(targetOpponent))
-      return res.status(400).json({error: "game not found"});
-
-    else if(userGameMap.get(targetOpponent).user2 != undefined)
-      return res.status(400).json({error: "game is full"});
-
-    else{
-      let game = userGameMap.get(targetOpponent);
-      game.addPlayerTwo(username);
-      game.setStatus("redirect to deckbuilder");
-      userGameMap.set(username, game);
-      return res.status(200).json({message: "game joined"});
-    }
+    // successful join
+    return res.status(200).json({ message: "game joined" });
   });
 
 
   gameRouter.get("/getGameList", authenticateToken, (req, res) => {
-    let gamePlayersList = [];
-    for(let game of games){
-      if(game.player2)
-        gamePlayersList.push([game.player1.playerName, game.player2.playerName]);
-      else
-        gamePlayersList.push([game.player1.playerName]);
-    }
-    res.json(gamePlayersList);
+    res.json(manager.getGameList());
   });
 
 
@@ -155,8 +133,7 @@ export default function GameRouter(io){
   gameRouter.get("/resetGames", authenticateToken, (req, res) => {
     if(req.username == "jimmynewsom"){
       console.log("resetting games");
-      games = [];
-      userGameMap = new Map();
+      manager.resetGames('jimmynewsom');
       return res.status(200).json({message: "games reset"});
     }
     else {
@@ -167,10 +144,7 @@ export default function GameRouter(io){
 
   gameRouter.get("/checkUserHasGameInProgress", authenticateToken, (req, res) => {
     let username = sanitizeInput(req.username);
-    if(userGameMap.has(username))
-      return res.json({inProgress: true});
-    else
-      return res.json({inProgress: false});
+    return res.json({ inProgress: manager.checkUserHasGameInProgress(username) });
   });
 
 
@@ -185,19 +159,15 @@ export default function GameRouter(io){
     const username = socket.username;
     console.log(username + " connected");
 
-    if(!userGameMap.has(username))
-      return;
+    const game = manager.getGameForUser(username);
+    if(!game) return;
 
-    const game = userGameMap.get(username);
     const playerIndex = game.getPlayerIndex(username);
     socket.join(game.player1.playerName);
     console.log(username + " joined room " + game.player1.playerName);
 
-    //store socket ids inside MultiplayerGwent object to send game updates later
-    if(username == game.player1.playerName)
-      game.player1socketid = socket.id;
-    else
-      game.player2socketid = socket.id;
+    // store socket id using helper
+    game.setPlayerSocketId(username, socket.id);
 
     //this sends the first player to deckbuilder once the second player joins
     if(game.status == "redirect to deckbuilder"){
@@ -229,7 +199,7 @@ export default function GameRouter(io){
 
           console.log(username + " submitted valid deck");
 
-          if(playerIndex == 0){
+            if(playerIndex == 0){
             game.setDeck1(deck);
             game.player1.setFaction(serializableDeck.faction);
             game.player1.setLeader(serializableDeck.leaderName);
@@ -243,7 +213,7 @@ export default function GameRouter(io){
           if(game.deck1 != undefined && game.deck2 != undefined){
             console.log("both players ready, redirecting to game view");
             game.startGame();
-            game.setStatus("gameInProgress");
+            // manager will keep track of status via instance
             io.to(game.player1.playerName).emit("redirect", "/gwent");
           }
           else {
@@ -256,12 +226,13 @@ export default function GameRouter(io){
     });
 
     socket.on("request_game_update", () => {
-      if(userGameMap.has(username) && userGameMap.get(username).status == "gameInProgress")
+      if(game && game.status == "gameInProgress")
         io.to(socket.id).emit("game_update", game.getGameState(playerIndex));
     });
 
     socket.on("play_card", (cardIndex, target) => {
       //console.log(playerIndex + " " + cardIndex + " " + target);
+      if(!game || !game.game) return;
       game.game.playCard(playerIndex, cardIndex, target);
       io.to(game.player1socketid).emit("game_update", game.getGameState(0));
       io.to(game.player2socketid).emit("game_update", game.getGameState(1));
@@ -270,6 +241,7 @@ export default function GameRouter(io){
     //game.pass returns 0 for game still in progress, 1 for p1 wins, 2 for p2 wins, and 3 for ties
     socket.on("pass", () => {
       //console.log("player " + playerIndex + " passes");
+      if(!game || !game.game) return;
       let result = game.game.pass(playerIndex);
       if(result == 0){
         io.to(game.player1socketid).emit("game_update", game.getGameState(0));
@@ -286,7 +258,7 @@ export default function GameRouter(io){
         }
         else if(result == 2){
           io.to(game.player1socketid).emit("game_over", "You Lose!");
-        io.to(game.player2socketid).emit("game_over", "You Win!");
+          io.to(game.player2socketid).emit("game_over", "You Win!");
           updateWinsAndLosses(game.player1.playerName, false);
           updateWinsAndLosses(game.player2.playerName, true);
         }
@@ -296,12 +268,13 @@ export default function GameRouter(io){
         incrementGamesThisMonth(game.player1.playerName);
         incrementGamesThisMonth(game.player2.playerName);
 
-        userGameMap.delete(game.player1.playerName);
-        userGameMap.delete(game.player2.playerName);
-        games.splice(games.indexOf(game), 1);
+        manager.removeGame(game);
       }
     });
   });
 
   return gameRouter;
 }
+
+// Export class to allow unit testing of game-wrapper behavior
+export { MultiplayerGwent };

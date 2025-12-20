@@ -1,0 +1,5 @@
+The styling is not as consistent as it should be, but here is what it's supposed to be (might change later):
+- Most variables names are camelCase. Variable names for fields in the csv files are in snake_case.
+- Constants are ALL_CAPS_WITH_UNDERSCORES.
+- File names are inconsistent, but should be PascalCase for React Components and snake_case for everything else.
+- CSS class names are inconsistent, but should be dash-case(?).

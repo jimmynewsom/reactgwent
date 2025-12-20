@@ -1,9 +1,8 @@
 import fs from 'fs';
-import { parse } from 'csv-parse';
+import { parse } from 'csv-parse/sync';
 
 
 //CARD AND DECK LOGIC!!!!
-
 
 export class CardData {
   constructor(name, image_url, type, faction, strength, range, special, available, description){
@@ -29,46 +28,39 @@ export class LeaderCardData {
   }
 }
 
-let cardRows;
+
+//load card data from unit_cards.csv
+const cardFileData = fs.readFileSync("./gwent/unit_cards.csv");
+const cardRows = parse(cardFileData, {columns: false, trim: true});
 const cardMap = new Map();
-
-//these should maybe be synchronous instead of async, since I need them to initialize at start up. but it's not that important
-fs.readFile("./gwent/unit_cards.csv", function (err, fileData) {
-  parse(fileData, {columns: false, trim: true}, function(err, rows) {
-    cardRows = rows;
-
-    cardRows.forEach((row, i) => {
-      //the first row is just the names of the columns
-      if(i!==0){
-        //each row is [0] card name, [1] image url, [2] type, [3] faction, [4], available, [5] strength, [6] range, [7] special, [8] avaialble, and [9] description
-        let card = new CardData(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9]);
-        cardMap.set(row[0], card);
-      }
-    });
-  });
+cardRows.forEach((row, i) => {
+  //the first row is just the names of the columns
+  if(i!==0){
+    //each row is [0] card name, [1] image url, [2] type, [3] faction, [4], available, [5] strength, [6] range, [7] special, [8] avaialble, and [9] description
+    let card = new CardData(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9]);
+    cardMap.set(row[0], card);
+  }
 });
 
-let leaderRows;
+
+//load leader data from leader_cards.csv
+const leaderFileData = fs.readFileSync("./gwent/leader_cards.csv");
+const leaderRows = parse(leaderFileData, {columns: false, trim: true});;
 const leaderMap = new Map();
-
-fs.readFile("./gwent/leader_cards.csv", function (err, fileData) {
-  parse(fileData, {columns: false, trim: true}, function(err, rows) {
-    leaderRows = rows;
-
-    leaderRows.forEach((row, i) => {
-      //the first row is just the names of the columns
-      if(i!==0){
-        //each row is [0] leader name, [1] image url, [2] faction, [3] description, and [4] ability description
-        let card = new LeaderCardData(row[0], row[1], row[2], row[3], row[4]);
-        leaderMap.set(row[0], card);
-      }
-    });
-  });
+leaderRows.forEach((row, i) => {
+  //the first row is just the names of the columns
+  if(i!==0){
+    //each row is [0] leader name, [1] image url, [2] faction, [3] description, and [4] ability description
+    let card = new LeaderCardData(row[0], row[1], row[2], row[3], row[4]);
+    leaderMap.set(row[0], card);
+  }
 });
+
 
 const defaultDeck = {
   "owner": "default",
   "faction": "Northern Realms",
+  "leaderName": "Foltest King of Temeria",
   "cards": {
     "Biting Frost": 2,
     "Impenetrable Fog": 2,
@@ -94,35 +86,36 @@ const defaultDeck = {
   "totalCardCount": 30,
   "totalUnitStrength": 84,
   "heroCount": 0,
-  "leaderName": "Foltest King of Temeria",
   "specialCount": 8,
   "unitCount": 22
 }
 
+
 export {cardMap, cardRows, leaderRows, leaderMap, defaultDeck};
 
 
-//deck should have faction, leaderName, and cards fields, from /saveUserDeck route in server.mjs and ready_for_game event in routes/game_routes.mjs
+//deck should have owner, faction, leaderName, and cards fields, from /saveUserDeck route in server.mjs
+//returns {isValid, message} for invalid results, or more fields for successful validation
 export function validateDeck(deck){
   let isValid = true, heroCount = 0, specialCount = 0, unitCount = 0, totalCardCount = 0, totalUnitStrength = 0;
   
   if(!leaderMap.has(deck.leaderName) || leaderMap.get(deck.leaderName).faction != deck.faction)
-    return {isValid: false};
+    return {isValid: false, message: "leaderName invalid or wrong faction"};
 
   let deckMap = new Map(Object.entries(deck.cards));
   for(let [cardName, numberInDeck] of deckMap){
     //if the user submits a deck with a card name I don't recognize they're not using my app
     if(!cardMap.has(cardName))
-      return {isValid: false};
+      return {isValid: false, message: "cardName invalid"};
 
     let card = cardMap.get(cardName);
     totalCardCount += numberInDeck;
 
     if(numberInDeck > card.available)
-      isValid = false;
+      return {isValid: false, message: "too many " + cardName + " in deck"};
 
     if(card.faction != deck.faction && card.faction != "neutral")
-      isValid = false;
+      return {isValid: false, message: cardName + " is not part of " + deck.faction};
 
     if(card.type == "hero"){
       heroCount++;
@@ -130,8 +123,9 @@ export function validateDeck(deck){
       totalUnitStrength += card.strength;
     }
 
-    if(card.type == "special")
+    if(card.type == "special"){
       specialCount = specialCount + numberInDeck;
+    }
 
     if(card.type == "unit"){
       unitCount += numberInDeck;
@@ -140,10 +134,10 @@ export function validateDeck(deck){
   }
 
   if(specialCount > 10)
-    isValid = false;
+    return {isValid: false, message: "too many special cards"};
 
   if(unitCount < 22)
-    isValid = false;
+    return {isValid: false, message: "not enough unit cards"};
 
   let result = {isValid, unitCount, heroCount, specialCount, totalCardCount, totalUnitStrength};
   return result;
@@ -153,15 +147,16 @@ export function validateDeck(deck){
 //GAME LOGIC!!!!
 //a lot of this might need to get optimized, and if it's really slow this might block my event loop
 //but I'm just going to write a sloppy v1 first and then optimize later if necessary
-//also, I only have to do this at the end of rounds. Normal turns I can getCardStrength and getRowStrength client-side
-
+//also, I only have to do this at the end of rounds. Normal turns I can call getCardStrength and getRowStrength client-side
 export class Player{
   lives = 2;
   passed = false;
   usedLeaderAbility = false;
 
-  constructor(playerName){
+  constructor(playerName, faction, leaderName){
     this.playerName = playerName;
+    this.faction = faction;
+    this.leaderName = leaderName;
   }
 
   setFaction(faction){
@@ -317,11 +312,30 @@ class Board{
           maxStrength = strength;
       }
       if(totalStrength >= 10){
+        // First, collect indices to remove so we don't change strengths mid-evaluation
+        const removeIdxs = [];
         for(let i = this.field[(playerIndex + 1) % 2][range].length - 1; i > -1; i--){
           let strength = this.getCardStrength((playerIndex + 1) % 2, range, i);
           let type = this.field[(playerIndex + 1) % 2][range][i].type;
-          if(strength == maxStrength && type != "hero")
-            this.field[(playerIndex + 1) % 2][range].splice(i, 1);
+          if(strength == maxStrength && type != "hero"){
+            removeIdxs.push(i);
+          }
+        }
+        // Now apply bookkeeping and removals
+        for(const i of removeIdxs){
+          const removedCard = this.field[(playerIndex + 1) % 2][range][i];
+          if(removedCard.special == 'morale'){
+            this.morale[(playerIndex + 1) % 2][range] = Math.max(0, this.morale[(playerIndex + 1) % 2][range] - 1);
+          }
+          if(removedCard.special == 'tight bond'){
+            const tbMap = this.tightBondsMaps[(playerIndex + 1) % 2];
+            if(tbMap.has(removedCard.name)){
+              const v = tbMap.get(removedCard.name);
+              if(v > 0) tbMap.set(removedCard.name, v - 1);
+              else tbMap.delete(removedCard.name);
+            }
+          }
+          this.field[(playerIndex + 1) % 2][range].splice(i, 1);
         }
       }
     }
@@ -339,15 +353,41 @@ class Board{
           }
         }
       }
+      // Collect all removals first so strength calculations aren't tainted by bookkeeping
+      const removals = [];
       for(let i = 0; i < 2; i++){
         for(let range of ranges){
           for(let j = this.field[i][range].length - 1; j > -1; j--){
             let strength = this.getCardStrength(i, range, j);
             let type = this.field[i][range][j].type;
-            if(strength == maxStrength && type != "hero")
-              this.field[i][range].splice(j, 1);
+            if(strength == maxStrength && type != "hero"){
+              removals.push({i, range, j});
+            }
           }
         }
+      }
+
+      // Apply bookkeeping and removals (iterate removals in order so splices don't affect earlier indices)
+      removals.sort((a,b) => {
+        if(a.i !== b.i) return a.i - b.i;
+        if(a.range !== b.range) return a.range.localeCompare(b.range);
+        return b.j - a.j; // descending index for safe splicing
+      });
+
+      for(const r of removals){
+        const removedCard = this.field[r.i][r.range][r.j];
+        if(removedCard.special == 'morale'){
+          this.morale[r.i][r.range] = Math.max(0, this.morale[r.i][r.range] - 1);
+        }
+        if(removedCard.special == 'tight bond'){
+          const tbMap = this.tightBondsMaps[r.i];
+          if(tbMap.has(removedCard.name)){
+            const v = tbMap.get(removedCard.name);
+            if(v > 0) tbMap.set(removedCard.name, v - 1);
+            else tbMap.delete(removedCard.name);
+          }
+        }
+        this.field[r.i][r.range].splice(r.j, 1);
       }
     }
   }
@@ -397,10 +437,7 @@ I think that's all I need to make this work
 export class Gwent{
   constructor(player1, player2, deck1, deck2){
     this.round = 1;
-    this.deck1 = shuffle(deck1);
-    this.deck2 = shuffle(deck2);
-
-    this.players = [{player: player1, deck: deck1, hand: []}, {player: player2, deck: deck2, hand: []}];
+    this.players = [{player: player1, deck: shuffle(deck1), hand: []}, {player: player2, deck: shuffle(deck2), hand: []}];
     this.board = new Board();
     this.players[0].hand = this.draw(0, 10);
     this.players[1].hand = this.draw(1, 10);
@@ -420,11 +457,73 @@ export class Gwent{
     return Math.random() - 0.5 > 0;
   }
 
+  // Play a card object that is being revived from the graveyard (not from the hand).
+  // This mirrors the placement logic from playCard but does not manipulate hands.
+  // revivedAgileTarget: optional string "close" or "ranged" to specify where revived agile units should be placed
+  playCardFromGraveyard(playerIndex, card, revivedAgileTarget){
+    try{
+      // Only handle units here. Heroes and special cards should not be revived by medic.
+      if(card.type == "unit" && card.special != "spy"){
+        let placedRange;
+        if(card.range == "close"){
+          this.board.field[playerIndex].close.push(card);
+          placedRange = "close";
+          if(card.special == "horn")
+            this.board.rallyHorns[playerIndex].close = true;
+        }
+        else if(card.range == "ranged"){
+          this.board.field[playerIndex].ranged.push(card);
+          placedRange = "ranged";
+        }
+        else if(card.range == "siege"){
+          this.board.field[playerIndex].siege.push(card);
+          placedRange = "siege";
+        }
+        else if(card.range == "agile"){
+          // place agile units into specified range when revived; default to close, disallow siege
+          const placeRange = (revivedAgileTarget === "ranged") ? "ranged" : "close";
+          this.board.field[playerIndex][placeRange].push(card);
+          placedRange = placeRange;
+        }
+
+        if(card.special == 'morale'){
+          this.board.morale[playerIndex][placedRange]++;
+        }
+        else if(card.special == "tight bond"){
+          if(this.board.tightBondsMaps[playerIndex].has(card.name))
+            this.board.tightBondsMaps[playerIndex].set(card.name, this.board.tightBondsMaps[playerIndex].get(card.name) + 1);
+          else
+            this.board.tightBondsMaps[playerIndex].set(card.name, 0);
+        }
+        else if(card.special == "scorchClose")
+          this.board.scorch(playerIndex, "close");
+        else if(card.special == "scorchRanged")
+          this.board.scorch(playerIndex, "ranged");
+        else if(card.special == "scorchSiege")
+          this.board.scorch(playerIndex, "siege");
+        else if(card.special == "muster"){
+          this.muster(playerIndex, card.name);
+        }
+      }
+      else if(card.special == "spy"){
+        // revived spy goes to opponent's board
+        this.players[playerIndex].hand.push(...this.draw(playerIndex, 2));
+        if(card.range == "close")
+          this.board.field[(playerIndex + 1) % 2].close.push(card);
+        else if(card.range == "ranged")
+          this.board.field[(playerIndex + 1) % 2].ranged.push(card);
+        else if(card.range == "siege")
+          this.board.field[(playerIndex + 1) % 2].siege.push(card);
+      }
+    }
+    catch(error){ console.log(error); }
+  }
+
   /*
   One more big function...
   play cards, following all gwent rules
   */
-  playCard(playerIndex, cardIndex, target){
+  playCard(playerIndex, cardIndex, target, revivedAgileTarget){
     try {
       //first check if it is the player's turn
       if(playerIndex != this.playersTurn)
@@ -436,22 +535,29 @@ export class Gwent{
       //unit cards and hero cards that aren't spies get added to their respective range
       //if the unit range is agile, target should specify the range
       if((card.type == "unit" || card.type == "hero") && card.special != "spy"){
+        let placedRange;
         if(card.range == "close"){
           this.board.field[playerIndex].close.push(card);
+          placedRange = "close";
           if(card.special == "horn")
             this.board.rallyHorns[playerIndex].close = true;
         }
-        else if(card.range == "ranged")
+        else if(card.range == "ranged"){
           this.board.field[playerIndex].ranged.push(card);
-        else if(card.range == "siege")
+          placedRange = "ranged";
+        }
+        else if(card.range == "siege"){
           this.board.field[playerIndex].siege.push(card);
+          placedRange = "siege";
+        }
         else if(card.range == "agile"){
           this.board.field[playerIndex][target].push(card);
+          placedRange = target;
         }
 
         //unit cards can have 6 abilities that trigger when placed - morale, tight bond, medic, spy, scorchClose, & muster
         if(card.special == 'morale'){
-          this.board.morale[playerIndex][card.range]++;
+          this.board.morale[playerIndex][placedRange]++;
         }
         else if(card.special == "tight bond"){
           if(this.board.tightBondsMaps[playerIndex].has(card.name))
@@ -468,14 +574,52 @@ export class Gwent{
         //if the player plays a medic card, target should specify indexes in graveyard
         //since medics can revive medics, target is an array here
         else if(card.special == "medic"){
-          console.log("medic played");
-          // for(let i = 0; i < target.length; i++){
-          //   let card2 = this.board.field[playerIndex].graveyard[target[i]];
-          //   this.board.field[playerIndex].graveyard.splice(target[i], 1);
-          //   this.playCardFromGraveyard(playerIndex, card2);
-          //   if(card2.special != "medic")
-          //     break;
-          // }
+          // medic: revive cards from your graveyard. "target" is an array of graveyard indexes (snapshot order)
+          // medics can revive medics, in which case the chain continues until a non-medic is revived or targets exhausted
+          const graveSnapshot = this.board.field[playerIndex].graveyard.slice();
+
+          // Validation: target must be an array of unique indexes referring to unit cards in the graveyard
+          if(!Array.isArray(target)){
+            console.log('invalid medic targets: target is not an array');
+            // restore card to hand
+            this.players[playerIndex].hand.unshift(card);
+            return;
+          }
+
+          const idxSet = new Set();
+          for(const idx of target){
+            if(!Number.isInteger(idx) || idx < 0 || idx >= graveSnapshot.length){
+              console.log('invalid medic targets: index out of range');
+              this.players[playerIndex].hand.unshift(card);
+              return;
+            }
+            const candidate = graveSnapshot[idx];
+            if(!candidate || candidate.type !== 'unit'){
+              console.log('invalid medic targets: non-unit target');
+              this.players[playerIndex].hand.unshift(card);
+              return;
+            }
+            if(idxSet.has(idx)){
+              console.log('invalid medic targets: duplicate index');
+              this.players[playerIndex].hand.unshift(card);
+              return;
+            }
+            idxSet.add(idx);
+          }
+
+          const toRevive = target.map(i => graveSnapshot[i]);
+
+          for(let i = 0; i < toRevive.length; i++){
+            const card2 = toRevive[i];
+            // find current index (because earlier splices may have shifted indexes)
+            const curIdx = this.board.field[playerIndex].graveyard.indexOf(card2);
+            if(curIdx === -1) continue;
+            // remove from graveyard and play it from graveyard
+            this.board.field[playerIndex].graveyard.splice(curIdx, 1);
+            this.playCardFromGraveyard(playerIndex, card2, revivedAgileTarget);
+            if(card2.special != "medic")
+              break;
+          }
         }
         else if(card.special == "muster"){
           this.muster(playerIndex, card.name);
